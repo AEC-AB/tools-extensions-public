@@ -1,5 +1,5 @@
 # tools-extensions-public
-![Assistant by AEC Logo](./Assistant%20by%20AEC%20full%20logo.svg)
+![Assistant by AEC Logo](./Assistant-by-AEC-full-logo.svg)
 A shared collection of extensions built to extend Assistant and evolve through community contributions.
 # Assistant Public Extensions
 

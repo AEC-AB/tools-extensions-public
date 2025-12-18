@@ -13,8 +13,4 @@
     <LangVersion>12</LangVersion>
   </PropertyGroup>
   
-  <ItemGroup>
-    <None Include=".github\instructions\extensions-development-llm.instructions.md" />
-    <None Include="AssistantDemoExtension.slnx" />
-  </ItemGroup>
 </Project>

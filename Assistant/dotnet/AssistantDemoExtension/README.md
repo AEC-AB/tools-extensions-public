@@ -551,10 +551,10 @@ public enum CustomEnum
 
 Create a form that reveals fields step-by-step as the user provides valid input:
 
-1. User checks a box ? text field appears
-2. User enters "Apple" ? dropdown appears
-3. User selects "Beta" ? age field appears
-4. User enters age ? 18 ? notification appears
+1. User checks a box → text field appears
+2. User enters "Apple" → dropdown appears
+3. User selects "Beta" → age field appears
+4. User enters age 18 or older → notification appears
 
 This creates an intuitive, guided user experience that prevents overwhelming users with too many options at once.
 

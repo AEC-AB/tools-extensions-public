@@ -1,20 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
+  
   <PropertyGroup>
-    <ExtensionId>AssistantDemoExtension</ExtensionId>
-    <Authors>COWI Tools</Authors>
     <Version>0.0.1</Version>
-    <Title>AssistantDemoExtension</Title>
+    <Title>Assistant Demo Extension</Title>
     <Description>AssistantDemoExtension Description</Description>
-    <PackageTags>AssistantExtension;Assistant;Extension</PackageTags>
-    <PackageIcon>Icon.png</PackageIcon>
-    <PackageIconUrl></PackageIconUrl>
   </PropertyGroup>
+  
   <Import Project=".\Configurations.targets" />
+  
   <PropertyGroup>
     <LangVersion>12</LangVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <None Include="Icon.png" Pack="true" PackagePath="" />
-  </ItemGroup>
 </Project>

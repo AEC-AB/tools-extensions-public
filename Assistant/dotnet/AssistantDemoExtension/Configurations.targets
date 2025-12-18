@@ -10,13 +10,8 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyName>$(ExtensionId).$(Version)</AssemblyName>
+		<AssemblyName>$(MSBuildProjectName).$(Version)</AssemblyName>
 	</PropertyGroup>
-
-	<PropertyGroup>
-		<PackageId>$(ExtensionId)</PackageId>
-	</PropertyGroup>
-
 
 	<ItemGroup>
 		 <PackageReference Include="CW.Assistant.Extensions.Assistant" Version="26.*-*">

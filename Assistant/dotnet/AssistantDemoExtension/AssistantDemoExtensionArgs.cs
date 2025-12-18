@@ -14,7 +14,7 @@ public class AssistantDemoExtensionArgs
     [UrlField(
         Label = "Demo Extension GitHub URL",
         ToolTip = "Link to this demo extension")]
-    public string ExtensionGitUrl { get; } = "https://github.com/example/extension";
+    public string ExtensionGitUrl { get; } = "https://github.com/AEC-AB/tools-extensions-public/blob/main/Assistant/dotnet/AssistantDemoExtension/AssistantDemoExtensionArgs.cs";
 
     [TextField(
        Label = "Text input",
@@ -202,7 +202,6 @@ public class AssistantDemoExtensionArgs
     public System.Drawing.Color Color { get; set; } = System.Drawing.Color.Red;
 
     // Conditional visibility example fields
-
     [TextField(Label = "")]
     public string ConditionalVisibilityExamples { get; } = "*** This section demonstrates conditional visibility of fields based on user input. ***";
 
@@ -242,6 +241,12 @@ public class AssistantDemoExtensionArgs
     public string? MoreThanTwoItemsNotification { get; } = "You have added more than two items!";
 }
 
+
+/// <summary>
+/// This class implements a custom AutoFill collector for providing dynamic options.
+/// It generates a dictionary of key-value pairs to be used as options in the UI.
+/// Use values from the args class to customize the options if needed.
+/// </summary>
 internal class CustomAutoFillCollector : IAsyncAutoFillCollector<AssistantDemoExtensionArgs>
 {
     public Task<Dictionary<string, string>> Get(AssistantDemoExtensionArgs args, CancellationToken cancellationToken)
@@ -255,6 +260,9 @@ internal class CustomAutoFillCollector : IAsyncAutoFillCollector<AssistantDemoEx
     }
 }
 
+/// <summary>
+/// This enum represents sample options for demonstration purposes.
+/// </summary>
 public enum SampleEnum
 {
     Alpha,
@@ -262,11 +270,24 @@ public enum SampleEnum
     Gamma
 }
 
+/// <summary>
+/// This enum represents custom options for demonstration purposes.
+/// Descriptions are shown as user-friendly names in the UI.
+/// </summary>
 public enum CustomEnum
 {
+    [Description("Option 1")]
     Option1,
+
+    [Description("Option 2")]
     Option2,
+
+    [Description("Option 3")]
     Option3,
+
+    [Description("Option 4")]
     Option4,
+
+    [Description("Option 5")]
     Option5
 }

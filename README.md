@@ -1,5 +1,5 @@
 # tools-extensions-public
-![Assistant by AEC Logo](./Assistant%20by%20AEC%20full%20logo.svg)
+![Assistant by AEC Logo](./Assistant-by-AEC-full-logo.svg)
 A shared collection of extensions built to extend Assistant and evolve through community contributions.
 # Assistant Public Extensions
 
@@ -27,7 +27,7 @@ Assistant allows teams to:
 - automate model-based and data-driven tasks
 - standardize how projects are executed, regardless of who runs them
 
-Assistant is not just about automation —  
+Assistant is not just about automation—  
 its strongest ROI comes from **standardization made executable**.
 
 Instead of relying on manuals, checklists, or individual experience, Assistant makes approved workflows runnable, repeatable, and auditable.

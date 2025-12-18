@@ -27,7 +27,7 @@ Assistant allows teams to:
 - automate model-based and data-driven tasks
 - standardize how projects are executed, regardless of who runs them
 
-Assistant is not just about automation —  
+Assistant is not just about automation—  
 its strongest ROI comes from **standardization made executable**.
 
 Instead of relying on manuals, checklists, or individual experience, Assistant makes approved workflows runnable, repeatable, and auditable.

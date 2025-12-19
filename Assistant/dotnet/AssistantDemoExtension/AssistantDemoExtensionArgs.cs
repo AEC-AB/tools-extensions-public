@@ -1,6 +1,12 @@
 using CW.Assistant.Extensions.Assistant.Collectors;
+using CW.Assistant.Extensions.Contracts.Enums;
 using CW.Assistant.Extensions.Contracts.Fields;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AssistantDemoExtension;
 
@@ -52,12 +58,12 @@ public class AssistantDemoExtensionArgs
     public string? AutoFillTextInput { get; set; }
 
     [OptionsField(
-        Label = "AutoFill input",
-        ToolTip = "AutoFill input provides a dropdown list of options populated dynamically.",
+        Label = "Options field",
+        ToolTip = "Options field provides a dropdown list of options populated by a custom collector.",
         CollectorType = typeof(CustomAutoFillCollector),
         CollectorSortOrder = SortOrder.SortByAscending
     )]
-    public string AutoFillInput { get; set; } = "Option2";
+    public string? OptionsField { get; set; }
 
     [FilePickerField(
         Label = "Browse for File input",

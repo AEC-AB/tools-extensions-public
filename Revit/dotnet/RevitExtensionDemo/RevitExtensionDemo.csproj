@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ExtensionId>RevitExtensionDemo</ExtensionId>
+    <Authors>COWI Tools</Authors>
+    <Version>0.0.2</Version>
+    <Title>COWI Macro Demo</Title>
+    <Description>A demonstration extension for Revit in Assistant.</Description>
+    <PackageTags>Revit;Assistant;Extension</PackageTags>
+    <PackageIcon>Icon.png</PackageIcon>
+    <PackageIconUrl></PackageIconUrl>
+  </PropertyGroup>
+
+  <Import Project=".\Configurations.targets" />
+
+  <PropertyGroup>
+    <!-- Adjust MainRevitVersion to get IntelliSense for the correct version -->
+    <MainRevitVersion Condition="'$(Configuration)' == 'Debug'">2025</MainRevitVersion>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+  
+</Project>

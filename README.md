@@ -51,7 +51,12 @@ This repository only contains extensions built **for** Assistant.
 
 Extensions in this repository follow a consistent folder structure:
 
-Integration => TechStack => Extension
+```
+Integration/
+└── TechStack/
+    └── Extension/
+```
+
 
 
 ## Download Assistant & start a trial

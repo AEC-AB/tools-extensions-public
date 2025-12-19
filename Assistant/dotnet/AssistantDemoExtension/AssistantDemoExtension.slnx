@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="AssistantDemoExtension.csproj" />
+  <Properties Name="Configuration">
+    <Property Name="SolutionConfiguration" />
+    <Property Name="SolutionPlatform" />
+  </Properties>
+</Solution>

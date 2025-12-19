@@ -1,3 +1,7 @@
+using System.Threading;
+using System.Threading.Tasks;
+using CW.Assistant.Extensions.Assistant;
+using CW.Assistant.Extensions.Contracts;
 
 namespace AssistantDemoExtension;
 

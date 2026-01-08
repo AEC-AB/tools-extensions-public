@@ -1,0 +1,54 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+parameters:
+  - name: configurations
+    type: object
+    default:
+      - 'Release 2022'
+      - 'Release 2023'
+      - 'Release 2024'
+      - 'Release 2025'
+      - 'Release 2026'
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- ${{ each config in parameters.configurations }}:
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore ${{ config }}'
+      inputs:
+        command: 'restore'
+        restoreArguments: '/p:Configuration="${{ config }}"'
+        projects: '**/*.csproj'
+        feedsToUse: 'config'
+        nugetConfigPath: '.\nuget.config'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build ${{ config }}'
+      inputs:
+        command: 'build'
+        arguments: '-c "${{ config }}" --no-restore'
+        projects: '**/*.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Pack ${{ config }}'
+      inputs:
+        command: 'pack'
+        configuration: '${{ config }}'
+        packagesToPack: '**/*.csproj'
+        nobuild: true
+        versioningScheme: 'off'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Push all packages'
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: '1a0b4016-9203-4701-aa2b-6b0351690a7d/7fbb1448-4807-44bf-a41d-c8f554b858f4'

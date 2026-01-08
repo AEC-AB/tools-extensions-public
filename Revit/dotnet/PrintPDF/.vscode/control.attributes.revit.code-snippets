@@ -1,0 +1,38 @@
+{
+  "Control attribute autofill": {
+    "prefix": [
+      "control-attribute-auto-fill"
+    ],
+    "body": [
+      "[RevitAutoFill(RevitAutoFillSource.${1|SharedParameters,ProjectParameters,BuiltInParameters,Categories,Views,Sheets,Worksets,Families,FamilySymbols,Filters,CableTraySizes,ConduitSizes,PipeSizes,DuctSizes,Phases,Levels,Grids,RevitType,ParametersForCategory,ByCustomFilter|})]"
+    ],
+    "description": "Control autofill attribute"
+  },
+  "Control attribute autofill parameters for Category": {
+    "prefix": [
+      "control-attribute-auto-fill-parameters"
+    ],
+    "body": [
+      "[RevitAutoFill(RevitAutoFillSource.ParametersForCategory, RevitBuiltInCategory = \"${1:OST_GenericModel}\")]"
+    ],
+    "description": "Control autofill parameters for category attribute"
+  },
+  "Control attribute autoFill by custom filter": {
+    "prefix": [
+      "control-attribute-auto-fill-byCustomFilter"
+    ],
+    "body": [
+      "[RevitAutoFill(RevitAutoFillSource.ByCustomFilter, RevitType = typeof(${1:View}), RevitBuiltInCategory = \"${2:OST_Sheets}\", WhereElementIsType = false, ParameterName = \"${3:Sheet Number}\")]"
+    ],
+    "description": "Control autofill by custom filter attribute"
+  },
+  "Control attribute autofill by type": {
+    "prefix": [
+      "control-attribute-auto-fill-byType"
+    ],
+    "body": [
+      "[RevitAutoFill(RevitAutoFillSource.RevitType, RevitType = typeof(${1:WallType}))]"
+    ],
+    "description": "Control autofill by type attribute"
+  }
+}

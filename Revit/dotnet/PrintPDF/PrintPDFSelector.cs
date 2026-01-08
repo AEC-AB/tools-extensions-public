@@ -209,9 +209,6 @@ public class PrintPDFSelector
         return (sheets, viewSetName);
     }
 
-
-
-
 #if R2025_OR_GREATER
 
     public (List<ViewSheet> sheetsToPrint, string? name) CollectByViewCollection(string viewCollectionName)

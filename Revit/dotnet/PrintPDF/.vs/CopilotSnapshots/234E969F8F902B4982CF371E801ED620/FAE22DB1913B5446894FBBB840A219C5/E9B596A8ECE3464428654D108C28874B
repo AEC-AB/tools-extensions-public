@@ -1,0 +1,97 @@
+﻿# PrintPDF Extension
+
+The PrintPDF extension allows you to export views and sheets from Revit to PDF files with various options for customization.
+
+## How to Use
+
+1. **Destination Directory**: Select the folder where the PDF files will be saved.
+
+2. **Print Option**: Choose the sheets to be printed based on different criteria:
+
+   - `Use Active View`: Print the currently active view.
+   - `View Begins With`: Print views whose names begin with the specified text.
+   - `View Contains`: Print views whose names contain the specified text.
+   - `View Name Equals`: Print views whose names exactly match the specified text.
+   - `Number Begins With`: Print sheets whose numbers begin with the specified text.
+   - `Number Contains`: Print sheets whose numbers contain the specified text.
+   - `Number Equals`: Print sheets whose numbers exactly match the specified text.
+   - `View Set`: Print views from a selected view/sheet set.
+   - `Sheet Containing Parameter`: Print sheets containing a specified parameter value.
+   - `Use Pattern Search in Sheet Names`: Print sheets whose names match a specified pattern.
+   - `Use Pattern Search in Sheet Numbers`: Print sheets whose numbers match a specified pattern.
+   - `Use Pattern Search in Sheet Sets`: Print views from view sets whose names match a specified pattern.
+   - `Use Pattern Search in Sheet Collections`: Print sheets that belong to view/sheet collections whose names match a specified pattern. The collection names are matched using the provided pattern; any sheet whose SHEET_COLLECTION parameter references a matched collection will be included. The collected sheets are sorted alphanumerically before printing.
+
+3. **View/Sheet Set**: Select the view/sheet set to be printed. This is only required if you have selected to export a view/sheet set in the print options.
+
+4. **Sheet Parameter Name**: Select the sheet parameter to be used for filtering. This is required if you have selected "Sheet Containing Parameter".
+
+5. **Pattern Value**: Enter the text or pattern to be searched in the sheet name/number or parameter value. This is required if you have selected any option other than "Use Active View" or "View Set".
+
+6. **Naming Options**: Choose the naming convention for the PDF files:
+
+   - `Sheet Name Only`
+   - `Sheet Number Only`
+   - `Sheet Name And Number`
+   - `Sheet Number And Name`
+   - `Project Name And Sheet Name And Number`
+   - `Project Name And Sheet Name`
+   - `Project Name And Sheet Number`
+   - `Sheet Name And Number And Project Name`
+   - `Sheet Name And Project Name`
+   - `Sheet Number And Project Name`
+   - `Custom`
+
+If you select the `Custom` naming option, you can use variables like `{SheetName}`, `{SheetNumber}`, `{ProjectName}`, or any sheet parameter name in curly braces (e.g., `{Discipline}`, `{Status}`). For example: `"{SheetNumber}_{SheetName}"`, `"PDF_{ProjectName}_{SheetNumber}"`, `"Custom-{SheetName}-v1"`, or `"{Discipline}-{SheetNumber}"`.If you select the `Custom` naming option, You can use variables like `{SheetName}`, `{SheetNumber}`, `{ProjectName}`, or add your own text. Examples: `"{SheetNumber}_{SheetName}"`, `"PDF_{ProjectName}_{SheetNumber}"`, `"Custom-{SheetName}-v1"`.
+
+8. **Separator in File Name**: Specify the separator to be used in the file name. This is required if you have selected any naming option other than "Sheet Name Only" or "Sheet Number Only".
+
+9. **Prefix in file name (Optional)**: Add a prefix to the file name.
+
+10. **Suffix in file name (Optional)**: Add a suffix to the file name.
+
+11. **Combine**: Choose whether to export all views and sheets into one PDF file or multiple files.
+
+12. **Use Sheetset name as PDF Name (Optional)**: If 'Combine' is selected, use the sheet set name as the combined PDF name.
+
+13. **Combined File Name (Optional)**: Provide a file name if multiple sheets are combined.
+
+14. **Always Use Raster**: Choose whether to completely use raster processing for graphics.
+
+15. **Color Depth Type**: Select the color depth (black/white, gray scale, or color).
+
+16. **PDF Export Quality Type**: Select the preferred export quality (DPI).
+
+17. **Hide Crop Boundaries**: Choose whether to hide crop boundaries.
+
+18. **Hide Reference Plane**: Choose whether to hide reference/work planes.
+
+19. **Hide Scope Boxes**: Choose whether to hide scope boxes.
+
+20. **Hide Unreferenced View Tags**: Choose whether to hide unreferenced view tags.
+
+21. **Mask Coincident Lines**: Choose whether to mask coincident lines.
+
+22. **Replace Halftone With Thin Lines**: Choose whether to replace halftone with thin lines.
+
+23. **View Links In Blue**: Choose whether to set view links to blue.
+
+24. **Origin Offset X**: Specify the offset between the left sides of the PDF content and paper.
+
+25. **Origin Offset Y**: Specify the offset between the bottom sides of the PDF content and paper.
+
+26. **Zoom Percentage**: Specify the percentage of the zoom for the view.
+
+27. **Paper Format**: Select the paper format.
+
+28. **Page Orientation Type**: Select the paper orientation (Portrait/Landscape/Auto).
+
+29. **Paper Placement Type**: Select the paper placement (center or offset from corner).
+
+30. **Raster Quality Type**: Select the preferred raster quality (DPI).
+
+31. **Zoom Type**: Select the zoom type (fit to page or specific percentage).
+
+## Execution
+
+Once all the options are set, the extension will process the selected views and sheets based on the specified criteria and export them to PDF files in the chosen destination directory.

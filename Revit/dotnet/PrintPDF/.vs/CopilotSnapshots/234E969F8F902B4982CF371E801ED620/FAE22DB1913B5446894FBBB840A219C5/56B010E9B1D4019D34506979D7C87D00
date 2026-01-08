@@ -1,0 +1,176 @@
+﻿# PrintPDF Extension
+
+Export Revit sheets to PDF with configurable selection, naming, and print settings.
+
+## Workflow (quick)
+
+1. **Destination Folder**
+   - Choose **Destination Folder**.
+   - The extension will create the folder if it does not exist. If it cannot be created/written to, the run fails.
+
+2. **Choose What To Print**
+   Select **Choose What To Print**:
+
+   - **ActiveView**
+     - Exports the currently active view **only if it is a sheet** (`ViewSheet`).
+
+   - **AllSheets**
+     - Exports every sheet found in the model.
+
+   - **CustomFilter**
+     - Exports sheets returned by your filter rules (Sheets category).
+
+   - **SheetSet**
+     - Exports sheets contained in a specific Revit **View/Sheet Set**.
+
+   - **UseRegexInSheetSet**
+     - Finds all View/Sheet Sets whose names match a **Regex Pattern**, then exports each matched set.
+
+   - **SheetCollection** *(Revit 2025+ only)*
+     - Exports sheets contained in a specific Revit **Sheet Collection**.
+
+   - **UseRegexInSheetCollections** *(Revit 2025+ only)*
+     - Finds all Sheet Collections whose names match a **Regex Pattern**, then exports each matched collection.
+
+3. **(Optional) Configure naming**
+   Choose a naming mode in **Naming Options**, then set prefix/suffix/separator or a custom template.
+
+4. **(Optional) Configure Revit print/export settings**
+   Use the properties under *“Configure Revit Print Settings”* to control color depth, DPI, placement, raster behavior, etc.
+
+5. **Run**
+   The extension collects sheets based on selection options and exports PDFs to the destination folder.
+
+---
+
+## Field reference (including UI visibility)
+
+This section mirrors the UI logic from `PrintPDFArgs` (not all fields are always shown).
+
+### Destination
+
+- **Destination Folder** (required)
+  - Where exported PDFs are written.
+
+### Choose What To Print
+
+- **Choose What To Print** (`ExportOption`)
+  - Controls which additional fields appear.
+
+#### When `ExportOption == CustomFilter`
+
+- **Set Filter Rules** (`CustomFilter`)
+  - Visible only when **Choose What To Print** is `CustomFilter`.
+  - Uses the active document.
+  - Category fixed to **Sheets**.
+  - Tip: if no rules are defined, the filter UI may still return all sheets depending on the filter setup.
+
+#### When `ExportOption == SheetSet`
+
+- **Sheet Set** (`ViewSet`) (required)
+  - Visible only when **Choose What To Print** is `SheetSet`.
+  - You can select from an auto-filled list of existing View/Sheet Sets or type a name.
+
+#### When `ExportOption == SheetCollection` *(Revit 2025+ only)*
+
+- **Sheet Collection** (`ViewCollection`) (required)
+  - Visible only when **Choose What To Print** is `SheetCollection`.
+  - You can select from an auto-filled list of existing Sheet Collections or type a name.
+
+#### When `ExportOption == UseRegexInSheetSet` OR `UseRegexInSheetCollections`
+
+- **Regex Pattern** (`RegexPattern`) (required)
+  - Visible only for regex-based options.
+  - Used to match **set/collection names**.
+  - If the regex is invalid, the run is aborted.
+
+---
+
+## Naming configuration
+
+- **Naming Options** (`NamingOptions`)
+  - Select how file names are created.
+
+- **Separator in file Name** (`SeparatorInFileName`)
+  - Visible when `NamingOptions != CustomNamingConvention`.
+
+- **Prefix in file name (Optional)** (`PrefixFileName`)
+  - Visible when `NamingOptions != CustomNamingConvention`.
+
+- **Suffix in file name (Optional)** (`SuffixFileName`)
+  - Visible when `NamingOptions != CustomNamingConvention`.
+
+- **Custom Naming Convention** (`CustomNamingConvention`) (required when shown)
+  - Visible only when `NamingOptions == CustomNamingConvention`.
+  - Use placeholders in braces:
+    - Built-in placeholders: `{SheetName}`, `{ModelName}`
+    - Any sheet/view parameter name, e.g. `{Discipline}`, `{Status}`, `{Phase}`
+  - Examples:
+    - `{SheetName}_{Phase}`
+    - `PDF_{ModelName}_{Discipline}`
+    - `Custom-{SheetName}-v1`
+    - `{Discipline}-{SheetName}`
+
+---
+
+## Combine vs one PDF per sheet
+
+- **Combine** (`Combine`)
+  - If enabled, export a **single PDF** for the selected sheet list.
+
+- **Use sheet set name as PDF Name** (`UseSheetSetNameAsPdfName`)
+  - Visible only when **Combine** is enabled *and* `ExportOption == SheetSet`.
+  - Uses the selected sheet set name as the output PDF file name.
+
+- **Combined File Name (Optional)** (`CombinedFileName`)
+  - Visible only when **Combine** is enabled *and* **Use sheet set name as PDF Name** is `false`.
+
+Notes:
+- When exporting multiple sets/collections via regex, a combined PDF (if enabled) will be produced **per matched set/collection**.
+
+---
+
+## Revit print/export settings
+
+The UI shows a separator labeled:
+
+> Configure Revit Print Settings
+
+The following settings are always available:
+
+- **Always Use Raster** (`AlwaysUseRaster`)
+- **Color Depth Type** (`ColorDepthType`)
+- **PDF Export Quality Type** (`PDFExportQualityType`)
+- **Hide Crop Boundaries** (`HideCropBoundaries`)
+- **Hide Reference Plane** (`HideReferencePlane`)
+- **Hide Scope Boxes** (`HideScopeBoxes`)
+- **Hide Unreferenced View Tags** (`HideUnreferencedViewTags`)
+- **Mask Coincident Lines** (`MaskCoincidentLines`)
+- **Replace Halftone With Thin Lines** (`ReplaceHalftoneWithThinLines`)
+- **View Links In Blue** (`ViewLinksInBlue`)
+- **Origin Offset X** (`OriginOffsetX`)
+- **Origin Offset Y** (`OriginOffsetY`)
+- **Zoom Percentage** (`ZoomPercentage`)
+- **Paper Format** (`ExportPaperFormat`)
+- **Page Orientation Type** (`PageOrientationType`)
+- **Paper Placement Type** (`PaperPlacementType`)
+- **Raster Quality Type** (`RasterQualityType`)
+- **Zoom Type** (`ZoomType`)
+- **Open View On Export** (`OpenViewOnExport`)
+
+---
+
+## What the extension does at runtime
+
+Based on your **Choose What To Print** selection, the command collects a list of `ViewSheet` instances:
+
+- **ActiveView**: uses the active view if it’s a sheet; otherwise fails.
+- **AllSheets**: collects all sheets.
+- **CustomFilter**: takes the filter results and keeps only sheets.
+- **SheetSet**: collects sheets from the named View/Sheet Set.
+- **UseRegexInSheetSet**: finds matching sets, then exports each set.
+- **SheetCollection / UseRegexInSheetCollections** (2025+): same pattern, but for sheet collections.
+
+It then exports to PDF using the configured naming, combine behavior, and print/export settings.
+
+If nothing matching is found for the chosen option, the extension returns a **partially succeeded** result with an explanatory message.

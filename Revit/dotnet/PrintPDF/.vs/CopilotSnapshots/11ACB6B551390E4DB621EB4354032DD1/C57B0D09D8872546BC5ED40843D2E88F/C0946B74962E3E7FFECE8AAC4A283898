@@ -1,0 +1,74 @@
+﻿# PrintPDF Extension
+
+The PrintPDF extension exports Revit sheets to PDF with configurable selection, naming, and export settings.
+
+## How to use
+
+### 1) Destination
+- **Destination Directory**: Folder where PDFs will be saved.
+
+### 2) What to export (Export Option)
+Pick one of the supported export modes:
+
+- **ActiveView**: Exports the currently active view (must be a sheet).
+- **AllSheets**: Exports all sheets in the model.
+- **CustomFilter**: Exports sheets returned by the configured custom filter.
+- **ViewSet**: Exports sheets from a selected Revit view/sheet set.
+- **ViewCollection**: Exports sheets from a selected Revit sheet collection.
+- **UseRegexInViewSet**: Matches view/sheet sets by regex, then exports each matched set.
+- **UseRegexInViewCollections** *(Revit 2025+)*: Matches sheet collections by regex, then exports each matched collection.
+
+#### Fields shown based on Export Option
+- **Custom Filter**: Shown when `ExportOption == CustomFilter`.
+- **Sheet Set**: Shown when `ExportOption == ViewSet`.
+- **View collection**: Shown when `ExportOption == ViewCollection`.
+- **Regex Pattern**: Shown when `ExportOption == UseRegexInViewSet` or `ExportOption == UseRegexInViewCollections`.
+
+### 3) File naming
+- **Naming Options**: Select how the file name is built.
+- **Separator in File Name**: Separator used when the naming option combines multiple parts.
+- **Prefix in file name (Optional)**: Text prepended to the file name.
+- **Suffix in file name (Optional)**: Text appended to the file name.
+- **Custom Naming Convention**: Shown when `NamingOptions == Custom`.
+
+#### Custom Naming Convention tokens
+Custom patterns support tokens in braces:
+- Built-in tokens: `{SheetName}`, `{ModelName}`
+- Any view/sheet parameter name: `{Discipline}`, `{Status}`, etc.
+
+Examples:
+- `{SheetName}_{Discipline}`
+- `PDF_{ModelName}_{SheetName}`
+- `Custom-{SheetName}-v1`
+
+### 4) Combine output
+- **Combine**: When enabled, exports each selection as a single combined PDF.
+- **Use sheet set name as PDF Name**: Shown when `Combine == true`.
+- **Combined File Name (Optional)**: Shown when `Combine == true` and `UseSheetSetNameAsPdfName == false`.
+
+> Note: When exporting via regex (multiple sets/collections), each matched set/collection is exported as its own combined PDF.
+
+### 5) PDF export settings
+- **Always Use Raster**
+- **Color Depth Type**
+- **PDF Export Quality Type**
+- **Hide Crop Boundaries**
+- **Hide Reference Plane**
+- **Hide Scope Boxes**
+- **Hide Unreferenced View Tags**
+- **Mask Coincident Lines**
+- **Replace Halftone With Thin Lines**
+- **View Links In Blue**
+- **Origin Offset X**
+- **Origin Offset Y**
+- **Zoom Type**
+- **Zoom Percentage**
+- **Paper Format**
+- **Page Orientation Type**
+- **Paper Placement Type**
+- **Raster Quality Type**
+- **Open View On Export**
+
+## Execution
+
+Once configured, the extension collects sheets based on the selected **Export Option** and exports them to PDF in the configured **Destination Directory**.

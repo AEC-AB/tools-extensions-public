@@ -1,0 +1,246 @@
+﻿using CW.Assistant.Extensions.Contracts.Fields;
+using CW.Assistant.Extensions.Contracts.Fields.Revit;
+using PrintPDF.Enums;
+
+namespace PrintPDF
+{
+    public class PrintPDFArgs
+    {
+        [FolderPickerField(
+            Label = "Destination Directory",
+            ToolTip = "Location of the PDF to be saved")]
+        public string? DestinationDirectory { get; set; }
+
+        [OptionsField(
+            Label = "Export Option",
+            ToolTip = "Sheets to be printed")]
+        public ExportOptions ExportOption { get; set; } = ExportOptions.ViewSet;
+
+        [FilterField(
+            Label = "Custom Filter",
+            ToolTip = "Define filter rules when 'Custom Filter' is selected in Export option. Example: SheetName equals PDF_Export.",
+            UseActiveDocument = true,
+            Categories = ["Sheets"],
+            DisableCategorySelection = true,
+            DisableModelSelection = true,
+            Visibility = $"{nameof(ExportOption)} == 'CustomFilter'")]
+        public FilteredElementCollector? CustomFilter { get; set; }
+
+        [OptionsField(
+            Label = "Sheet Set",
+            ToolTip = "Pick the sheet set",
+            CollectorType = typeof(ViewSetCollector),
+            Visibility = $"{nameof(ExportOption)} == 'ViewSet'")]
+        public string? ViewSet { get; set; }
+
+        [OptionsField(
+            Label = "View collection",
+            ToolTip = "Pick the view collection",
+            CollectorType = typeof(ViewCollectionCollector),
+            Visibility = $"{nameof(ExportOption)} == 'ViewCollection'")]
+        public string? ViewCollection { get; set; }
+
+        [TextField(
+            Label = "Regex Pattern",
+            ToolTip = "Regex pattern to search in view set/collection",
+            Visibility = $"{nameof(ExportOption)} == 'UseRegexInViewSet' || {nameof(ExportOption)} == 'UseRegexInViewCollections'")]
+        public string? RegexPattern { get; set; }
+
+        [OptionsField(
+            Label = "Naming Options",
+            ToolTip = "Choose how PDF files are named: 'SheetNameOnly' uses the sheet name; other options combine prefix/suffix/separator and optional custom pattern",
+            CollectorSortOrder = SortOrder.None)]
+        public NamingOptions NamingOptions { get; set; } = NamingOptions.SheetNameOnly;
+
+        [TextField(
+            Label = "Separator in File Name",
+            ToolTip = "Text used to separate parts of the file name (e.g., '-' results in SheetName-Discipline)")]
+        public string SeparatorInFileName { get; set; } = "-";
+
+        [TextField(
+            Label = "Prefix in file name (Optional)",
+            ToolTip = "Add a prefix to the file name")]
+        public string? PrefixFileName { get; internal set; }
+
+        [TextField(
+            Label = "Suffix in file name (Optional)",
+            ToolTip = "Add a suffix to the file name")]
+        public string? SuffixFileName { get; internal set; }
+
+        [TextField(
+            Label = "Custom Naming Convention",
+            ToolTip = "Define a custom naming pattern for the PDF file. Use variables like {SheetName}, {ModelName}, or any View parameter name in braces (e.g., {Discipline}, {Status}). Examples: '{SheetName}_{Phase}', 'PDF_{ModelName}_{Discipline}', 'Custom-{SheetName}-v1', '{Discipline}-{SheetName}'",
+            Visibility = $"{nameof(NamingOptions)} == 'Custom'")]
+        public string? CustomNamingConvention { get; set; }
+
+        [BooleanField(
+            Label ="Combine",
+            ToolTip = "Whether export all views and sheets into one PDF file or multiple files")]
+        public bool Combine { get; set; }
+
+        [BooleanField(
+            Label = "Use sheet set name as PDF Name",
+            ToolTip ="Use Sheet set name as the combined PDF name",
+             Visibility = nameof(Combine))]
+        public bool UseSheetSetNameAsPdfName { get; set; }
+
+        [TextField(
+            Label = "Combined File Name (Optional)",
+            ToolTip = "Provide file name if multiple sheets are combined",
+            Visibility = $"{nameof(Combine)} && {nameof(UseSheetSetNameAsPdfName)} == 'false'")]
+        public string? CombinedFileName { get; set; }
+
+        [BooleanField(
+            Label = "Always Use Raster",
+            ToolTip = "True to completely use raster processing for graphics")]
+        public bool AlwaysUseRaster { get; set; } = false;
+
+        [OptionsField(
+            Label = "Color Depth Type",
+            ToolTip = "Color depth of either black/white, gray scale or color")]
+        public ColorDepthType ColorDepthType { get; set; } = ColorDepthType.Color;
+
+        [OptionsField(
+            Label = "PDF Export Quality Type",
+            ToolTip = "The preferred export quality (DPI)")]
+        public PDFExportQualityType PDFExportQualityType { get; set; } = PDFExportQualityType.DPI144;
+
+        [BooleanField(
+            Label = "Hide Crop Boundaries",
+            ToolTip = "Hide crop boundaries from the exported PDF")]
+        public bool HideCropBoundaries { get; set; } = true;
+
+        [BooleanField(
+            Label = "Hide Reference Plane",
+            ToolTip = "Hide reference planes from the exported PDF")]
+        public bool HideReferencePlane { get; set; } = true;
+
+        [BooleanField(
+            Label = "Hide Scope Boxes",
+            ToolTip = "Hide scope boxes from the exported PDF")]
+        public bool HideScopeBoxes { get; set; } = true;
+
+        [BooleanField(
+            Label = "Hide Unreferenced View Tags",
+            ToolTip = "Hide unreferenced view tags from the exported PDF")]
+        public bool HideUnreferencedViewTags { get; set; } = true;
+
+        [BooleanField(
+            Label = "Mask Coincident Lines",
+            ToolTip = "Mask coincident lines to improve clarity")]
+        public bool MaskCoincidentLines { get; set; } = true;
+
+        [BooleanField(
+            Label = "Replace Halftone With Thin Lines",
+            ToolTip = "Replace halftone with thin lines for better visibility")]
+        public bool ReplaceHalftoneWithThinLines { get; set; } = true;
+
+        [BooleanField(
+            Label = "View Links In Blue",
+            ToolTip = "Set view links to be displayed in blue color")]
+        public bool ViewLinksInBlue { get; set; }
+
+        [DoubleField(
+            Label = "Origin Offset X",
+            ToolTip = "Offset between left sides of pdf content and paper")]
+        public double OriginOffsetX { get; set; }
+
+        [DoubleField(
+            Label = "Origin Offset Y",
+            ToolTip = "Offset between bottom sides of pdf content and paper")]
+        public double OriginOffsetY { get; set; }
+
+        [IntegerField(
+            Label = "Zoom Percentage",
+            ToolTip = "Percentage of the zoom for the view")]
+        public int ZoomPercentage { get; set; }
+
+        [OptionsField(
+            Label = "Paper Format",
+            ToolTip = "Paper format to be used for export")]
+        public ExportPaperFormat ExportPaperFormat { get; set; } = ExportPaperFormat.Default;
+
+        [OptionsField(
+            Label = "Page Orientation Type",
+            ToolTip = "Paper orientation of either portrait, landscape or auto")]
+        public PageOrientationType PageOrientationType { get; set; } = PageOrientationType.Landscape;
+
+        [OptionsField(
+            Label = "Paper Placement Type",
+            ToolTip = "Paper placement of either center or offset from corner")]
+        public PaperPlacementType PaperPlacementType { get; set; } = PaperPlacementType.Center;
+
+        [OptionsField(
+            Label = "Raster Quality Type",
+            ToolTip = "The preferred raster quality (DPI)")]
+        public RasterQualityType RasterQualityType { get; set; } = RasterQualityType.High;
+
+        [OptionsField(
+            Label = "Zoom Type",
+            ToolTip = "Zoom type of either fit to page or on a specific percentage")]
+        public ZoomType ZoomType { get; set; } = ZoomType.FitToPage;
+
+        [BooleanField(
+            Label = "Open View On Export",
+            ToolTip = "Open the view when exporting the PDF")]
+        public bool OpenViewOnExport { get; set; }
+    }
+
+    internal class ViewCollectionCollector : IRevitAutoFillCollector<PrintPDFArgs>
+    {
+        public Dictionary<string, string> Get(UIApplication uiApplication, PrintPDFArgs args)
+        {
+            var result = new Dictionary<string, string>();
+
+            try
+            {
+                var document = uiApplication.ActiveUIDocument?.Document;
+
+                if (document is null)
+                    return result;
+
+                var viewCollections = new FilteredElementCollector(document).OfCategory(BuiltInCategory.OST_SheetCollections)
+                                .WhereElementIsNotElementType().ToElements();
+
+                foreach (var viewCollection in viewCollections)
+                {
+                    result.Add(viewCollection.Name, viewCollection.Name);
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+
+            return result;
+        }
+    }
+    internal class ViewSetCollector : IRevitAutoFillCollector<PrintPDFArgs>
+    {
+        public Dictionary<string, string> Get(UIApplication uiApplication, PrintPDFArgs args)
+        {
+            var result = new Dictionary<string, string>();
+
+            try
+            {
+                var document = uiApplication.ActiveUIDocument?.Document;
+
+                if (document is null)
+                    return result;
+
+                var viewSets = new FilteredElementCollector(document).OfClass(typeof(ViewSheetSet)).ToElements();
+
+                foreach (var viewSet in viewSets)
+                {
+                    result.Add(viewSet.Name, viewSet.Name);
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+
+            return result;
+        }
+    }
+}

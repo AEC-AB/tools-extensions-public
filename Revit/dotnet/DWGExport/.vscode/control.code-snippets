@@ -1,0 +1,126 @@
+{
+    "Control": {
+      "prefix": ["control"],
+      "body": [
+        "[Description(\"${1:ControlName}\")]",
+        "[ControlData(ToolTip = \"${4:Control ToolTip}\")]",
+        "public ${2:string} ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; } = ${3:\"Default value\"};"],
+      "description": "Control for macro UI"
+    },
+    "ControlAutoFill": {
+      "prefix": ["control-auto-fill"],
+      "body": [
+        "[RevitAutoFill(RevitAutoFillSource.${1|SharedParameters,ProjectParameters,BuiltInParameters,Categories,Views,Sheets,Worksets,Families,FamilySymbols,Filters,CableTraySizes,ConduitSizes,PipeSizes,DuctSizes,Phases,Levels,Grids,RevitType,ParametersForCategory,ByCustomFilter|})]"
+      ],
+      "description": "Control autofill attribute"
+    },
+    "ControlAutoFillRequired": {
+      "prefix": ["control-auto-fill-required"],
+      "body": [
+        "${TM_SELECTED_TEXT/(ParametersForCategory)|(RevitType)/${1:+ParametersForCategory, RevitBuiltInCategory = \"{1:OST_GenericModel}\"}${2:+RevitType, RevitType = typeof(WallType)}/}"
+      ],
+      "description": "Control autofill attribute"
+    },
+    "ControlAutoFillParametersForCategory": {
+      "prefix": ["control-auto-fill-parameters"],
+      "body": ["[RevitAutoFill(RevitAutoFillSource.ParametersForCategory, RevitBuiltInCategory = \"${1:OST_GenericModel}\")]"],
+      "description": "Control autofill parameters for category attribute"
+    },
+    "ControlAutoFillByCustomFilter": {
+      "prefix": ["control-auto-fill-byCustomFilter"],
+      "body": ["[RevitAutoFill(RevitAutoFillSource.ByCustomFilter, RevitType = typeof(${1:View}), RevitBuiltInCategory = \"${2:OST_Sheets}\", WhereElementIsType = false, ParameterName = \"${3:Sheet Number}\")]"],
+      "description": "Control autofill by custom filter attribute"
+    },
+    "ControlAutoFillByType": {
+      "prefix": ["control-auto-fill-byType"],
+      "body": ["[RevitAutoFill(RevitAutoFillSource.RevitType, RevitType = typeof(${1:WallType}))]"],
+      "description": "Control autofill by type attribute"
+    },
+    "ControlType": {
+      "prefix": ["control-type"],
+      "body": ["[ControlType(ControlType.${1|ImageViewer,Password,Url,Browse,Save,Option,ListBox|})]"],
+      "description": "Type of control to display"
+    },
+    "ControlSetting": {
+      "prefix": ["control-setting"],
+      "body": ["[ControlSettings(\"${1:MaxHeight}\", \"${2:300}\")]"],
+      "description": "Adjust the settings for a wpf control"
+    },
+    "ControlSaveType": {
+      "prefix": ["control-type-save"],
+      "body": [
+        "[Description(\"${1:Save file}\")]",
+        "[ControlType(ControlType.Save)]",
+        "[FileExtension(\"${2:json}\")]",
+        "[FileExtension(\".*\")]",
+        "public string ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"],
+      "description": "Save file control"
+    },
+    "ControlOpenType": {
+      "prefix": ["control-type-browse"],
+      "body": [
+        "[Description(\"${1:Browse for file}\")]",
+        "[ControlType(ControlType.Browse)]",
+        "[FileExtension(\"${2:json}\")]",
+        "[FileExtension(\".*\")]",
+        "public string ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"],
+      "description": "Browse file control"
+    },
+    "ControlAutoComplete": {
+      "prefix": ["control-type-auto-fill"],
+      "body": [
+        "[Description(\"${1:ControlName}\")]",
+        "[RevitAutoFill(RevitAutoFillSource.${2|SharedParameters,ProjectParameters,BuiltInParameters,Categories,Views,Sheets,Worksets,Families,FamilySymbols,Filters,CableTraySizes,ConduitSizes,PipeSizes,DuctSizes,Phases,Levels,Grids,RevitType,ParametersForCategory,ByCustomFilter|})]",
+        "public string ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"],
+      "description": "AutComplete control"
+    },
+    "ControlListType": {
+      "prefix": ["control-type-list"],
+      "body": [
+        "[Description(\"${1:Items}\")]",
+        "public List<string> ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"],
+      "description": "List control"
+    },
+    "ControlListBoxType": {
+      "prefix": ["control-type-list-box"],
+      "body": [
+        "[Description(\"${1:Items}\")]",
+        "[ControlType(ControlType.ListBox)]",
+        "[RevitAutoFill(RevitAutoFillSource.${2|SharedParameters,ProjectParameters,BuiltInParameters,Categories,Views,Sheets,Worksets,Families,FamilySymbols,Filters,CableTraySizes,ConduitSizes,PipeSizes,DuctSizes,Phases,Levels,Grids,RevitType,ParametersForCategory,ByCustomFilter|})]",
+        "public List<string> ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"],
+      "description": "List box control"
+    },
+    "ControlOptionType": {
+      "prefix": ["control-type-options"],
+      "body": [
+        "[Description(\"${1:Items}\")]",
+        "[ControlType(ControlType.Option)]",
+        "[RevitAutoFill(RevitAutoFillSource.${2|SharedParameters,ProjectParameters,BuiltInParameters,Categories,Views,Sheets,Worksets,Families,FamilySymbols,Filters,CableTraySizes,ConduitSizes,PipeSizes,DuctSizes,Phases,Levels,Grids,RevitType,ParametersForCategory,ByCustomFilter|})]",
+        "public List<string> ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"],
+      "description": "Options control"
+    },
+    "ControlEnumType": {
+      "prefix": ["control-type-enum"],
+      "body": [
+        "[Description(\"${1:My enum}\")]",
+        "public ${2:MyEnum} ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"],
+      "description": "Enum control"
+    },
+    "ControlEnumsType": {
+      "prefix": ["control-type-enums"],
+      "body": [
+        "[Description(\"${1:My enum}\")]",
+        "[ControlType(ControlType.ListBox)]",
+        "public List<${2:MyEnum}> ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"],
+      "description": "Enums control"
+    },
+    "ControlDictionaryType": {
+      "prefix": ["control-type-dictionary"],
+      "body": [
+        "[Description(\"${1:Dictionary}\")]",
+        "public Dictionary<string, string> ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"],
+      "description": "Enums control"
+    }
+  }
+
+  

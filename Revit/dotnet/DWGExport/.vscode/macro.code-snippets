@@ -1,0 +1,22 @@
+{
+    "Transaction": {
+      "prefix": ["transaction", "revit-transaction"],
+      "body": ["using var transaction = new Transaction(${2:document}, \"${1:Transaction name}\");\r\ntransaction.Start();\r\n\r\n${0}\r\n\r\ntransaction.Commit();"],
+      "description": "Revit transaction"
+    },
+    "FilteredElementCollector": {
+      "prefix": ["element-collector", "revit-element-collector"],
+      "body": ["using var ${1:collector} = new FilteredElementCollector(${2:document})${0};"],
+      "description": "Revit filtered element collector"
+    },
+    "ElementIterator": {
+      "prefix": ["collector-iterator", "revit-collector-iterator"],
+      "body": ["using var elementIterator = ${1:collector}.GetElementIterator();\r\nwhile (elementIterator.MoveNext())\r\n{\r\n\tusing var ${2:element} = elementIterator.Current;\r\n\t\r\n\t${0}\r\n}"],
+      "description": "Revit element iterator"
+    },
+    "If not": {
+      "prefix": ["if-not"],
+      "body": ["if (!(${1:item} is ${2:Element} ${3:element})) return;\r\n\r\n${0}"],
+      "description": "Inverted if"
+    }
+  }

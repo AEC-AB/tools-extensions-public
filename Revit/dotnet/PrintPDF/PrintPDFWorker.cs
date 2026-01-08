@@ -46,7 +46,6 @@ public class PrintPDFWorker
         }
         _telemetry?.IncrementSheetsRequested(sheets.Count);
         _logger.Info($"PrintPDF called with {sheets.Count} sheets. Combine={_args.Combine}");
-        _logger.Info($"PrintPDF called with {sheets.Count} sheets. Combine={_args.Combine}");
 
         // If there are no sheets to export, nothing to do.
         if (sheets == null || !sheets.Any())

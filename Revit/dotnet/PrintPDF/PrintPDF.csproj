@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ExtensionId>PrintPDF</ExtensionId>
     <Authors>AEC</Authors>
-    <Version>1.1.5</Version>
+    <Version>1.1.6</Version>
     <Title>Print PDF</Title>
     <Description>Print PDFs</Description>
     <PackageTags>Revit;Assistant;Extension</PackageTags>

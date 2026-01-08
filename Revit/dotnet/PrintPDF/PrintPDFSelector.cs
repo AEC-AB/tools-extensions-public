@@ -152,8 +152,6 @@ public class PrintPDFSelector
         return ordered;
     }
 
-    
-
     public (List<ViewSheet> Sheets, string Name) CollectByViewSet(string viewSetName)
     {
         var viewSet = new FilteredElementCollector(_document).OfClass(typeof(ViewSheetSet)).Where(x => x.Name == viewSetName).OfType<ViewSheetSet>().FirstOrDefault();

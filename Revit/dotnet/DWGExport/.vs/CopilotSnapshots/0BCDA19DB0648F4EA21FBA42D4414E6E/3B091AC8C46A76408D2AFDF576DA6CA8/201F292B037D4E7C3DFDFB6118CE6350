@@ -1,0 +1,200 @@
+﻿using CW.Assistant.Extensions.Contracts.Fields;
+using CW.Assistant.Extensions.Contracts.Fields.Revit;
+
+namespace DWGExport;
+
+public class DWGExportArgs
+{
+    [FolderPickerField(
+        Label = "Destination Directory",
+        ToolTip = "Folder where the exported DWG file(s) will be saved")]
+    public string? DestinationDirectory { get; set; }
+
+    [OptionsField(
+        Label = "Export Option",
+        ToolTip = "Choose export option",
+        CollectorSortOrder = SortOrder.None)]
+    public ExportOptions ExportOption { get; set; } = ExportOptions.AllSheets;
+
+    [FilterField(
+        Label = "Custom Filter",
+        ToolTip = "Define filter rules when 'Custom Filter' is selected in Export option. Example: ViewName equals DWG_Export. Ignored for 'Use Active View' and 'View Set'",
+        UseActiveDocument = true,
+        Categories = ["Views", "Sheets"],
+        DisableCategorySelection = true,
+        DisableModelSelection = true,
+        Visibility = $"{nameof(ExportOption)} == 'CustomFilter'")]
+    public FilteredElementCollector? CustomFilter { get; set; }
+
+    [OptionsField(
+        Label = "View/Sheet Set",
+        ToolTip = "Pick the view/sheet set",
+        CollectorType = typeof(ViewSetCollector),
+        Visibility = $"{nameof(ExportOption)} == 'ViewSet' || {nameof(ExportOption)} == 'UseRegexInViewSet'")]
+    public string? ViewSet { get; set; }
+
+    [TextField(
+        Label = "Regex Pattern",
+        ToolTip = "Regex pattern to search in view set",
+        Visibility = $"{nameof(ExportOption)} == 'UseRegexInViewSet'"
+    )]
+    public string? RegexPattern { get; set; }
+
+    [OptionsField(
+        Label = "Naming Options",
+        ToolTip = "Choose how DWG files are named: 'ViewNameOnly' uses the view name; other options combine prefix/suffix/separator and optional custom pattern",
+        CollectorSortOrder = SortOrder.None)]
+    public NamingOptions NamingOptions { get; set; } = NamingOptions.ViewNameOnly;
+
+    [TextField(
+        Label = "Separator in File Name",
+        ToolTip = "Text used to separate parts of the file name (e.g., '-' results in ViewName-Discipline)"
+    )]
+    public string SeparatorInFileName { get; set; } = "-";
+
+    [TextField(
+        Label = "Prefix in file name (Optional)",
+        ToolTip = "Add a prefix to the file name"
+    )]
+    public string? PrefixFileName { get; internal set; }
+
+    [TextField(
+        Label = "Suffix in file name (Optional)",
+        ToolTip = "Add a suffix to the file name"
+    )]
+    public string? SuffixFileName { get; internal set; }
+
+    [TextField(
+        Label = "Custom Naming Convention",
+        ToolTip = "Define a custom naming pattern for the DWG file. Use variables like {ViewName}, {ModelName}, or any View parameter name in braces (e.g., {Discipline}, {Status}). Examples: '{ViewName}_{Phase}', 'DWG_{ModelName}_{Discipline}', 'Custom-{ViewName}-v1', '{Discipline}-{ViewName}'",
+        Visibility = $"{nameof(NamingOptions)} == 'Custom'"
+    )]
+    public string? CustomNamingConvention { get; set; }
+
+    [OptionsField(
+        Label = "ACA Preference",
+        ToolTip = "The preferred way to generate geometry of ACA objects")]
+    public ACAObjectPreference ACAPreference { get; internal set; } = ACAObjectPreference.Object;
+
+    [OptionsField(
+        Label = "Colors",
+        ToolTip = "Select the Export color mode")]
+    public ExportColorMode Colors { get; internal set; } = ExportColorMode.IndexColors;
+
+    [OptionsField(
+        Label = "Export Of Solids",
+        ToolTip = "The mode used to export solids in 3D views")]
+    public SolidGeometry ExportOfSolids { get; internal set; } = SolidGeometry.Polymesh;
+
+    [OptionsField(
+        Label = "File Version",
+        ToolTip = "Select the prefered version")]
+    public ACADVersion FileVersion { get; internal set; } = ACADVersion.R2013;
+
+    [OptionsField(
+        Label = "Export Unit",
+        ToolTip = "Select the target unit type")]
+    public ExportUnit Values { get; internal set; } = ExportUnit.Default;
+
+    [OptionsField(
+        Label = "Line Scaling ",
+        ToolTip = "The scaling mode for the line type. Default value is LineScaling.ViewScale.")]
+    public LineScaling LineScaling { get; internal set; } = LineScaling.ViewScale;
+
+    [OptionsField(
+        Label = "Export layer options",
+        ToolTip = "Select the export layer options")]
+    public PropOverrideMode PropOverrideMode { get; internal set; } = PropOverrideMode.ByEntity;
+
+    [OptionsField(
+        Label = "Target Unit",
+        ToolTip = "Select target unit")]
+    public ExportUnit TargetUnit { get; internal set; } = ExportUnit.Default;
+
+    [OptionsField(
+        Label = "Text Treatment",
+        ToolTip = "Select Text Treatment")]
+    public TextTreatment TextTreatment { get; internal set; } = TextTreatment.Exact;
+
+    [BooleanField(
+        Label = "Export Areas",
+        ToolTip = "True to export area and room geometry, false otherwise")]
+    public bool ExportingAreas { get; internal set; }
+
+    [BooleanField(
+        Label = "Hide Reference Plane",
+        ToolTip = "Whether or not to hide reference planes")]
+    public bool HideReferencePlane { get; internal set; } = true;
+
+    [BooleanField(
+        Label = "Hide Scope Box",
+        ToolTip = "Whether or not to hide the scope box")]
+    public bool HideScopeBox { get; internal set; }
+
+    [BooleanField(
+        Label = "Hide Unreferenced View Tags",
+        ToolTip = "Whether or not to hide unreferenced view tags")]
+    public bool HideUnreferenceViewTags { get; internal set; } = true;
+
+    [BooleanField(
+        Label = "Merge Views",
+        ToolTip = "Whether to merge all views in one file (via XRefs)")]
+    public bool MergedViews { get; internal set; } = true;
+
+    [BooleanField(
+        Label = "Preserve Coincident Lines",
+        ToolTip = "Whether or not to preserve coincident lines")]
+    public bool PreserveCoincidentLines { get; internal set; }
+
+    [BooleanField(
+        Label = "Shared Coordinate",
+        ToolTip = "True to use the shared coordinate system's origin, false to use the project origin")]
+    public bool SharedCoords { get; internal set; } = true;
+
+    [BooleanField(
+        Label = "Use Hatch Background Color",
+        ToolTip = "Indicates if hatch background color will be used or not. default value is false.")]
+    public bool UseHatchBackgroundColor { get; internal set; }
+
+    [BooleanField(
+        Label = "Mark Nonplot Layers",
+        ToolTip = "If true and the nonplot layer suffix is not empty, all layers whose names contain that suffix will be marked as non-plot.")]
+    public bool MarkNonplotLayers { get; internal set; }
+
+    [TextField(
+        Label = "Nonplot Suffix",
+        ToolTip = "If the MarkNonplotLayers attribute is set to true, all layers with names containing this suffix will be marked as non-plot. No action will be performed if the suffix is empty.",
+        Visibility = nameof(MarkNonplotLayers))]
+    public string? NonplotSuffix { get; set; }
+}
+
+internal class ViewSetCollector : IRevitAutoFillCollector<DWGExportArgs>
+{
+    public Dictionary<string, string> Get(UIApplication uiApplication, DWGExportArgs args)
+    {
+        var result = new Dictionary<string, string>();
+
+        try
+        {
+            var document = uiApplication.ActiveUIDocument?.Document;
+            if (document is null)
+                return result;
+
+            var viewSets = new FilteredElementCollector(document)
+                .OfClass(typeof(ViewSheetSet))
+                .ToElements();
+
+            foreach (var viewSet in viewSets)
+            {
+                // Use name as both key and value for UI display/selection
+                result[viewSet.Name] = viewSet.Name;
+            }
+        }
+        catch
+        {
+            // Intentionally ignore errors when auto-filling; UI can still function without these values.
+        }
+
+        return result;
+    }
+}

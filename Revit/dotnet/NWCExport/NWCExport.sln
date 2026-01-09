@@ -1,0 +1,48 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11222.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWCExport", "NWCExport.csproj", "{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug 2019|Any CPU = Debug 2019|Any CPU
+		Debug 2020|Any CPU = Debug 2020|Any CPU
+		Debug 2021|Any CPU = Debug 2021|Any CPU
+		Debug 2022|Any CPU = Debug 2022|Any CPU
+		Debug 2023|Any CPU = Debug 2023|Any CPU
+		Debug 2024|Any CPU = Debug 2024|Any CPU
+		Debug 2025|Any CPU = Debug 2025|Any CPU
+		Debug 2026|Any CPU = Debug 2026|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2019|Any CPU.ActiveCfg = Debug 2019|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2019|Any CPU.Build.0 = Debug 2019|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2020|Any CPU.ActiveCfg = Debug 2020|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2020|Any CPU.Build.0 = Debug 2020|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2021|Any CPU.ActiveCfg = Debug 2021|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2021|Any CPU.Build.0 = Debug 2021|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2022|Any CPU.ActiveCfg = Debug 2022|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2022|Any CPU.Build.0 = Debug 2022|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2023|Any CPU.ActiveCfg = Debug 2023|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2023|Any CPU.Build.0 = Debug 2023|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2024|Any CPU.ActiveCfg = Debug 2024|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2024|Any CPU.Build.0 = Debug 2024|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2025|Any CPU.ActiveCfg = Debug 2025|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2025|Any CPU.Build.0 = Debug 2025|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2026|Any CPU.ActiveCfg = Debug 2026|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug 2026|Any CPU.Build.0 = Debug 2026|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug|Any CPU.ActiveCfg = Debug 2024|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Debug|Any CPU.Build.0 = Debug 2024|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22AF64A0-ED5A-93A3-5D10-AFFA7DE2F7C7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {937BD9CD-693B-4F12-A25D-2794E277C94B}
+	EndGlobalSection
+EndGlobal

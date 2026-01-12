@@ -6,7 +6,7 @@ public class SaveDocumentAsCommand : INavisworksExtension<SaveDocumentAsArgs>
     public IExtensionResult Run(INavisworksExtensionContext context, SaveDocumentAsArgs args, CancellationToken cancellationToken)
     {
         var saveFolder = Path.GetDirectoryName(args.Path);
-        if (!Directory.Exists(saveFolder))
+        if (!string.IsNullOrEmpty(saveFolder) && !Directory.Exists(saveFolder))
         {
             Directory.CreateDirectory(saveFolder);
         }

@@ -42,7 +42,7 @@
     <PropertyGroup Condition="$(Configuration.Contains('2025')) or $(Configuration.Equals('Debug'))">
     <MainNavisworksVersion>2025</MainNavisworksVersion>
     <NavisworksVersion>1.0.0</NavisworksVersion>
-    <DefineConstants>N2025;N2019_OR_GREATER;N2020_OR_GREATER;N2021_OR_GREATER;N2022_OR_GREATER;N2023_OR_GREATER;N2024_OR_GREATER;N2025_OR_GREATER;N2024_OR_LESS</DefineConstants>
+    <DefineConstants>N2025;N2019_OR_GREATER;N2020_OR_GREATER;N2021_OR_GREATER;N2022_OR_GREATER;N2023_OR_GREATER;N2024_OR_GREATER;N2025_OR_GREATER;N2025_OR_LESS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(Configuration.Contains('Debug'))">

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ExtensionId>SaveDocumentAs</ExtensionId>
+    <Authors>COWI Tools</Authors>
+    <Version>0.0.4</Version>
+    <Title>Save Document As</Title>
+    <Description>Save document as in Navisworks</Description>
+    <PackageTags>Navisworks;Assistant;Extension</PackageTags>
+    <PackageIcon>Icon.png</PackageIcon>
+    <PackageIconUrl></PackageIconUrl>
+  </PropertyGroup>
+
+  <Import Project=".\Configurations.targets" />
+
+  <PropertyGroup>
+    <LangVersion>11</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>compile</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

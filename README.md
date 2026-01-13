@@ -1,4 +1,4 @@
-# tools-extensions-public
+# Public Assistant Extensions
 ![Assistant by AEC Logo](./Assistant-by-AEC-full-logo.svg)
 A shared, community-driven collection of Assistant extensions.
 
@@ -9,6 +9,10 @@ Assistant is an extensible automation and orchestration platform for the AEC (Ar
 Assistant workflows can run manually, scheduled, or event-based, and span multiple applications within a single flow.
 
 Automation here is more than eliminating manual clicks. By encoding approved methods into executable steps, teams get consistent outcomes, higher quality, and less dependency on a handful of key people to remember how things should be done.
+
+## Download Assistant & start a trial
+
+To learn more about Assistant, download the application, or start a free trial, visit **https://assistant.aec.se/**.
 
 ## How Assistant is put together
 
@@ -50,7 +54,5 @@ Assistant itself is **not open source**; only the extensions are.
 
 Contributions are welcome. Please open an issue or pull request if you want to improve an existing extension or contribute a new generic extension. Keep contributions generic and reusable, avoid company- or project-specific logic, and follow the established folder and coding conventions.
 
-## Download Assistant & start a trial
 
-To learn more about Assistant, download the application, or start a free trial, visit **https://assistant.aec.se/**.
 

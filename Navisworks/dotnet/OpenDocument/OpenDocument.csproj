@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <ExtensionId>OpenDocument</ExtensionId>
-    <Authors>COWI Tools</Authors>
+    <Authors>Tools</Authors>
     <Version>0.1.4</Version>
     <Title>Open Document</Title>
     <Description>Open document in Navisworks</Description>

@@ -2,15 +2,12 @@
 
   <PropertyGroup>
     <ExtensionId>SelectObjectFromSelectionFilter</ExtensionId>
-    <Authors>COWI Tools</Authors>
-    <Company>COWI</Company>
+    <Authors>Tools</Authors>
     <Version>0.0.3</Version>
     <Title>SelectObjectFromSelectionFilter</Title>
     <Description>Select objects in a Tekla model based on filter</Description>
     <PackageTags>Tekla;Assistant;Extension</PackageTags>
     <PackageIcon>Icon.png</PackageIcon>
-    <PackageProjectUrl>https://cowi-tools.visualstudio.com/COWI-Tools%20Macros/_git/TeklaSelectObjectFromSelectionFilter?path=%2FREADME.md&amp;version=GBmaster</PackageProjectUrl>
-    <RepositoryUrl>https://cowi-tools.visualstudio.com/COWI-Tools%20Macros/_git/TeklaSelectObjectFromSelectionFilter</RepositoryUrl>
     <MainTeklaVersion Condition="'$(Configuration)' == 'Debug'">2024</MainTeklaVersion>
     <LangVersion>12</LangVersion>
   </PropertyGroup>

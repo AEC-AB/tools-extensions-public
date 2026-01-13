@@ -1,55 +1,33 @@
-# tools-extensions-public
+# Public Assistant Extensions
 ![Assistant by AEC Logo](./Assistant-by-AEC-full-logo.svg)
-A shared collection of extensions built to extend Assistant and evolve through community contributions.
-# Assistant Public Extensions
-
-This repository contains **public, open-source extensions for _Assistant by AEC_**.
-
-The extensions in this repository are **generic, reusable building blocks** intended to support automation and standardization of workflows across common AEC software.
-
-Only extensions that are:
-- not company-specific
-- not project-specific
-- and do not contain internal or proprietary logic  
-
-are included in this repository.
-
-The goal is to grow a **shared extension library** that benefits the wider AEC community and helps establish consistent, executable workflows in Assistant.
-
----
+A shared, community-driven collection of Assistant extensions.
 
 ## What is Assistant by AEC?
 
-**Assistant by AEC** is an automation and orchestration platform for the architecture, engineering, and construction industry.
+Assistant is an extensible automation and orchestration platform for the AEC (Architecture, Engineering, and Construction) industry. It standardizes, automates, and operationalizes BIM- and model-based workflows across tools such as Revit, Tekla Structures, AutoCAD, Navisworks, Solibri, Dynamo, and related ecosystems. The core value is **standardization made executable**—turning approved ways of working into repeatable, auditable workflows that anyone can run.
 
-Assistant allows teams to:
-- define repeatable workflows across multiple applications
-- automate model-based and data-driven tasks
-- standardize how projects are executed, regardless of who runs them
+Assistant workflows can run manually, scheduled, or event-based, and span multiple applications within a single flow.
 
-Assistant is not just about automation—  
-its strongest ROI comes from **standardization made executable**.
+Automation here is more than eliminating manual clicks. By encoding approved methods into executable steps, teams get consistent outcomes, higher quality, and less dependency on a handful of key people to remember how things should be done.
 
-Instead of relying on manuals, checklists, or individual experience, Assistant makes approved workflows runnable, repeatable, and auditable.
 
----
+To learn more about Assistant, download the application, or start a free trial, visit **https://assistant.aec.se/**.
 
-## What does this repository contain?
+## How Assistant is put together
 
-This repository contains **public extensions built for use inside Assistant**.
+- Core platform: Loads and executes workflows, manages configuration and context, and orchestrates calls to integrations. It is tool-agnostic and not part of this repository.
+- Integrations (host apps): Thin layers that know how to talk to applications such as Revit, Tekla Structures, AutoCAD, Navisworks, and others, exposing a consistent execution model to the core. They may run in-process or out-of-process depending on the host.
+- Extensions (this repo): Small, focused units of functionality bound to a specific integration and tech stack. They trigger native commands, read/validate/modify model data, export files (IFC, DWG, reports), enforce standards, automate coordination tasks, or bridge data between tools. Assistant composes these into larger workflows.
 
-These extensions are intended to:
-- be directly usable in Assistant workflows
-- serve as reference implementations for developers
-- be extended and improved by the community
+## What lives in this repository
 
-Assistant itself is **not open source**.  
-This repository only contains extensions built **for** Assistant.
+- Public, open-source extensions for Assistant—generic, reusable building blocks meant to be dropped into Assistant workflows.
+- No company-specific or project-specific logic.
+- Reference implementations that show how to build Assistant extensions for common AEC tools.
 
----
-## Repository structure
+## Repository layout
 
-Extensions in this repository follow a consistent folder structure:
+Extensions follow a consistent convention:
 
 ```
 Integration/
@@ -58,31 +36,22 @@ Integration/
 ```
 
 
+Each extension folder typically contains:
+- Source code for the action/command.
+- A minimal project file and build configuration for the target host.
+- A README describing usage, inputs/outputs, and any host-specific notes.
 
-## Download Assistant & start a trial
+Assistant itself is **not open source**; only the extensions are.
 
-To learn more about Assistant, download the application, or start a free trial, visit:
+## Who this repo is for
 
-**https://assistant.aec.se/**
-
----
+- Developers building Assistant extensions.
+- Technical BIM specialists and automation engineers.
+- Contributors who want to create reusable, shareable functionality for the Assistant platform.
 
 ## Contributing
 
-Contributions are welcome.
+Contributions are welcome. Please open an issue or pull request if you want to improve an existing extension or contribute a new generic extension. Keep contributions generic and reusable, avoid company- or project-specific logic, and follow the established folder and coding conventions.
 
-If you want to:
-- improve an existing extension
-- fix bugs
-- add compatibility for new application versions
-- contribute a new generic extension  
 
-please open an issue or pull request.
-
-When contributing, ensure that:
-- the extension is generic and reusable
-- no company-specific or project-specific logic is included
-- the extension follows the existing structure and conventions
-
----
 

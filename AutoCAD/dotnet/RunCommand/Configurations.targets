@@ -6,7 +6,7 @@
     <DebugType>portable</DebugType>
     <Nullable>enable</Nullable>
     <NoWarn>NU1701</NoWarn>
-    <Configurations>Debug;Debug 2019;Debug 2020;Debug 2021;Debug 2022;Debug 2023;Debug 2024;Release 2019;Release 2020;Release 2021;Release 2022;Release 2023;Release 2024</Configurations>
+    <Configurations>Debug;Debug 2019;Debug 2020;Debug 2021;Debug 2022;Debug 2023;Debug 2024;Debug 2026;Release 2019;Release 2020;Release 2021;Release 2022;Release 2023;Release 2024;Release 2026</Configurations>
   </PropertyGroup>
 
   <Choose>

@@ -10,7 +10,6 @@ Assistant workflows can run manually, scheduled, or event-based, and span multip
 
 Automation here is more than eliminating manual clicks. By encoding approved methods into executable steps, teams get consistent outcomes, higher quality, and less dependency on a handful of key people to remember how things should be done.
 
-## Download Assistant & start a trial
 
 To learn more about Assistant, download the application, or start a free trial, visit **https://assistant.aec.se/**.
 

@@ -24,8 +24,9 @@
     "ExecutableTarget": {
       "type": "string",
       "enum": [
-        "BuildChanged",
-        "DetermineChanged"
+        "Compile",
+        "ComputeChangedProjects",
+        "Final"
       ]
     },
     "Verbosity": {
@@ -99,25 +100,9 @@
   "allOf": [
     {
       "properties": {
-        "EventName": {
-          "type": "string",
-          "description": "Event name from GitHub Actions"
-        },
-        "OutputPath": {
-          "type": "string",
-          "description": "GitHub output file path"
-        },
         "PullRequestBaseBranch": {
           "type": "string",
           "description": "Pull request base branch"
-        },
-        "PullRequestBaseSha": {
-          "type": "string",
-          "description": "Pull request base SHA"
-        },
-        "PushBeforeSha": {
-          "type": "string",
-          "description": "Push before SHA"
         }
       }
     },

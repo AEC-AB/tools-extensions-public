@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ExtensionId>RunCommand</ExtensionId>    <Version>0.0.4</Version>
+    <ExtensionId>RunCommand</ExtensionId>    
+    <Version>0.0.4</Version>
     <Title>Run Command</Title>
     <Description>Set up a list of AutoCAD commands to be executed, similar to a .scr script file. Can be any command you can enter normally in the AutoCAD command line.</Description>
     <PackageTags>AutoCAD;Assistant;Extension</PackageTags>
@@ -19,5 +20,3 @@
   </ItemGroup>
 
 </Project>
-
-

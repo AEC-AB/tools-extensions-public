@@ -1,25 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<ExtensionId>DWGExport</ExtensionId>		<Version>1.0.3</Version>
+		<ExtensionId>DWGExport</ExtensionId>		
+		<Version>1.0.3</Version>
 		<Title>DWG Export</Title>
 		<Description>Automatically exports DWGs for selected views/sheets</Description>
 		<PackageTags>Revit;Assistant;Extension</PackageTags>
-		<PackageIcon>Icon.png</PackageIcon>		<Configurations>Debug;Debug 2019;Debug 2020;Debug 2021;Debug 2022;Debug 2023;Debug 2024;Debug 2025;Release 2019;Release 2020;Release 2021;Release 2022;Release 2023;Release 2024;Release 2025;Debug 2026;Release 2026;</Configurations>
-	</PropertyGroup>	<PropertyGroup>	</PropertyGroup>
+		<PackageIcon>Icon.png</PackageIcon>		
+		<Configurations>Debug;Debug 2019;Debug 2020;Debug 2021;Debug 2022;Debug 2023;Debug 2024;Debug 2025;Release 2019;Release 2020;Release 2021;Release 2022;Release 2023;Release 2024;Release 2025;Debug 2026;Release 2026;</Configurations>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<None Include="Icon.png" Pack="true" PackagePath="" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>compile</IncludeAssets>
-		</PackageReference>
-	</ItemGroup>
-
 </Project>
-
-
-

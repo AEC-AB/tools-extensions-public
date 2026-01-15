@@ -38,4 +38,11 @@
             Text="Configuration '$(Configuration)' is not supported by this project. Excluded versions: '$(ExcludeRevitVersions)'." />
     </Target>
 
+    <PropertyGroup>
+        <ExtensionId Condition="'$(ExtensionId)' == ''">$(MSBuildProjectName)</ExtensionId>
+        <AssemblyName>$(ExtensionId).$(MainRevitVersion).$(Version)</AssemblyName>
+        <TargetName>$(AssemblyName)</TargetName>
+        <PackageId>$(ExtensionId).$(MainRevitVersion)</PackageId>
+    </PropertyGroup>
+
 </Project>

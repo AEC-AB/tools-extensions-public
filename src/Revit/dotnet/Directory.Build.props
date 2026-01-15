@@ -25,8 +25,9 @@
     <MainRevitVersion Condition="$(Configuration.Contains('2025'))">2025</MainRevitVersion>
     <MainRevitVersion Condition="$(Configuration.Contains('2026'))">2026</MainRevitVersion>
 
-    <!-- treat plain Debug as latest by default -->
+    <!-- treat plain Debug/Release as latest by default -->
     <MainRevitVersion Condition="'$(MainRevitVersion)'=='' and '$(Configuration)'=='Debug'">2026</MainRevitVersion>
+    <MainRevitVersion Condition="'$(MainRevitVersion)'=='' and '$(Configuration)'=='Release'">2026</MainRevitVersion>
   </PropertyGroup>
 
   <Choose>
@@ -98,14 +99,6 @@
 
   <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
     <OutputPath>.\bin\Debug\</OutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <AssemblyName>$(ExtensionId).$(MainRevitVersion).$(Version)</AssemblyName>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <PackageId>$(ExtensionId).$(MainRevitVersion)</PackageId>
   </PropertyGroup>
 
   <Choose>

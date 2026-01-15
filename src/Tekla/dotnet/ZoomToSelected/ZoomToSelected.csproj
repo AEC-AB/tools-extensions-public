@@ -8,49 +8,7 @@
     <PackageTags>Tekla;Assistant;Extension</PackageTags>
     <PackageIcon>Icon.png</PackageIcon>
   </PropertyGroup>
-<!-- 
-  <Choose>
-    <When Condition="$(Configuration.Contains('2020'))">
-      <ItemGroup>
-        <PackageReference Include="TeklaOpenAPI" Version="$(TeklaVersion)">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>compile</IncludeAssets>
-        </PackageReference>
-      </ItemGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <PackageReference Include="Tekla.Structures" Version="$(TeklaVersion)">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>compile</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Tekla.Structures.Catalogs" Version="$(TeklaVersion)">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>compile</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Tekla.Structures.Datatype" Version="$(TeklaVersion)">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>compile</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Tekla.Structures.Dialog" Version="$(TeklaVersion)">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>compile</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Tekla.Structures.Drawing" Version="$(TeklaVersion)">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>compile</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Tekla.Structures.Model" Version="$(TeklaVersion)">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>compile</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Tekla.Structures.Plugins" Version="$(TeklaVersion)">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>compile</IncludeAssets>
-        </PackageReference>
-      </ItemGroup>
-    </Otherwise>
-  </Choose> -->
+
 
   
   

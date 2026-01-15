@@ -1,0 +1,48 @@
+<Project>
+
+    <!-- Compute supported versions for THIS project -->
+    <ItemGroup>
+        <ExcludedAutoCADVersion Include="$(ExcludeAutoCADVersions)"
+            Condition="'$(ExcludeAutoCADVersions)'!=''" />
+        <SupportedAutoCADVersion Include="@(AllAutoCADVersion)" Exclude="@(ExcludedAutoCADVersion)" />
+    </ItemGroup>
+
+    <!-- Generate only supported configurations for this project -->
+    <PropertyGroup>
+        <Configurations>
+            Debug;
+            @(SupportedAutoCADVersion->'Debug %(Identity)', ';');
+            @(SupportedAutoCADVersion->'Release %(Identity)', ';')
+        </Configurations>
+    </PropertyGroup>
+
+    <!-- Identify if the current configuration is supported -->
+    <PropertyGroup Condition="'$(MainAutoCADVersion)'!=''">
+        <_ExcludedList>;$(ExcludeAutoCADVersions);</_ExcludedList>
+        <IsSupportedAutoCADConfig>true</IsSupportedAutoCADConfig>
+        <IsSupportedAutoCADConfig Condition="$(_ExcludedList.Contains(';$(MainAutoCADVersion);'))">false</IsSupportedAutoCADConfig>
+        <!-- treat plain Debug as supported -->
+        <IsSupportedAutoCADConfig Condition="'$(Configuration)'=='Debug'">true</IsSupportedAutoCADConfig>
+    </PropertyGroup>
+
+    <!-- Optional: skip project in solution builds when unsupported -->
+    <PropertyGroup Condition="'$(IsSupportedAutoCADConfig)'=='false'">
+        <BuildInSolution>false</BuildInSolution>
+    </PropertyGroup>
+
+    <!-- Optional: fail fast if someone builds the csproj directly in unsupported config -->
+    <Target Name="FailUnsupportedAutoCADConfig"
+        BeforeTargets="PrepareForBuild"
+        Condition="'$(IsSupportedAutoCADConfig)'=='false' and '$(BuildingSolutionFile)'!='true'">
+        <Error
+            Text="Configuration '$(Configuration)' is not supported by this project. Excluded versions: '$(ExcludeAutoCADVersions)'." />
+    </Target>
+
+    <PropertyGroup>
+        <ExtensionId Condition="'$(ExtensionId)' == ''">$(MSBuildProjectName)</ExtensionId>
+        <AssemblyName>$(ExtensionId).$(MainAutoCADVersion).$(Version)</AssemblyName>
+        <TargetName>$(AssemblyName)</TargetName>
+        <PackageId>$(ExtensionId).$(MainAutoCADVersion)</PackageId>
+    </PropertyGroup>
+
+</Project>

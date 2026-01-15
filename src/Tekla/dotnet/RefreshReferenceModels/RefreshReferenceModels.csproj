@@ -8,7 +8,8 @@
     <Title>RefreshReferenceModels</Title>
     <Description>RefreshReferenceModels Description</Description>
     <PackageTags>Tekla;Assistant;Extension</PackageTags>
-    <PackageIcon>Icon.png</PackageIcon>    <!-- 
+    <PackageIcon>Icon.png</PackageIcon>
+    <!-- 
 		Adjust MainTeklaVersion to get IntelliSense for the correct version do a 
 		dotnet restore to restore the correct nuget packages for the selected Tekla version.
 		-->

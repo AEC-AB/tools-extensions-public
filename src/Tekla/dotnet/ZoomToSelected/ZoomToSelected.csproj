@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <Configurations>Debug;Debug 2020;Debug 2021;Debug 2022;Debug 2023;Debug 2024;Release 2020;Release 2021;Release 2022;Release 2023;Release 2024</Configurations>
-    <ExtensionId>ZoomToSelected</ExtensionId>    <Version>0.0.1</Version>
+    <ExtensionId>ZoomToSelected</ExtensionId>
+    <Version>0.0.1</Version>
     <Title>Zoom To Selected</Title>
     <Description>This extension will briefly show any selected hidden ModelObjects in the drawing to be able to zoom</Description>
     <PackageTags>Tekla;Assistant;Extension</PackageTags>

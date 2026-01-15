@@ -1,13 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ExtensionId>RevitExtensionDemo</ExtensionId>    <Version>0.0.2</Version>
+    <ExtensionId>RevitExtensionDemo</ExtensionId>
+    <Version>0.0.2</Version>
     <Title>Extension Demo</Title>
     <Description>A demonstration extension for Revit in Assistant.</Description>
     <PackageTags>Revit;Assistant;Extension</PackageTags>
-    <PackageIcon>Icon.png</PackageIcon>  </PropertyGroup>  <PropertyGroup>
+    <PackageIcon>Icon.png</PackageIcon>
+  </PropertyGroup>
+  <PropertyGroup>
     <!-- Adjust MainRevitVersion to get IntelliSense for the correct version -->
-    <MainRevitVersion Condition="'$(Configuration)' == 'Debug'">2025</MainRevitVersion>  </PropertyGroup>
+    <MainRevitVersion Condition="'$(Configuration)' == 'Debug'">2025</MainRevitVersion>
+  </PropertyGroup>
   
 </Project>
 

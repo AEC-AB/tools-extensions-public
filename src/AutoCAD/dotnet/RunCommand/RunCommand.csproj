@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ExtensionId>RunCommand</ExtensionId>    
+    <ExtensionId>RunCommand</ExtensionId>
     <Version>0.0.4</Version>
     <Title>Run Command</Title>
     <Description>Set up a list of AutoCAD commands to be executed, similar to a .scr script file. Can be any command you can enter normally in the AutoCAD command line.</Description>
@@ -11,11 +11,13 @@
 		Adjust MainAutoCADVersion to get IntelliSense for the correct version do a 
 		dotnet restore to restore the correct nuget packages for the selected AutoCAD version.
 		-->
-		<MainAutoCADVersion Condition="'$(Configuration)' == 'Debug'">2024</MainAutoCADVersion>  </PropertyGroup>
+		<MainAutoCADVersion Condition="'$(Configuration)' == 'Debug'">2024</MainAutoCADVersion>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-  </ItemGroup>  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 

@@ -13,11 +13,21 @@ partial class Build : NukeBuild
         .Executes(() =>
     {
         var gitFolder = Repository.Discover(EnvironmentInfo.WorkingDirectory);
+        if (string.IsNullOrWhiteSpace(gitFolder))
+        {
+            BuildAllProjects("Git repository not found.");
+            return;
+        }
         var sourceDir = NormalizePath(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(gitFolder)!)!, "src"));
         using var repo = new Repository(gitFolder);
 
         var currentBranch = repo.Head;
         var otherBranch = repo.Branches[PullRequestBaseBranch];
+        if (currentBranch?.Tip == null || otherBranch?.Tip == null)
+        {
+            BuildAllProjects($"Base branch '{PullRequestBaseBranch}' not found or has no commits.");
+            return;
+        }
 
         var changes = repo.Diff.Compare<TreeChanges>(
             otherBranch.Tip.Tree,
@@ -78,6 +88,18 @@ partial class Build : NukeBuild
             Console.WriteLine(project.TrimStart(sourceDir).TrimStart('/'));
         }
     });
+
+    void BuildAllProjects(string reason)
+    {
+        var sourceDir = NormalizePath(Path.Combine(EnvironmentInfo.WorkingDirectory, "src"));
+        var projects = Directory.GetFiles(sourceDir, "*.csproj", SearchOption.AllDirectories)
+            .Select(NormalizePath)
+            .OrderBy(project => project, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        Console.WriteLine($"ComputeChangedProjects fallback: {reason} Building all projects.");
+        _projectsToBuild.AddRange(projects);
+    }
 
     static string NormalizePath(string path) =>
         path.Replace('\\', '/').Trim();

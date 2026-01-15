@@ -1,0 +1,41 @@
+<Project>
+
+    <!-- Compute supported versions for THIS project -->
+    <ItemGroup>
+        <ExcludedRevitVersion Include="$(ExcludeRevitVersions)"
+            Condition="'$(ExcludeRevitVersions)'!=''" />
+        <SupportedRevitVersion Include="@(AllRevitVersion)" Exclude="@(ExcludedRevitVersion)" />
+    </ItemGroup>
+
+    <!-- Generate only supported configurations for this project -->
+    <PropertyGroup>
+        <Configurations>
+            Debug;
+            @(SupportedRevitVersion->'Debug %(Identity)', ';');
+            @(SupportedRevitVersion->'Release %(Identity)', ';')
+        </Configurations>
+    </PropertyGroup>
+
+    <!-- Identify if the current configuration is supported -->
+    <PropertyGroup Condition="'$(MainRevitVersion)'!=''">
+        <_ExcludedList>;$(ExcludeRevitVersions);</_ExcludedList>
+        <IsSupportedRevitConfig>true</IsSupportedRevitConfig>
+        <IsSupportedRevitConfig Condition="$(_ExcludedList.Contains(';$(MainRevitVersion);'))">false</IsSupportedRevitConfig>
+        <!-- treat plain Debug as supported -->
+        <IsSupportedRevitConfig Condition="'$(Configuration)'=='Debug'">true</IsSupportedRevitConfig>
+    </PropertyGroup>
+
+    <!-- Optional: skip project in solution builds when unsupported -->
+    <PropertyGroup Condition="'$(IsSupportedRevitConfig)'=='false'">
+        <BuildInSolution>false</BuildInSolution>
+    </PropertyGroup>
+
+    <!-- Optional: fail fast if someone builds the csproj directly in unsupported config -->
+    <Target Name="FailUnsupportedRevitConfig"
+        BeforeTargets="PrepareForBuild"
+        Condition="'$(IsSupportedRevitConfig)'=='false' and '$(BuildingSolutionFile)'!='true'">
+        <Error
+            Text="Configuration '$(Configuration)' is not supported by this project. Excluded versions: '$(ExcludeRevitVersions)'." />
+    </Target>
+
+</Project>

@@ -256,6 +256,29 @@ Common operations:
 - `public List<CustomEnum> ListControl { get; set; }`: List of enum values
 - `public DateTime DateControl { get; set; }`: Date and time picker
 
+## Project Configuration and Version Management
+
+### Supported Revit Versions
+Revit versions are managed centrally in `src/Revit/dotnet/Directory.Build.props`. All projects automatically receive configurations for all years defined in the `AllRevitVersion` list (e.g., `Debug 2024`, `Release 2024`). The `MainRevitVersion` property is automatically derived from the active configuration.
+
+### Excluding Versions in a Project
+If a project is only compatible with certain Revit versions, it can opt-out of specific years in its `.csproj` file. This will skip the project during solution builds and fail with a clear error if built directly.
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Semicolon-separated list of versions to exclude -->
+    <ExcludeRevitVersions>2019;2020;2021</ExcludeRevitVersions>
+  </PropertyGroup>
+</Project>
+```
+
+### Multi-Version Build Logic
+The build system use logic in `Directory.Build.props` to:
+- Set the correct `TargetFramework` (`net48` for versions < 2025, `net8.0-windows` for >= 2025)
+- Reference matching Revit API and Assistant contract packages
+- Set preprocessor directives (e.g., `R2024`, `R2024_OR_GREATER`, `R2024_OR_LESS`)
+
 ## Best Practices
 
 1. Always check for null document/elements

@@ -2,13 +2,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ExtensionId>PrintPDF</ExtensionId>    
+    <ExcludeRevitVersions>2019;2020;2021</ExcludeRevitVersions>
     <Version>1.1.6</Version>
     <Title>Print PDF</Title>
     <Description>Print PDFs</Description>
     <PackageTags>Revit;Assistant;Extension</PackageTags>
     <PackageIcon>Icon.png</PackageIcon>  
   </PropertyGroup>
+
   <ItemGroup>
     <None Include="Icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
+  
 </Project>

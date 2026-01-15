@@ -27,24 +27,24 @@ partial class Build : NukeBuild
                     continue;
                 }
 
+                var projectName = Path.GetFileNameWithoutExtension(project);
                 foreach (var configuration in releaseConfigurations)
                 {
-                    Console.WriteLine($"Building {project} ({configuration})");
+                    Console.WriteLine($"Building {projectName} ({configuration})");
                     try
                     {
                         DotNetBuild(settings => settings
                             .SetProjectFile(project)
                             .SetConfiguration(configuration));
 
-                        Console.WriteLine($"Successfully built {project} ({configuration})");
-                        buildResults.Add((project, true, configuration, null));
+                        Console.WriteLine($"Successfully built {projectName} ({configuration})");
+                        buildResults.Add((projectName, true, configuration, null));
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine($"Failed to build {project} ({configuration}): {e.Message}");
-                        buildResults.Add((project, false, configuration, e.Message));
+                        Console.WriteLine($"Failed to build {projectName} ({configuration}): {e.Message}");
+                        buildResults.Add((projectName, false, configuration, e.Message));
                     }
-
                 }
             }
 
@@ -72,10 +72,13 @@ partial class Build : NukeBuild
     private IEnumerable<string> GetProjectConfigurations(string projectPath)
     {
         Project project = LoadProject(projectPath);
-        return
-            project.Properties.Where(x => x.Name == "Configurations")
-            .Select(x => x.EvaluatedValue)
-            .SelectMany(x => x.Split(";"))
+
+        var instance = project.CreateProjectInstance();
+        var raw = instance.GetPropertyValue("Configurations");
+        var expanded = instance.ExpandString(raw);
+
+        return expanded
+            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Distinct(StringComparer.OrdinalIgnoreCase);
     }
 

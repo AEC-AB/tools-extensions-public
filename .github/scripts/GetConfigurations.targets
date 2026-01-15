@@ -1,5 +1,0 @@
-<Project>
-  <Target Name="GetConfigurations">
-    <Message Text="CONFIGURATIONS=$(Configurations)" Importance="High" />
-  </Target>
-</Project>

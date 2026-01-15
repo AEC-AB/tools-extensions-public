@@ -63,7 +63,7 @@ partial class Build : NukeBuild
             }
             
             Console.ResetColor();
-            if (buildResults.Any(x => x.Success == false))
+            if (buildResults.Any(x => !x.Success))
             {
                 throw new Exception("One or more projects failed to build.");
             }

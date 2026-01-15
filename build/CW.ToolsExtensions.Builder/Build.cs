@@ -87,52 +87,65 @@ class Build : NukeBuild
 
     IEnumerable<string> GetChangedProjects()
     {
-        var repoRoot = Repository.Discover(EnvironmentInfo.WorkingDirectory);
-        using var repo = new Repository(repoRoot);
+        var gitFolder = Repository.Discover(EnvironmentInfo.WorkingDirectory);
+        var sourceDir = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(gitFolder)!)!);
+        using var repo = new Repository(gitFolder);
 
-        var currentBranch = repo.Head;     
+        var currentBranch = repo.Head;
         var otherBranch = repo.Branches[PullRequestBaseBranch];
 
         var changes = repo.Diff.Compare<TreeChanges>(
-            currentBranch.Tip.Tree,
-            otherBranch.Tip.Tree
+            otherBranch.Tip.Tree,
+            currentBranch.Tip.Tree
         );
 
+        var projectDirectories = Directory.GetFiles(sourceDir, "*.csproj", SearchOption.AllDirectories)
+            .Select(p => Path.GetDirectoryName(p)!)
+            .Select(p => p.TrimStart(sourceDir.ToCharArray()))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var allProjects = RunGitLines("ls-files \"**/*.csproj\"")
-            .Select(NormalizePath)
+        var changedFiles = changes
+            .Where(x => x.Status is ChangeKind.Added or ChangeKind.Modified or ChangeKind.Deleted or ChangeKind.Renamed)
+            .Select(x => x.Path)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(project => project, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        var changedFiles = new List<string>();
-        var headSha = string.IsNullOrWhiteSpace(GitRepository?.Commit) ? "HEAD" : GitRepository.Commit;
+        var changedPropsFiles = changedFiles
+            .Where(path => Path.GetFileName(path) == "Directory.Build.props")
+            .ToList();
 
-        bool rebuildAll = ShouldRebuildAll(changedFiles, headSha);
-
-        if (!rebuildAll)
-        {
-            var normalizedFiles = changedFiles.Select(NormalizePath).ToList();
-            if (normalizedFiles.Any(path => Regex.IsMatch(path, @"(^|/)Directory\.Build\.props$", RegexOptions.IgnoreCase)))
-            {
-                rebuildAll = true;
-            }
-        }
-
-        if (rebuildAll)
-        {
-            return allProjects;
-        }
-
-        var changedFileSet = new HashSet<string>(changedFiles.Select(NormalizePath), StringComparer.OrdinalIgnoreCase);
         var projectsToBuild = new List<string>();
-        foreach (var project in allProjects)
+
+        // If any Directory.Build.props files changed, rebuild all projects in the corresponding integration (all projects in subdirectories of the changed props file)
+        if (changedPropsFiles.Count > 0)
         {
-            var projectDir = NormalizePath(Path.GetDirectoryName(project) ?? string.Empty);
-            var prefix = projectDir.Length == 0 ? string.Empty : projectDir + "/";
-            if (changedFileSet.Any(file => file.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
-            {
-                projectsToBuild.Add(project);
+            var changedProps = changedPropsFiles
+                .Select(path => Path.GetDirectoryName(path)!)
+                .Select(dir => NormalizePath(dir))
+                .ToList();
+
+            var subProjects = projectDirectories
+                 .Where(projDir => changedProps.Any(changedProp => NormalizePath(projDir).StartsWith(changedProp + "/", StringComparison.OrdinalIgnoreCase)))
+                 .SelectMany(projDir => Directory.GetFiles(projDir, "*.csproj", SearchOption.TopDirectoryOnly))
+                 .Distinct(StringComparer.OrdinalIgnoreCase)
+                 .OrderBy(project => project, StringComparer.OrdinalIgnoreCase);
+
+            projectsToBuild.AddRange(subProjects);
+        }
+
+        foreach (var project in projectDirectories)
+        {
+            var changesInProject = changedFiles
+                .Where(path => NormalizePath(path).StartsWith(NormalizePath(project) + "/", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (changesInProject.Count > 0)
+                {
+                var projectPath = Directory.GetFiles(project, "*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
+                if (projectPath != null)
+                {
+                    projectsToBuild.Add(projectPath);
+                }
             }
         }
 

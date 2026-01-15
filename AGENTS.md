@@ -16,7 +16,7 @@ These files live in `.github/instructions/` and apply to matching paths:
 
 - Assistant .NET extensions: `.github/instructions/assistant-extensions-development.instructions.md` (applyTo `**/Assistant/dotnet/**`)
 - AutoCAD .NET extensions: `.github/instructions/autocad-extensions-development.instructions.md` (applyTo `**/AutoCAD/dotnet/**`)
-- Navisworks .NET extensions: `.github/instructions/navsiworks-extensions-development.instructions.md` (applyTo `**/Navisworks/dotnet/**`)
+- Navisworks .NET extensions: `.github/instructions/navisworks-extensions-development.instructions.md` (applyTo `**/Navisworks/dotnet/**`)
 - Revit .NET extensions: `.github/instructions/revit-extensions-development.instructions.md` (applyTo `**/Revit/dotnet/**`)
 - Tekla .NET extensions: `.github/instructions/tekla-extensions-development.instructions.md` (applyTo `**/Tekla/dotnet/**`)
 

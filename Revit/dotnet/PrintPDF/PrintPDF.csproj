@@ -1,20 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ExtensionId>PrintPDF</ExtensionId>
-    <Authors>AEC</Authors>
-    <Version>1.1.6</Version>
+    <ExtensionId>PrintPDF</ExtensionId>    <Version>1.1.6</Version>
     <Title>Print PDF</Title>
     <Description>Print PDFs</Description>
     <PackageTags>Revit;Assistant;Extension</PackageTags>
-    <PackageIcon>Icon.png</PackageIcon>
-    <PackageIconUrl></PackageIconUrl>
-  </PropertyGroup>
-  <Import Project=".\Configurations.targets" />
-  <PropertyGroup>
-    <LangVersion>12</LangVersion>
-  </PropertyGroup>
+    <PackageIcon>Icon.png</PackageIcon>  </PropertyGroup>  <PropertyGroup>  </PropertyGroup>
   <ItemGroup>
     <None Include="Icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
+
+

@@ -1,0 +1,73 @@
+V |                      | ArgumentsFromParametersFile.OnBuildCreated (150)
+V |                      | HandleReSharperSurrogateArguments.OnBuildCreated (150)
+V |                      | InjectParameterValues.OnBuildCreated (100)
+V |                      | HandleShellCompletion.OnBuildCreated (75)
+V |                      | GenerateBuildServerConfigurations.OnBuildCreated (50)
+V |                      | InvokeBuildServerConfigurationGeneration.OnBuildCreated (45)
+V |                      | UpdateNotification.OnBuildCreated (10)
+V |                      | UnsetVisualStudioEnvironmentVariables.OnBuildCreated (0)
+V |                      | HandleVisualStudioDebugging.OnBuildCreated (0)
+V |                      | EventInvoker.OnBuildCreated (-3.4028235E+38)
+V |                      | HandlePlanRequests.OnBuildInitialized (10)
+V |                      | HandleHelpRequests.OnBuildInitialized (5)
+V |                      | Telemetry.OnBuildInitialized (0)
+V |                      | InjectNonParameterValues.OnBuildInitialized (-100)
+V |                      | EventInvoker.OnBuildInitialized (-3.4028235E+38)
+V | BuildChanged         | EventInvoker.OnTargetRunning (-3.4028235E+38)
+I | BuildChanged         | > C:\Users\frte\AppData\Local\Programs\Git\cmd\git.exe ls-files "**/*.csproj"
+V | BuildChanged         | @ C:\Users\frte\source\repos\tools-extensions-public
+I | BuildChanged         | > "C:\Program Files\dotnet\dotnet.exe" msbuild "C:\Users\frte\source\repos\tools-extensions-public\Assistant\dotnet\AssistantDemoExtension\AssistantDemoExtension.csproj" /nologo /v:q /t:GetConfigurations /p:CustomAfterMicrosoftCommonTargets="C:\Users\frte\source\repos\tools-extensions-public\.github\scripts\GetConfigurations.targets"
+V | BuildChanged         | @ C:\Users\frte\source\repos\tools-extensions-public
+I | BuildChanged         | > "C:\Program Files\dotnet\dotnet.exe" build Assistant/dotnet/AssistantDemoExtension/AssistantDemoExtension.csproj --configuration Release
+V | BuildChanged         | @ C:\Users\frte\source\repos\tools-extensions-public
+D | BuildChanged         |   Determining projects to restore...
+D | BuildChanged         |   Restored C:\Users\frte\source\repos\tools-extensions-public\Assistant\dotnet\AssistantDemoExtension\AssistantDemoExtension.csproj (in 243 ms).
+D | BuildChanged         |   AssistantDemoExtension -> C:\Users\frte\source\repos\tools-extensions-public\Assistant\dotnet\AssistantDemoExtension\bin\Release\net10.0\..dll
+D | BuildChanged         | 
+D | BuildChanged         | Build succeeded.
+D | BuildChanged         |     0 Warning(s)
+D | BuildChanged         |     0 Error(s)
+D | BuildChanged         | 
+D | BuildChanged         | Time Elapsed 00:00:01.85
+I | BuildChanged         | > "C:\Program Files\dotnet\dotnet.exe" msbuild "C:\Users\frte\source\repos\tools-extensions-public\AutoCAD\dotnet\RunCommand\RunCommand.csproj" /nologo /v:q /t:GetConfigurations /p:CustomAfterMicrosoftCommonTargets="C:\Users\frte\source\repos\tools-extensions-public\.github\scripts\GetConfigurations.targets"
+V | BuildChanged         | @ C:\Users\frte\source\repos\tools-extensions-public
+I | BuildChanged         | > "C:\Program Files\dotnet\dotnet.exe" build AutoCAD/dotnet/RunCommand/RunCommand.csproj --configuration Release
+V | BuildChanged         | @ C:\Users\frte\source\repos\tools-extensions-public
+D | BuildChanged         |   Determining projects to restore...
+E | BuildChanged         | C:\Users\frte\source\repos\tools-extensions-public\AutoCAD\dotnet\RunCommand\RunCommand.csproj : error NU1015: The following PackageReference item(s) do not have a version specified: AutoCAD.NET
+D | BuildChanged         |   Failed to restore C:\Users\frte\source\repos\tools-extensions-public\AutoCAD\dotnet\RunCommand\RunCommand.csproj (in 46 ms).
+D | BuildChanged         | 
+D | BuildChanged         | Build FAILED.
+D | BuildChanged         | 
+E | BuildChanged         | C:\Users\frte\source\repos\tools-extensions-public\AutoCAD\dotnet\RunCommand\RunCommand.csproj : error NU1015: The following PackageReference item(s) do not have a version specified: AutoCAD.NET
+D | BuildChanged         |     0 Warning(s)
+D | BuildChanged         |     1 Error(s)
+D | BuildChanged         | 
+D | BuildChanged         | Time Elapsed 00:00:00.67
+E | BuildChanged         | Target BuildChanged has thrown an exception
+Nuke.Common.Tooling.ProcessException: Process 'dotnet.exe' exited with code 1.
+   > "C:\Program Files\dotnet\dotnet.exe" build AutoCAD/dotnet/RunCommand/RunCommand.csproj --configuration Release
+   @ C:\Users\frte\source\repos\tools-extensions-public
+Standard output:
+     Determining projects to restore...
+   C:\Users\frte\source\repos\tools-extensions-public\AutoCAD\dotnet\RunCommand\RunCommand.csproj : error NU1015: The following PackageReference item(s) do not have a version specified: AutoCAD.NET
+     Failed to restore C:\Users\frte\source\repos\tools-extensions-public\AutoCAD\dotnet\RunCommand\RunCommand.csproj (in 46 ms).
+   
+   Build FAILED.
+   
+   C:\Users\frte\source\repos\tools-extensions-public\AutoCAD\dotnet\RunCommand\RunCommand.csproj : error NU1015: The following PackageReference item(s) do not have a version specified: AutoCAD.NET
+       0 Warning(s)
+       1 Error(s)
+   
+   Time Elapsed 00:00:00.67
+
+   at Nuke.Common.Tooling.ProcessExtensions.AssertZeroExitCode(IProcess process) in /_/source/Nuke.Tooling/ProcessExtensions.cs:line 38
+   at Nuke.Common.Tooling.ToolTasks.<>c.<GetExitHandler>b__4_0(ToolOptions _, IProcess p) in /_/source/Nuke.Tooling/ToolTasks.ExitHandler.cs:line 27
+   at Nuke.Common.Tooling.ToolTasks.<>c__DisplayClass8_0.<GetExitHandlerInternal>b__3(ToolOptions o, IProcess p) in /_/source/Nuke.Tooling/ToolTasks.ExitHandler.cs:line 22
+   at Nuke.Common.Tooling.ToolTasks.Run[T](T options) in /_/source/Nuke.Tooling/ToolTasks.Run.cs:line 36
+   at Nuke.Common.Tools.DotNet.DotNetTasks.DotNetBuild(Configure`1 configurator) in /_/source/Nuke.Common/Tools/DotNet/DotNet.Generated.cs:line 62
+   at Build.<get_BuildChanged>b__8_1() in C:\Users\frte\source\repos\tools-extensions-public\build\CW.ToolsExtensions.Builder\Build.cs:line 74
+   at Nuke.Common.Execution.BuildExecutor.<>c.<Execute>b__4_2(Action x) in /_/source/Nuke.Build/Execution/BuildExecutor.cs:line 120
+   at System.Collections.Generic.List`1.ForEach(Action`1 action)
+   at Nuke.Common.Execution.BuildExecutor.Execute(NukeBuild build, ExecutableTarget target, IReadOnlyCollection`1 previouslyExecutedTargets, Boolean failureMode) in /_/source/Nuke.Build/Execution/BuildExecutor.cs:line 120
+V | BuildChanged         | EventInvoker.OnTargetFailed (-3.4028235E+38)

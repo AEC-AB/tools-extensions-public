@@ -1,31 +1,61 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ExtensionId>ZoomToSelected</ExtensionId>
-    <Authors>Tools</Authors>
-    <Version>0.0.1</Version>
+    <Configurations>Debug;Debug 2020;Debug 2021;Debug 2022;Debug 2023;Debug 2024;Release 2020;Release 2021;Release 2022;Release 2023;Release 2024</Configurations>
+    <ExtensionId>ZoomToSelected</ExtensionId>    <Version>0.0.1</Version>
     <Title>Zoom To Selected</Title>
     <Description>This extension will briefly show any selected hidden ModelObjects in the drawing to be able to zoom</Description>
     <PackageTags>Tekla;Assistant;Extension</PackageTags>
     <PackageIcon>Icon.png</PackageIcon>
-    <PackageIconUrl></PackageIconUrl>
   </PropertyGroup>
+<!-- 
+  <Choose>
+    <When Condition="$(Configuration.Contains('2020'))">
+      <ItemGroup>
+        <PackageReference Include="TeklaOpenAPI" Version="$(TeklaVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <PackageReference Include="Tekla.Structures" Version="$(TeklaVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Tekla.Structures.Catalogs" Version="$(TeklaVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Tekla.Structures.Datatype" Version="$(TeklaVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Tekla.Structures.Dialog" Version="$(TeklaVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Tekla.Structures.Drawing" Version="$(TeklaVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Tekla.Structures.Model" Version="$(TeklaVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Tekla.Structures.Plugins" Version="$(TeklaVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+      </ItemGroup>
+    </Otherwise>
+  </Choose> -->
 
-  <Import Project=".\Configurations.targets" />
   
-  <PropertyGroup>
-    <LangVersion>12</LangVersion>
-  </PropertyGroup>
-
+  
   <ItemGroup>
     <None Include="Icon.png" Pack="true" PackagePath="" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>compile</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 
 </Project>

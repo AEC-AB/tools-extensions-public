@@ -1,21 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ExtensionId>NWCExport</ExtensionId>
-    <Authors>Tools by AEC</Authors>
-    <Version>2.0.2</Version>
+    <ExtensionId>NWCExport</ExtensionId>    <Version>2.0.2</Version>
     <Title>NWC Export</Title>
     <Description>Automatically exports NWCs for selected views</Description>
     <PackageTags>Revit;Assistant;Extension</PackageTags>
-    <PackageIcon>Icon.png</PackageIcon>
-    <PackageIconUrl></PackageIconUrl>
-  </PropertyGroup>
-
-  <Import Project=".\Configurations.targets" />
-
-  <PropertyGroup>
-    <LangVersion>12</LangVersion>
-  </PropertyGroup>
+    <PackageIcon>Icon.png</PackageIcon>  </PropertyGroup>  <PropertyGroup>  </PropertyGroup>
 
   <ItemGroup>
     <None Include="Icon.png" Pack="true" PackagePath="" />
@@ -29,3 +19,5 @@
   </ItemGroup>
 
 </Project>
+
+

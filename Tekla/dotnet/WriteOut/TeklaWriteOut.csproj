@@ -1,26 +1,74 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ExtensionId>TeklaWriteOut</ExtensionId>
-    <Authors>AEC AB</Authors>
-    <Version>0.0.3</Version>
+    <ExtensionId>TeklaWriteOut</ExtensionId>    <Version>0.0.3</Version>
     <Title>TeklaWriteOut</Title>
     <Description>Writes out model changes to the cloud</Description>
     <PackageTags>Tekla;Assistant;Extension</PackageTags>
-    <PackageIcon>Icon.png</PackageIcon>
-    <PackageIconUrl></PackageIconUrl>
-    <!-- 
+    <PackageIcon>Icon.png</PackageIcon>    <!-- 
 		Adjust MainTeklaVersion to get IntelliSense for the correct version do a 
 		dotnet restore to restore the correct nuget packages for the selected Tekla version.
 		-->
-    <MainTeklaVersion Condition="'$(Configuration)' == 'Debug'">2024</MainTeklaVersion>
-    <LangVersion>12</LangVersion>
-  </PropertyGroup>
-
-  <Import Project=".\Configurations.targets" />
-
-  <ItemGroup>
+    <MainTeklaVersion Condition="'$(Configuration)' == 'Debug'">2024</MainTeklaVersion>  </PropertyGroup>  
+  <Choose>
+    <When Condition="$(Configuration.Contains('2020'))">
+      <ItemGroup>
+        <PackageReference Include="TeklaOpenAPI" Version="$(TeklaApiVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(Configuration.Contains('2021'))">
+      <ItemGroup>
+        <PackageReference Include="Tekla.Application.Library" Version="$(TeklaApiVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Tekla.Structures" Version="$(TeklaApiVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Tekla.Structures.Catalogs" Version="$(TeklaApiVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Tekla.Structures.Datatype" Version="$(TeklaApiVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Tekla.Structures.Dialog" Version="$(TeklaApiVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Tekla.Structures.Drawing" Version="$(TeklaApiVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Tekla.Structures.Model" Version="$(TeklaApiVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Tekla.Structures.Plugins" Version="$(TeklaApiVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <PackageReference Include="Tekla.Application.Library" Version="$(TeklaApiVersion)">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile</IncludeAssets>
+        </PackageReference>
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+<ItemGroup>
     <None Include="Icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
+
+
+

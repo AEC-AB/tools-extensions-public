@@ -1,0 +1,45 @@
+name: Build changed .NET projects
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Setup .NET 10 SDK (preview)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+          dotnet-quality: "preview"
+
+      - name: Determine changed projects
+        id: changes
+        run: |
+          dotnet run --project build/CW.ToolsExtensions.Builder/CW.ToolsExtensions.Builder.csproj --target DetermineChanged `
+            --EventName '${{ github.event_name }}' `
+            --PullRequestBaseSha '${{ github.event.pull_request.base.sha }}' `
+            --PushBeforeSha '${{ github.event.before }}'
+
+      - name: Build changed projects
+        if: steps.changes.outputs.projects != '[]'
+        run: |
+          dotnet run --project build/CW.ToolsExtensions.Builder/CW.ToolsExtensions.Builder.csproj --target BuildChanged `
+            --EventName '${{ github.event_name }}' `
+            --PullRequestBaseSha '${{ github.event.pull_request.base.sha }}' `
+            --PushBeforeSha '${{ github.event.before }}'

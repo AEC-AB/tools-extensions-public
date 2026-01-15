@@ -7,7 +7,7 @@ partial class Build : NukeBuild
 {
     private readonly Dictionary<string, Project> _loadedProject = [];
 
-    private List<string> _projectsToBuild = [];
+    private readonly List<string> _projectsToBuild = [];
 
     Target ComputeChangedProjects => _ => _
         .Executes(() =>

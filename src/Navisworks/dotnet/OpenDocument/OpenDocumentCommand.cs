@@ -16,6 +16,11 @@ namespace OpenDocument
             }
 
             var doc = Application.ActiveDocument;
+            if (doc is null)
+            {
+                return Result.Text.Failed("Navisworks has no active model open");
+            }
+
             doc.OpenFile(args.Path);
 
             return Result.Text.Succeeded($"Opened file at path: {args.Path}");

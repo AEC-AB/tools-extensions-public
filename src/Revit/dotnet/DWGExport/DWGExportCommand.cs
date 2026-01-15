@@ -295,7 +295,7 @@ public class DWGExportCommand : IRevitExtension<DWGExportArgs>
         return Result.Text.Failed($"Operation cancelled. Exported: {_exportedCount}, Failed: {_failedCount}{FormatFailureLog()}");
     }
 
-    private static bool IsRegexValid(string pattern)
+    private static bool IsRegexValid(string? pattern)
     {
         if (string.IsNullOrWhiteSpace(pattern))
             return false;

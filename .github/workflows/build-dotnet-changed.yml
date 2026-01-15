@@ -30,4 +30,5 @@ jobs:
 
       - name: Build 
         run: |
-          dotnet run --project build/ExtensionBuilder.csproj`
+          dotnet run --project build/ExtensionBuilder.csproj
+        working-directory: ${{ github.workspace }}

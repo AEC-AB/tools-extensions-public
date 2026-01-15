@@ -105,6 +105,8 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
+.nuke/temp/*
+.tmp/*
 
 # Chutzpah Test files
 _Chutzpah*

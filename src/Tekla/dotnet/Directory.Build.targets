@@ -1,0 +1,48 @@
+<Project>
+
+    <!-- Compute supported versions for THIS project -->
+    <ItemGroup>
+        <ExcludedTeklaVersion Include="$(ExcludeTeklaVersions)"
+            Condition="'$(ExcludeTeklaVersions)'!=''" />
+        <SupportedTeklaVersion Include="@(AllTeklaVersion)" Exclude="@(ExcludedTeklaVersion)" />
+    </ItemGroup>
+
+    <!-- Generate only supported configurations for this project -->
+    <PropertyGroup>
+        <Configurations>
+            Debug;
+            @(SupportedTeklaVersion->'Debug %(Identity)', ';');
+            @(SupportedTeklaVersion->'Release %(Identity)', ';')
+        </Configurations>
+    </PropertyGroup>
+
+    <!-- Identify if the current configuration is supported -->
+    <PropertyGroup Condition="'$(MainTeklaVersion)'!=''">
+        <_ExcludedList>;$(ExcludeTeklaVersions);</_ExcludedList>
+        <IsSupportedTeklaConfig>true</IsSupportedTeklaConfig>
+        <IsSupportedTeklaConfig Condition="$(_ExcludedList.Contains(';$(MainTeklaVersion);'))">false</IsSupportedTeklaConfig>
+        <!-- treat plain Debug as supported -->
+        <IsSupportedTeklaConfig Condition="'$(Configuration)'=='Debug'">true</IsSupportedTeklaConfig>
+    </PropertyGroup>
+
+    <!-- Optional: skip project in solution builds when unsupported -->
+    <PropertyGroup Condition="'$(IsSupportedTeklaConfig)'=='false'">
+        <BuildInSolution>false</BuildInSolution>
+    </PropertyGroup>
+
+    <!-- Optional: fail fast if someone builds the csproj directly in unsupported config -->
+    <Target Name="FailUnsupportedTeklaConfig"
+        BeforeTargets="PrepareForBuild"
+        Condition="'$(IsSupportedTeklaConfig)'=='false' and '$(BuildingSolutionFile)'!='true'">
+        <Error
+            Text="Configuration '$(Configuration)' is not supported by this project. Excluded versions: '$(ExcludeTeklaVersions)'." />
+    </Target>
+
+    <PropertyGroup>
+        <ExtensionId Condition="'$(ExtensionId)' == ''">$(MSBuildProjectName)</ExtensionId>
+        <AssemblyName>$(ExtensionId).$(MainTeklaVersion).$(Version)</AssemblyName>
+        <TargetName>$(AssemblyName)</TargetName>
+        <PackageId>$(ExtensionId).$(MainTeklaVersion)</PackageId>
+    </PropertyGroup>
+
+</Project>

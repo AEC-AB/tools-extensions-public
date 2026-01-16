@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Configurations>Debug;Debug 2020;Debug 2021;Debug 2022;Debug 2023;Debug 2024;Release
+      2020;Release 2021;Release 2022;Release 2023;Release 2024</Configurations>
+    <ExtensionId>RefreshReferenceModels</ExtensionId>
+    <Version>0.0.2</Version>
+    <Title>RefreshReferenceModels</Title>
+    <Description>RefreshReferenceModels Description</Description>
+    <PackageTags>Tekla;Assistant;Extension</PackageTags>
+    <PackageIcon>Icon.png</PackageIcon>
+    <!-- 
+		Adjust MainTeklaVersion to get IntelliSense for the correct version do a 
+		dotnet restore to restore the correct nuget packages for the selected Tekla version.
+		-->
+    <MainTeklaVersion Condition="'$(Configuration)' == 'Debug'">2024</MainTeklaVersion>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <None Include="Icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>

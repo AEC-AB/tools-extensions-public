@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ExtensionId>OpenDocument</ExtensionId>
+    <Version>0.1.4</Version>
+    <Title>Open Document</Title>
+    <Description>Open document in Navisworks</Description>
+    <PackageTags>Navisworks;Assistant;Extension</PackageTags>
+    <PackageIcon>Icon.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+    <None Include="Icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>

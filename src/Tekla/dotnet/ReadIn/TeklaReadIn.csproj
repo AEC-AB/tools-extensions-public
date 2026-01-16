@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ExtensionId>TeklaReadIn</ExtensionId>
+    <Version>0.0.4</Version>
+    <Title>TeklaReadIn</Title>
+    <Description>Reads in model changes from the cloud</Description>
+    <PackageTags>Tekla;Assistant;Extension</PackageTags>
+    <PackageIcon>Icon.png</PackageIcon>
+    <!-- 
+		Adjust MainTeklaVersion to get IntelliSense for the correct version do a 
+		dotnet restore to restore the correct nuget packages for the selected Tekla version.
+		-->
+    <MainTeklaVersion Condition="'$(Configuration)' == 'Debug'">2024</MainTeklaVersion>
+  </PropertyGroup>
+ 
+  <ItemGroup>
+    <None Include="Icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>

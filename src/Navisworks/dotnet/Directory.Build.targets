@@ -1,0 +1,48 @@
+<Project>
+
+    <!-- Compute supported versions for THIS project -->
+    <ItemGroup>
+        <ExcludedNavisworksVersion Include="$(ExcludeNavisworksVersions)"
+            Condition="'$(ExcludeNavisworksVersions)'!=''" />
+        <SupportedNavisworksVersion Include="@(AllNavisworksVersion)" Exclude="@(ExcludedNavisworksVersion)" />
+    </ItemGroup>
+
+    <!-- Generate only supported configurations for this project -->
+    <PropertyGroup>
+        <Configurations>
+            Debug;
+            @(SupportedNavisworksVersion->'Debug %(Identity)', ';');
+            @(SupportedNavisworksVersion->'Release %(Identity)', ';')
+        </Configurations>
+    </PropertyGroup>
+
+    <!-- Identify if the current configuration is supported -->
+    <PropertyGroup Condition="'$(MainNavisworksVersion)'!=''">
+        <_ExcludedList>;$(ExcludeNavisworksVersions);</_ExcludedList>
+        <IsSupportedNavisworksConfig>true</IsSupportedNavisworksConfig>
+        <IsSupportedNavisworksConfig Condition="$(_ExcludedList.Contains(';$(MainNavisworksVersion);'))">false</IsSupportedNavisworksConfig>
+        <!-- treat plain Debug as supported -->
+        <IsSupportedNavisworksConfig Condition="'$(Configuration)'=='Debug'">true</IsSupportedNavisworksConfig>
+    </PropertyGroup>
+
+    <!-- Optional: skip project in solution builds when unsupported -->
+    <PropertyGroup Condition="'$(IsSupportedNavisworksConfig)'=='false'">
+        <BuildInSolution>false</BuildInSolution>
+    </PropertyGroup>
+
+    <!-- Optional: fail fast if someone builds the csproj directly in unsupported config -->
+    <Target Name="FailUnsupportedNavisworksConfig"
+        BeforeTargets="PrepareForBuild"
+        Condition="'$(IsSupportedNavisworksConfig)'=='false' and '$(BuildingSolutionFile)'!='true'">
+        <Error
+            Text="Configuration '$(Configuration)' is not supported by this project. Excluded versions: '$(ExcludeNavisworksVersions)'." />
+    </Target>
+
+    <PropertyGroup>
+        <ExtensionId Condition="'$(ExtensionId)' == ''">$(MSBuildProjectName)</ExtensionId>
+        <AssemblyName>$(ExtensionId).$(MainNavisworksVersion).$(Version)</AssemblyName>
+        <TargetName>$(AssemblyName)</TargetName>
+        <PackageId>$(ExtensionId).$(MainNavisworksVersion)</PackageId>
+    </PropertyGroup>
+
+</Project>

@@ -38,7 +38,7 @@
     <When Condition="$(Configuration.Contains('2021')) or $([System.String]::Equals('$(MainTeklaVersion)', '2021'))">
       <PropertyGroup>
         <TargetFramework>net48</TargetFramework>
-        <TeklaVersion>2021.0.0</TeklaVersion>
+        <TeklaVersion>2021.0.1</TeklaVersion>
         <DefineConstants>T2021;T2020_OR_GREATER;T2021_OR_GREATER;T2021_OR_LESS;T2022_OR_LESS;T2023_OR_LESS;T2024_OR_LESS</DefineConstants>
       </PropertyGroup>
     </When>

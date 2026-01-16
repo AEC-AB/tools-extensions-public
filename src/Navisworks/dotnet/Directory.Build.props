@@ -34,7 +34,7 @@
       <PropertyGroup>
         <TargetFramework>net48</TargetFramework>
         <NavisworksVersion>2019.0.1</NavisworksVersion>
-        <DefineConstants>N2019;N2020_OR_LESS;N2021_OR_LESS;N2021_OR_LESS;N2022_OR_LESS;N2023_OR_LESS;N2024_OR_LESS</DefineConstants>
+        <DefineConstants>N2019;N2020_OR_LESS;N2021_OR_LESS;N2022_OR_LESS;N2023_OR_LESS;N2024_OR_LESS</DefineConstants>
       </PropertyGroup>
     </When>
     <When Condition="$(Configuration.Contains('2020')) or $([System.String]::Equals('$(MainNavisworksVersion)', '2020'))">

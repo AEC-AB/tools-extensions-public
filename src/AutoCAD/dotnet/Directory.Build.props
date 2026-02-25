@@ -115,7 +115,7 @@
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
 
-    <PackageReference Include="CW.Assistant.Extensions.AutoCAD.$(MainAutoCADVersion)" Version="26.4.0">
+    <PackageReference Include="CW.Assistant.Extensions.AutoCAD.$(MainAutoCADVersion)" Version="26.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>

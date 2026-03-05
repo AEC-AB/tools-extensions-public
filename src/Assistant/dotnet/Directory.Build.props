@@ -10,14 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CW.Assistant.Extensions.Assistant" Version="26.4.0">
+    <PackageReference Include="CW.Assistant.Extensions.Assistant" Version="26.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 </Project>
-
-
 
 
 

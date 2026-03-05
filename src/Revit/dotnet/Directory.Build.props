@@ -123,12 +123,12 @@
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
 
-    <PackageReference Include="CW.Assistant.Extensions.Revit.$(MainRevitVersion)" Version="26.4.0">
+    <PackageReference Include="CW.Assistant.Extensions.Revit.$(MainRevitVersion)" Version="26.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>
 
-    <PackageReference Include="CW.Assistant.Extensions.Contracts" Version="26.4.0">
+    <PackageReference Include="CW.Assistant.Extensions.Contracts" Version="26.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>compile</IncludeAssets>
     </PackageReference>

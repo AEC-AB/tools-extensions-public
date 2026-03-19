@@ -1,0 +1,29 @@
+{
+  "Custom Autofill Navisworks": {
+    "prefix": [
+      "control-type-auto-fill-custom-Navisworks"
+    ],
+    "body": [
+      "[Description(\"${1:ControlName}\")]",
+      "[CustomNavisworksAutoFill(typeof(${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g}AutoFillCollector))]",
+      "public string ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }",
+      "",
+      "internal class ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g}AutoFillCollector : INavisworksAutoFillCollector<${2:ClashDetectiveRunTestArgs}>",
+      "{",
+      "    public Dictionary<string, string> Get(${2:ClashDetectiveRunTestArgs} args)",
+      "    {",
+      "        var result = new Dictionary<string, string>();",
+      "        try",
+      "        {",
+      "            var document = Autodesk.Navisworks.Api.Application.ActiveDocument;",
+      "            if (document is null) return result;",
+      "            ${3}",
+      "        }",
+      "        catch { }",
+      "        return result;",
+      "    }",
+      "}",
+    ],
+    "description": "Control for Extension UI with custom autofill with Navisworks context"
+  }
+}

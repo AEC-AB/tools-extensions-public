@@ -1,0 +1,160 @@
+{
+  "Control": {
+    "prefix": [
+      "control"
+    ],
+    "body": [
+      "[Description(\"${1:ControlName}\")]",
+      "[ControlData(ToolTip = \"${4:Control ToolTip}\")]",
+      "public ${2:string} ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; } = ${3:\"Default value\"};"
+    ],
+    "description": "Control for Extension UI"
+  },
+  "Control save type": {
+    "prefix": [
+      "control-type-save"
+    ],
+    "body": [
+      "[Description(\"${1:Save file}\")]",
+      "[ControlType(ControlType.Save)]",
+      "[FileExtension(\"${2:json}\")]",
+      "[FileExtension(\"*\")]",
+      "public string ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"
+    ],
+    "description": "Save file control"
+  },
+  "Control open type": {
+    "prefix": [
+      "control-type-browse"
+    ],
+    "body": [
+      "[Description(\"${1:Browse for file}\")]",
+      "[ControlType(ControlType.Browse)]",
+      "[FileExtension(\"${2:json}\")]",
+      "[FileExtension(\"*\")]",
+      "public string ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"
+    ],
+    "description": "Browse file control"
+  },
+  "Control List type": {
+    "prefix": [
+      "control-type-list"
+    ],
+    "body": [
+      "[Description(\"${1:Items}\")]",
+      "public List<string> ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"
+    ],
+    "description": "List control"
+  },
+  "Control ListBox type": {
+    "prefix": [
+      "control-type-list-box"
+    ],
+    "body": [
+      "[Description(\"${1:Items}\")]",
+      "[ControlType(ControlType.ListBox)]",
+      "public List<string> ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"
+    ],
+    "description": "List box control"
+  },
+  "Control Enum type": {
+    "prefix": [
+      "control-type-enum"
+    ],
+    "body": [
+      "[Description(\"${1:Selector}\")]",
+      "public ${2:MyEnum} ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"
+    ],
+    "description": "Enum control"
+  },
+  "Control RadioButton type": {
+    "prefix": [
+      "control-type-radio-button"
+    ],
+    "body": [
+      "[Description(\"${1:Choice}\")]",
+      "[ControlType(ControlType.RadioButton)]",
+      "[ControlSettings(\"Orientation\", \"Vertical\")] // or Horizontal",
+      "public ${2:RadioButtonOptionsEnum} ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"
+    ],
+    "description": "Radio button control"
+  },
+  "Control Enums type": {
+    "prefix": [
+      "control-type-enums"
+    ],
+    "body": [
+      "[Description(\"${1:Picker}\")]",
+      "[ControlType(ControlType.ListBox)]",
+      "public List<${2:MyEnum}> ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"
+    ],
+    "description": "Enums control"
+  },
+  "Control Dictionary type": {
+    "prefix": [
+      "control-type-dictionary"
+    ],
+    "body": [
+      "[Description(\"${1:Dictionary}\")]",
+      "public Dictionary<string, string> ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"
+    ],
+    "description": "Dictionary control"
+  },
+  "Control Multiline type": {
+    "prefix": [
+      "control-type-multiline"
+    ],
+    "body": [
+      "[Description(\"${1:MultiLineText}\")]",
+      "[ControlSettings(\"IsMultiline\", \"True\")]",
+      "public string ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"
+    ],
+    "description": "Multiline Control"
+  },
+  "Control Date type": {
+    "prefix": [
+      "control-type-date"
+    ],
+    "body": [
+      "[Description(\"${1:Date}\")]",
+      "[ControlSettings(\"ShowTime\", \"true\")] // or false, defaults to true if not provided",
+      "public DateTime ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"
+    ],
+    "description": "Date Control"
+  },
+  "Control Color type": {
+    "prefix": [
+      "control-type-color"
+    ],
+    "body": [
+      "[Description(\"${1:Color}\")]",
+      "public Color ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }"
+    ],
+    "description": "Color Control"
+  },
+  "Custom Autofill No Context": {
+    "prefix": [
+      "control-type-auto-fill-custom"
+    ],
+    "body": [
+      "[Description(\"${1:ControlName}\")]",
+      "[CustomAutoFill(typeof(${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g}AutoFillCollector))]",
+      "public string ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }",
+      "",
+      "internal class ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g}AutoFillCollector : IAsyncAutoFillCollector<${TM_FILENAME_BASE}>",
+      "{",
+      "    public async Task<Dictionary<string, string>> Get(${TM_FILENAME_BASE} args, CancellationToken cancellationToken)",
+      "    {",
+      "        var result = new Dictionary<string, string>();",
+      "        try",
+      "        {",
+      "            ${2}",
+      "        }",
+      "        catch { }",
+      "        return await Task.FromResult(result);",
+      "    }",
+      "}",
+    ],
+    "description": "Control for Extension UI with custom autofill"
+  }
+}

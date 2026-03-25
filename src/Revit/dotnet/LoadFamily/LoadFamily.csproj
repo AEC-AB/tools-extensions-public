@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ExtensionId>LoadFamily</ExtensionId>
     <Authors>AEC</Authors>
-    <Version>0.0.2</Version>
+    <Version>0.0.3</Version>
     <Title>LoadFamily</Title>
     <Description>LoadFamilyDescription</Description>
     <PackageTags>Revit;Assistant;Extension;Automation</PackageTags>

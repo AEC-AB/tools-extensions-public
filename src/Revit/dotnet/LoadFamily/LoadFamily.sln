@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11612.153 insiders
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadFamily", "LoadFamily.csproj", "{FEE254AF-2163-6E76-0CAA-4BF998DDFB2A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		')|Any CPU = ')|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FEE254AF-2163-6E76-0CAA-4BF998DDFB2A}.')|Any CPU.ActiveCfg = @(SupportedRevitVersion->'Release %(Identity)', '|Any CPU
+		{FEE254AF-2163-6E76-0CAA-4BF998DDFB2A}.')|Any CPU.Build.0 = @(SupportedRevitVersion->'Release %(Identity)', '|Any CPU
+		{FEE254AF-2163-6E76-0CAA-4BF998DDFB2A}.Debug|Any CPU.ActiveCfg = @(SupportedRevitVersion->'Debug %(Identity)', '|Any CPU
+		{FEE254AF-2163-6E76-0CAA-4BF998DDFB2A}.Debug|Any CPU.Build.0 = @(SupportedRevitVersion->'Debug %(Identity)', '|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A6029869-5CE6-4571-822C-033C25FD9E19}
+	EndGlobalSection
+EndGlobal

@@ -5,7 +5,7 @@
     <Authors>AEC</Authors>
     <Version>0.0.3</Version>
     <Title>LoadFamily</Title>
-    <Description>LoadFamilyDescription</Description>
+    <Description>Load multi families into Revit model</Description>
     <PackageTags>Revit;Assistant;Extension;Automation</PackageTags>
     <PackageIcon>Icon.png</PackageIcon>
     <LangVersion>12</LangVersion>

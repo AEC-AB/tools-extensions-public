@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ExtensionId>ClashDetectiveRunTest</ExtensionId>
+    <!-- 
+    Adjust MainNavisworksVersion to get IntelliSense for the correct version do a 
+    dotnet restore to restore the correct nuget packages for the selected Navisworks version.
+    -->
+    <MainNavisworksVersion Condition="'$(Configuration)' == 'Debug'">2024</MainNavisworksVersion>
+  </PropertyGroup>
+</Project>

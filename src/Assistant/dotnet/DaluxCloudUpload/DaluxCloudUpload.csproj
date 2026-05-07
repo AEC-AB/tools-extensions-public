@@ -10,7 +10,6 @@
     <PackageIcon>Icon.png</PackageIcon>
     <PackageIconUrl></PackageIconUrl>
   </PropertyGroup>
-  <Import Project=".\Configurations.targets" />
   <PropertyGroup>
     <LangVersion>12</LangVersion>
   </PropertyGroup>

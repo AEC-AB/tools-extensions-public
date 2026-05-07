@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ExtensionId>DaluxCloudDownload</ExtensionId>
+    <Authors>AEC AB</Authors>
+    <Version>0.0.1</Version>
+    <Title>DaluxCloudDownload</Title>
+    <Description>Download a file from a Dalux project to a local folder.</Description>
+    <PackageTags>AssistantExtension;Assistant;Extension</PackageTags>
+  </PropertyGroup>
+</Project>

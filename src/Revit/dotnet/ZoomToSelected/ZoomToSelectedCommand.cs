@@ -14,7 +14,9 @@ public class ZoomToSelectedCommand : IRevitExtension<ZoomToSelectedArgs>
         if (uiView is null)
             return Result.Empty.Succeeded();
 
-        var visibleIds = new FilteredElementCollector(document, view.Id).ToElementIds().ToLookup(x => x.GetValue());
+        using var collector = new FilteredElementCollector(document, view.Id);
+        
+        var visibleIds = collector.ToElementIds().ToLookup(x => x.GetValue());
         if (!visibleIds.Any())
             return Result.Empty.Succeeded();
 

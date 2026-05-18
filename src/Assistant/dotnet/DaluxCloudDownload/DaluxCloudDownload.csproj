@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ExtensionId>DaluxCloudDownload</ExtensionId>
     <Authors>AEC AB</Authors>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Title>DaluxCloudDownload</Title>
     <Description>Download a file from a Dalux project to a local folder.</Description>
     <PackageTags>AssistantExtension;Assistant;Extension</PackageTags>

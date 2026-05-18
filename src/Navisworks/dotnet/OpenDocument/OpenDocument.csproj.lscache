@@ -1,0 +1,102 @@
+version=1
+
+# This file caches language service data to improve the performance of C# Dev Kit.
+# It is not intended for manual editing. It can safely be deleted and will be
+# regenerated automatically. For more information, see https://aka.ms/lscache
+#
+# To control where cache files are stored, use the following VS Code setting:
+#   "dotnet.projectsystem.cacheInProjectFolder": true
+
+[project]
+language=C#
+primary
+lastDtbSucceeded
+
+[properties]
+AssemblyName=OpenDocument.2025.0.1.4
+CommandLineArgsForDesignTimeEvaluation=-langversion:12 -define:N2025;N2019_OR_GREATER;N2020_OR_GREATER;N2021_OR_GREATER;N2022_OR_GREATER;N2023_OR_GREATER;N2024_OR_GREATER;N2025_OR_GREATER;N2025_OR_LESS;TRACE
+CompilerGeneratedFilesOutputPath=
+MaxSupportedLangVersion=7.3
+ProjectAssetsFile=<PATH>obj/project.assets.json
+RootNamespace=OpenDocument
+RunAnalyzers=
+RunAnalyzersDuringLiveAnalysis=
+SolutionPath=*Undefined*
+TargetFrameworkIdentifier=.NETFramework
+TargetPath=<PATH>bin/Debug/net48/OpenDocument.dll
+TargetRefPath=
+TemporaryDependencyNodeTargetIdentifier=net48
+
+[commandLineArguments]
+/noconfig
+/unsafe-
+/checked-
+/nowarn:NU1701,1701,1702
+/fullpaths
+/nostdlib+
+/platform:x64
+/errorreport:prompt
+/warn:4
+/define:N2025;N2019_OR_GREATER;N2020_OR_GREATER;N2021_OR_GREATER;N2022_OR_GREATER;N2023_OR_GREATER;N2024_OR_GREATER;N2025_OR_GREATER;N2025_OR_LESS;TRACE;DEBUG;NETFRAMEWORK;NET48;NET20_OR_GREATER;NET30_OR_GREATER;NET35_OR_GREATER;NET40_OR_GREATER;NET45_OR_GREATER;NET451_OR_GREATER;NET452_OR_GREATER;NET46_OR_GREATER;NET461_OR_GREATER;NET462_OR_GREATER;NET47_OR_GREATER;NET471_OR_GREATER;NET472_OR_GREATER;NET48_OR_GREATER
+/highentropyva+
+/nullable:enable
+/debug+
+/debug:portable
+/filealign:512
+/optimize-
+/out:obj\Debug\net48\OpenDocument.2025.0.1.4.dll
+/subsystemversion:6.00
+/target:library
+/warnaserror-
+/utf8output
+/deterministic+
+/langversion:12
+/warnaserror+:NU1605
+
+[sourceFiles]
+obj/Debug/net48/
+ .NETFramework,Version=v4.8.AssemblyAttributes.cs
+ OpenDocument.AssemblyInfo.cs
+OpenDocumentArgs.cs
+OpenDocumentCommand.cs
+
+[metadataReferences]
+<NETFXREF>/v4.8/
+ Facades/netstandard.dll
+ mscorlib.dll
+ System.ComponentModel.DataAnnotations.dll
+ System.Core.dll
+ System.Data.dll
+ System.dll
+ System.Drawing.dll
+ System.IO.Compression.FileSystem.dll
+ System.Numerics.dll
+ System.Runtime.Serialization.dll
+ System.Xml.dll
+ System.Xml.Linq.dll
+<NUGET>/
+ cw.assistant.extensions.contracts/26.6.4/lib/netstandard2.0/CW.Assistant.Extensions.Contracts.dll
+ cw.assistant.extensions.navisworks.2025/26.6.4/lib/net48/CW.Assistant.Extensions.Navisworks.dll
+ navisworks.2025/1.0.0/lib/
+  Autodesk.Navisworks.Automation.dll
+  Autodesk.Navisworks.Controls.dll
+  Autodesk.Navisworks.Interop.ComApiAutomation.dll
+  Autodesk.Navisworks.Interop.Timeliner.dll
+  Autodesk.Navisworks.Resolver.dll
+  Autodesk.Navisworks.Takeoff.dll
+  Autodesk.Navisworks.Timeliner.dll
+  navisworks.gui.common.dll
+  navisworks.gui.generic.dll
+  navisworks.gui.interface.dll
+  navisworks.gui.roamer.dll
+  navisworks.roamer.plugin.dll
+ sgnl.navisworks.2025/3.0.0/lib/
+  AdWindows.dll
+  Autodesk.Navisworks.Api.dll
+  Autodesk.Navisworks.Clash.dll
+  Autodesk.Navisworks.ComApi.dll
+  Autodesk.Navisworks.Interop.ComApi.dll
+ system.componentmodel.annotations/5.0.0/ref/net461/System.ComponentModel.Annotations.dll
+
+[analyzerConfigFiles]
+obj/Debug/net48/OpenDocument.GeneratedMSBuildEditorConfig.editorconfig

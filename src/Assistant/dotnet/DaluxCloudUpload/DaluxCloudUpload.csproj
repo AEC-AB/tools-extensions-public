@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ExtensionId>DaluxCloudUpload</ExtensionId>
     <Authors>AEC AB</Authors>
-    <Version>0.0.3</Version>
+    <Version>0.0.4</Version>
     <Title>DaluxCloudUpload</Title>
     <Description>DaluxCloudUpload Description</Description>
     <PackageTags>AssistantExtension;Assistant;Extension</PackageTags>

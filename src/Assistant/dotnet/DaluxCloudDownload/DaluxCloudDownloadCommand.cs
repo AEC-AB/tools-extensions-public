@@ -1,5 +1,6 @@
 using DaluxCloudDownload.Models;
 using DaluxCloudDownload.Services;
+using Meziantou.Framework.Win32;
 using System.IO;
 
 namespace DaluxCloudDownload;
@@ -10,6 +11,12 @@ public class DaluxCloudDownloadCommand : IAssistantExtension<DaluxCloudDownloadA
     {
         try
         {
+            var apiKey = GetApiKey(args.ApiKey);
+            if (apiKey is null)
+            {
+                return Result.Text.Failed("API key not found.");
+            }
+
             if (args.FilePaths == null || args.FilePaths.Count == 0)
             {
                 return Result.Text.Failed("At least one Dalux File Path is required.");
@@ -25,7 +32,7 @@ public class DaluxCloudDownloadCommand : IAssistantExtension<DaluxCloudDownloadA
                 return Result.Text.Failed($"Output folder not found: {args.OutputFolder}");
             }
 
-            var daluxService = new DaluxApiService(args.ApiKey, args.BaseUrl);
+            var daluxService = new DaluxApiService(apiKey, args.BaseUrl);
 
             var projectResponse = await daluxService.GetProjectsAsync(cancellationToken);
             if (!projectResponse.IsSuccess || projectResponse.Data == null)
@@ -377,5 +384,16 @@ public class DaluxCloudDownloadCommand : IAssistantExtension<DaluxCloudDownloadA
         }
 
         return DaluxApiResponse<string>.Success($"Downloaded {downloadedCount} file(s)");
+    }
+
+    private static string? GetApiKey(string applicationName)
+    {
+        var creds = CredentialManager.ReadCredential(applicationName);
+        if (!string.IsNullOrEmpty(creds?.Password))
+        {
+            return creds.Password;
+        }
+
+        return null;
     }
 }

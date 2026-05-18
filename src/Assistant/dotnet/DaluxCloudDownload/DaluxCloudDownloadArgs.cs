@@ -2,11 +2,11 @@ namespace DaluxCloudDownload;
 
 public class DaluxCloudDownloadArgs
 {
-    [TextField(
+    [PasswordField(
         Label = "Dalux API Key",
         ToolTip = "Your Dalux API Identity key")]
-    [Required(ErrorMessage = "Dalux API Key is required.")]
-    public string ApiKey { get; set; } = string.Empty;
+    [Required(ErrorMessage = "Add organization name in the 'Name' field and Dalux API Key in the 'Password' field.")]
+    public string ApiKey { get; set; } = "Dalux API Key";
 
     [TextField(
         Label = "API Base URL",
@@ -24,7 +24,7 @@ public class DaluxCloudDownloadArgs
         Label = "Download Files/Folders",
         ToolTip = "Dalux file or folder paths. For files: 'Files/Path/file.ifc'. For folders: 'Files/Path' (all files and subfolders are downloaded with structure preserved)")]
     [Required(ErrorMessage = "At least one Dalux File or Folder Path is required.")]
-    public List<string> FilePaths { get; set; } = new();
+    public List<string> FilePaths { get; set; } = new ();
 
     [FolderPickerField(
         Label = "Output Folder",

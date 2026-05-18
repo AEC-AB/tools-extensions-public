@@ -8,4 +8,7 @@
     <Description>Download a file from a Dalux project to a local folder.</Description>
     <PackageTags>AssistantExtension;Assistant;Extension</PackageTags>
   </PropertyGroup>
+<ItemGroup>
+	<PackageReference Include="Meziantou.Framework.Win32.CredentialManager" Version="1.7.3" />
+</ItemGroup>
 </Project>

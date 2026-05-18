@@ -1,4 +1,5 @@
 using DaluxCloudUpload.Services;
+using Meziantou.Framework.Win32;
 using System.IO;
 
 namespace DaluxCloudUpload;
@@ -9,6 +10,11 @@ public class DaluxCloudUploadCommand : IAssistantExtension<DaluxCloudUploadArgs>
     {
         try
         {
+            var apiKey = GetApiKey(args.ApiKey);
+            if (apiKey is null)
+            {
+                return Result.Text.Failed("API key not found.");
+            }
             // Validate file path
             if (!File.Exists(args.FilePath))
             {
@@ -172,5 +178,16 @@ public class DaluxCloudUploadCommand : IAssistantExtension<DaluxCloudUploadArgs>
                 $"❌ Unexpected error: {ex.Message}"
             );
         }
+    }
+
+    private static string? GetApiKey(string applicationName)
+    {
+        var creds = CredentialManager.ReadCredential(applicationName);
+        if (!string.IsNullOrEmpty(creds?.Password))
+        {
+            return creds.Password;
+        }
+
+        return null;
     }
 }

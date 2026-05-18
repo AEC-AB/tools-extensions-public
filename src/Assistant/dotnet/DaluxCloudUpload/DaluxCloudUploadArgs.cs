@@ -7,11 +7,11 @@ namespace DaluxCloudUpload;
 /// </summary>
 public class DaluxCloudUploadArgs
 {
-    [TextField(
+    [PasswordField(
         Label = "Dalux API Key",
         ToolTip = "Your Dalux API Identity key")]
-    [Required(ErrorMessage = "Dalux API Key is required.")]
-    public string ApiKey { get; set; } = string.Empty;
+    [Required(ErrorMessage = "Add organization name in the 'Name' field and Dalux API Key in the 'Password' field.")]
+    public string ApiKey { get; set; } = "Dalux API Key";
 
     [TextField(
         Label = "API Base URL",

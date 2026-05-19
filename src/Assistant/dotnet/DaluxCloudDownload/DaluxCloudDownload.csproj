@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ExtensionId>DaluxCloudDownload</ExtensionId>
+    <Authors>AEC AB</Authors>
+    <Version>0.0.3</Version>
+    <Title>Dalux Cloud Download</Title>
+    <Description>Download a file from a Dalux project to a local folder.</Description>
+    <PackageTags>AssistantExtension;Assistant;Extension</PackageTags>
+  </PropertyGroup>
+<ItemGroup>
+	<PackageReference Include="Meziantou.Framework.Win32.CredentialManager" Version="1.7.3" />
+</ItemGroup>
+</Project>

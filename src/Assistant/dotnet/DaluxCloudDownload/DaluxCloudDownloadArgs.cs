@@ -4,8 +4,8 @@ public class DaluxCloudDownloadArgs
 {
     [PasswordField(
         Label = "Dalux API Key",
-        ToolTip = "Your Dalux API Identity key")]
-    [Required(ErrorMessage = "Add organization name in the 'Name' field and Dalux API Key in the 'Password' field.")]
+        ToolTip = "Add organization name in the 'Name' field and Dalux API Key in the 'Password' field.")]
+    [Required(ErrorMessage = "Dalux API Key is required.")]
     public string ApiKey { get; set; } = "Dalux API Key";
 
     [TextField(

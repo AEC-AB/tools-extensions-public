@@ -22,3 +22,12 @@ These files live in `.github/instructions/` and apply to matching paths:
 - Tekla .NET extensions: `.github/instructions/tekla-extensions-development.instructions.md` (applyTo `**/src/Tekla/dotnet/**/*.cs`)
 
 Read the relevant instructions for the integration you are working on. They define required patterns (args/command/result), UI attributes, and integration-specific API expectations.
+
+## Developer Documentation
+
+For comprehensive guides on extension development, configuration classes (Args), field attributes, validation, and platform-specific patterns, see the [Extension Development Documentation](./docs/README.md).
+
+- **Getting started?** → [Quick Start Guide](./docs/dotnet/QUICK_START.md)
+- **Building with patterns?** → [Cookbook](./docs/dotnet/COOKBOOK.md)
+- **Deep technical reference?** → [Args Developer Guide](./docs/dotnet/ARGS_DEVELOPER_GUIDE.md)
+- **Looking up syntax?** → [Reference](./docs/dotnet/REFERENCE.md)

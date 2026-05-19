@@ -29,7 +29,7 @@ public class DaluxCloudDownloadArgs
     [FolderPickerField(
         Label = "Output Folder",
         Hint = "Destination folder path",
-        ToolTip = "The local folder where the file will be written")]
+        ToolTip = "The local folder where downloaded files and folders will be saved")]
     [Required(ErrorMessage = "Output Folder is required.")]
     public string OutputFolder { get; set; } = string.Empty;
 }

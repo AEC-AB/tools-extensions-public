@@ -57,20 +57,40 @@ Understanding the complete flow helps you write effective Args classes and debug
 
 ### 1. Discovery & Registration
 
+Extensions are discovered and activated when:
+- **User adds the extension to an action** in the Assistant workflow builder
+- **User activates the extension for configuration** in the UI (opening the extension's settings form)
+- **The action executes** with this extension as a task
+
+When activated, the framework:
+
 ```
-Assistant starts
+Scans extension assemblies for your *Command class (implements IAssistantExtension)
   ↓
-Scans extension assemblies
+Looks for matching *Args class (by explicit type parameter)
   ↓
-Finds your *Command class (implements IAssistantExtension)
+Reads Args class via reflection
   ↓
-Looks for matching *Args class (by convention or explicit type parameter)
+Extracts field and validation attributes
   ↓
-Registers Args type for UI rendering
+Builds field definitions for the configuration form
+  ↓
+Renders the form for user configuration
 ```
 
-**Naming convention:** `ExportCommand` → looks for `ExportArgs`  
-**Explicit registration:** Some platforms allow explicit type binding
+**How the Args type is discovered:** The Command class declares the Args type explicitly as a generic type parameter:
+
+```csharp
+public class ExportCommand : IAssistantExtension<ExportArgs>
+{
+    public IExtensionResult Run(IAssistantExtensionContext context, ExportArgs args, CancellationToken cancellationToken)
+    {
+        // args is already typed as ExportArgs
+    }
+}
+```
+
+The framework reads the generic `IAssistantExtension<TArgs>` interface, extracts `TArgs`, and uses that to build the configuration form. No naming convention matching is needed.
 
 ### 2. UI Rendering
 

@@ -88,12 +88,11 @@ public class MyArgs
 
 **Command usage:**
 ```csharp
-var config = (MyArgs)args!;
-if (config.IncludeArchived)
+if (args.IncludeArchived)
 {
     // Include archived items in processing
 }
-if (config.SkipValidation)
+if (args.SkipValidation)
 {
     // Skip validation checks
 }
@@ -128,10 +127,11 @@ public enum DocumentType
 }
 ```
 
+If you decorate enum members with `[Description("...")]`, the description is shown in the UI while the enum member name is kept as the key value.
+
 **Command usage:**
 ```csharp
-var config = (MyArgs)args!;
-switch (config.Type)
+switch (args.Type)
 {
     case DocumentType.Architectural:
         // Handle architectural
@@ -169,11 +169,10 @@ public class MyArgs
 
 **Command usage:**
 ```csharp
-var config = (MyArgs)args!;
-if (string.IsNullOrEmpty(config.TemplateFile))
+if (string.IsNullOrEmpty(args.TemplateFile))
     return Result.Error("Template file is required");
 
-var content = File.ReadAllText(config.TemplateFile);
+var content = File.ReadAllText(args.TemplateFile);
 // Process the file
 ```
 
@@ -204,8 +203,7 @@ public class MyArgs
 
 **Command usage:**
 ```csharp
-var config = (MyArgs)args!;
-foreach (var file in config.SelectedFiles)
+foreach (var file in args.SelectedFiles)
 {
     var data = JsonSerializer.Deserialize(File.ReadAllText(file));
     // Process each file
@@ -237,8 +235,7 @@ public class MyArgs
 
 **Command usage:**
 ```csharp
-var config = (MyArgs)args!;
-var outputPath = Path.Combine(config.OutputFolder!, "result.json");
+var outputPath = Path.Combine(args.OutputFolder!, "result.json");
 File.WriteAllText(outputPath, jsonContent);
 ```
 
@@ -410,10 +407,16 @@ using CW.Assistant.Extensions.Contracts.Fields;
 
 namespace MyExtension;
 
-public class MyArgs  // Version 1 (default)
+public class MyArgsV1  // Version 1 (default)
 {
     [TextField(Label = "Project Name")]
     public string ProjectName { get; set; } = "";
+
+    [FolderPickerField(Label = "Output Directory")]
+    public string? OutputFolder { get; set; }
+
+    [TextField(Label = "Retry Count")]
+    public string RetryCountText { get; set; } = "3";
 }
 ```
 
@@ -421,6 +424,7 @@ public class MyArgs  // Version 1 (default)
 ```csharp
 using CW.Assistant.Extensions.Contracts.Fields;
 using CW.Assistant.Extensions.Contracts;
+using System;
 
 namespace MyExtension;
 
@@ -430,35 +434,53 @@ public class MyArgs
     [TextField(Label = "Project Name")]
     public string ProjectName { get; set; } = "";
 
-    [TextField(Label = "Description")]  // New in v2
-    public string Description { get; set; } = "";
+    [SectionField(Label = "Execution")]
+    public ExecutionSettings Execution { get; set; } = new();
+}
+
+public class ExecutionSettings
+{
+    [FolderPickerField(Label = "Output Directory")]
+    public string? OutputFolder { get; set; }
+
+    [IntegerField(Label = "Retry Count")]
+    public int RetryCount { get; set; } = 3;
+
+    [BooleanField(Label = "Dry Run")]
+    public bool DryRun { get; set; }
 }
 
 // Upgrade handler
-public class MyArgsUpgrade : IArgsUpgrade<V1Args, V2Args>
+public class MyArgsUpgradeV1ToV2 : IArgsUpgrade<MyArgsV1, MyArgs>
 {
-    public V2Args Upgrade(V1Args from)
+    public MyArgs Upgrade(MyArgsV1 from)
     {
-        return new V2Args
+        int retryCount;
+        if (!int.TryParse(from.RetryCountText, out retryCount) || retryCount < 0)
+        {
+            retryCount = 3;
+        }
+
+        return new MyArgs
         {
             ProjectName = from.ProjectName,
-            Description = ""  // Default for new field
+            Execution = new ExecutionSettings
+            {
+                OutputFolder = from.OutputFolder,
+                RetryCount = retryCount,
+                DryRun = false
+            }
         };
     }
-}
-
-// Define old version for reference
-public class V1Args
-{
-    public string ProjectName { get; set; } = "";
 }
 ```
 
 **What happens:**
 - Old workflows saved with v1 Args load automatically
-- Framework finds `MyArgsUpgrade` and runs it, migrating to v2
-- User sees new "Description" field on next run
-- No data loss; existing "ProjectName" is preserved
+- Framework finds `MyArgsUpgradeV1ToV2` and runs it, migrating to v2
+- Flat v1 fields are moved into the new `Execution` section in v2
+- `RetryCountText` is transformed from text to integer with a safe fallback
+- Existing values are preserved and the new `DryRun` field gets a default
 
 **Reference:** [Args Versioning](./REFERENCE.md#args-versioning)
 
@@ -546,11 +568,10 @@ public class MyArgs
 
 **Command usage:**
 ```csharp
-var config = (MyArgs)args!;
-if (!string.IsNullOrEmpty(config.OptionalNotes))
+if (!string.IsNullOrEmpty(args.OptionalNotes))
 {
     // Use optional field if provided
-    ProcessNotes(config.OptionalNotes);
+    ProcessNotes(args.OptionalNotes);
 }
 ```
 

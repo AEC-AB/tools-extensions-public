@@ -21,19 +21,21 @@ Tekla extensions access the model through the Tekla Model API.
 ### Basic Pattern
 
 ```csharp
-public async Task<Result> ExecuteAsync(object? args, CancellationToken cancellationToken)
+public async Task<IExtensionResult> RunAsync(
+    IAssistantExtensionContext context,
+    MyArgs args,
+    CancellationToken cancellationToken)
 {
-    var config = (MyArgs)args!;
     var model = new Model();
     
     if (!model.GetConnectionStatus())
-        return Result.Error("Could not connect to Tekla model");
+        return Result.Text.Failed("Could not connect to Tekla model");
     
     // Your model operations here
     
     model.CommitChanges();
     
-    return Result.Success("Tekla operation completed");
+    return Result.Text.Succeeded("Tekla operation completed");
 }
 ```
 

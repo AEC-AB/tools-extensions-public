@@ -21,9 +21,11 @@ All Revit document modifications must occur within a transaction.
 ### Transaction Pattern
 
 ```csharp
-public async Task<Result> ExecuteAsync(object? args, CancellationToken cancellationToken)
+public async Task<IExtensionResult> RunAsync(
+    IAssistantExtensionContext context,
+    MyArgs args,
+    CancellationToken cancellationToken)
 {
-    var config = (MyArgs)args!;
     var doc = GetCurrentDocument();  // Access current Revit document
     
     using (var trans = new Transaction(doc, "Extension operation"))
@@ -36,7 +38,7 @@ public async Task<Result> ExecuteAsync(object? args, CancellationToken cancellat
         trans.Commit();
     }
     
-    return Result.Success("Revit operation completed");
+    return Result.Text.Succeeded("Revit operation completed");
 }
 ```
 

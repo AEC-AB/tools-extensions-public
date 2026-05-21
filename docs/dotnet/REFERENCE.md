@@ -248,6 +248,26 @@ public enum ProjectType
 }
 ```
 
+When the property type is an enum:
+
+- Enum member name is used as the stored key value.
+- If `[Description("...")]` is present on an enum member, that description is used as the display value in the UI.
+- If no `Description` is provided, the enum member name is used for display.
+
+Example:
+```csharp
+public enum ProjectType
+{
+    [Description("Residential Building")]
+    Residential,
+
+    [Description("Commercial Building")]
+    Commercial,
+
+    Industrial
+}
+```
+
 #### ChoiceField
 
 Renders a radio button or segmented control.
@@ -278,6 +298,8 @@ public enum ExportFormat
     PDF
 }
 ```
+
+`ChoiceField` follows the same enum display/key behavior as `OptionsField`.
 
 ### File & Folder Pickers
 

@@ -20,14 +20,15 @@ Assistant extensions can read and write workflow variables.
 ### Reading Variables
 
 ```csharp
-public async Task<Result> ExecuteAsync(object? args, CancellationToken cancellationToken)
+public async Task<IExtensionResult> RunAsync(
+    IAssistantExtensionContext context,
+    MyArgs args,
+    CancellationToken cancellationToken)
 {
-    var config = (MyArgs)args!;
-    
     // Your extension receives the Args
     // Perform your work
-    
-    return Result.Success("Done");
+
+    return Result.Text.Succeeded("Done");
 }
 ```
 

@@ -14,6 +14,34 @@ This guide covers Revit-specific patterns for writing extensions that integrate 
 
 See [Quick Start](../QUICK_START.md) for Args/Command basics. This guide covers Revit-specific patterns.
 
+## Choose Revit Template
+
+When creating a Revit extension for Assistant, choose between:
+
+1. **Revit Automation Extension for Assistant**
+2. **Revit App Extension for Assistant**
+
+### Revit Automation Extension for Assistant
+
+Use this template when the extension should run as a task inside an Assistant automation action.
+
+- Best for workflow/automation actions
+- Focused on deterministic task execution (input -> run -> result)
+- Typically no modeless application UI
+
+### Revit App Extension for Assistant
+
+Use this template when the extension is an interactive Revit app with a modeless UI.
+
+- Best for interactive tools launched by users inside Revit
+- Intended for Assistant action files used as buttons via Assistant Shortcuts
+- Supports modeless WPF UI patterns so the window remains responsive while Revit work is dispatched on the Revit UI thread
+- Better fit for user-driven app workflows than unattended automation actions
+
+### Distribution note for Revit App Extensions
+
+Assistant Shortcuts enable distributing model-based extension apps: you can assign app actions to a Revit model so users opening that model can access the shortcut button (requires Assistant to be installed).
+
 ## Transaction Context
 
 All Revit document modifications must occur within a transaction.

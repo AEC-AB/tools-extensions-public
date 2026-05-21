@@ -9,6 +9,18 @@ This guide covers Assistant-specific patterns for writing extensions that run in
 - **Variable binding:** Read/write workflow variables
 - **Typical use cases:** Data transformation, file processing, orchestration logic
 
+## What Is an Assistant Extension?
+
+Assistant extensions are the default choice for extensions that do not depend on Revit/AutoCAD/Tekla/Navisworks host APIs.
+
+Choose an Assistant extension when your logic is primarily:
+
+- External service/tool integration (for example StreamBIM, INFRA, Excel, REST APIs)
+- Data/file processing outside a host model API
+- Workflow orchestration and cross-system automation
+
+If your extension must access a host application's model/document/selection/UI APIs, use that host's platform extension type instead (Revit/AutoCAD/Tekla/Navisworks).
+
 ## Getting Started
 
 See [Quick Start](../QUICK_START.md) for a basic extension example. This guide covers Assistant-specific patterns.

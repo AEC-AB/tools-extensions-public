@@ -23,6 +23,16 @@ Welcome to the comprehensive guide for building Assistant extensions. This docum
 - [Tekla Extensions](./dotnet/PLATFORM_GUIDES/TEKLA.md)
 - [Navisworks Extensions](./dotnet/PLATFORM_GUIDES/NAVISWORKS.md)
 
+## Choose Extension Type First
+
+Use this quick rule before you pick a template:
+
+- **Assistant Extension**: Use when your extension does not need Revit/AutoCAD/Tekla/Navisworks host APIs.
+	Typical examples: integrations with external services/tools such as StreamBIM, INFRA, Excel, REST APIs, file processing, and orchestration logic.
+- **Host-specific Extension**: Use Revit/AutoCAD/Tekla/Navisworks extension templates when the extension must access that host application's model, document, selection, or UI APIs.
+
+For Revit and Tekla specifically, see the platform guides for when to choose **Automation Extension** vs **App Extension** templates.
+
 ---
 
 ## Documentation Structure

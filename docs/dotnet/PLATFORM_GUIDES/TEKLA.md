@@ -14,6 +14,29 @@ This guide covers Tekla Structures-specific patterns for writing extensions that
 
 See [Quick Start](../QUICK_START.md) for Args/Command basics. This guide covers Tekla-specific patterns.
 
+## Choose Tekla Template
+
+When creating a Tekla extension for Assistant, choose between:
+
+1. **Tekla Automation Extension for Assistant**
+2. **Tekla App Extension for Assistant**
+
+### Tekla Automation Extension for Assistant
+
+Use this template when the extension should run as a task inside an Assistant automation action.
+
+- Best for workflow/automation actions
+- Focused on deterministic task execution (input -> run -> result)
+- Typically no modeless application UI
+
+### Tekla App Extension for Assistant
+
+Use this template when the extension is an interactive Tekla app with a modeless UI.
+
+- Best for user-driven tools launched inside Tekla
+- Better fit for shortcut/button-driven usage than unattended automation
+- Supports app-style MVVM/WPF interaction patterns for responsive UI while model operations are executed
+
 ## Model API Access
 
 Tekla extensions access the model through the Tekla Model API.

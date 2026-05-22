@@ -17,12 +17,17 @@ on:
       - .github/workflows/publish-extension-docs-nuget.yml
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  NUGET_SOURCE: https://api.nuget.org/v3/index.json
+
 jobs:
   pack-and-publish:
     name: Pack and publish docs package
     runs-on: windows-latest
-    permissions:
-      contents: read
 
     steps:
       - name: Checkout
@@ -62,38 +67,30 @@ jobs:
           -p:PackageVersion=${{ env.PACKAGE_VERSION }}
           --output ${{ github.workspace }}/artifacts/nuget
 
+      - name: NuGet login (Trusted Publishing)
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Evaluate publish conditions
         id: publish_gate
         shell: pwsh
-        env:
-          NUGET_API_KEY: ${{ secrets.AEC_TOOLS_FEED_TOKEN }}
         run: |
-          $hasToken = -not [string]::IsNullOrWhiteSpace($env:NUGET_API_KEY)
           $isPr = "${{ github.event_name }}" -eq "pull_request"
           $isSameRepoPr = "${{ github.event.pull_request.head.repo.full_name }}" -eq "${{ github.repository }}"
-
-          $canPublish = $hasToken -and (-not $isPr -or $isSameRepoPr)
-
-          "HAS_TOKEN=$hasToken" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          $canPublish = -not $isPr -or $isSameRepoPr
           "CAN_PUBLISH=$canPublish" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
-      - name: Validate publish token for main pushes
-        if: ${{ github.event_name == 'push' && steps.publish_gate.outputs.HAS_TOKEN != 'True' }}
-        shell: pwsh
-        run: |
-          throw "AEC_TOOLS_FEED_TOKEN is not configured."
-
-      - name: Skip publish notice for PR without token access
+      - name: Skip publish notice for fork PR
         if: ${{ github.event_name == 'pull_request' && steps.publish_gate.outputs.CAN_PUBLISH != 'True' }}
         shell: pwsh
         run: |
-          Write-Warning "Skipping NuGet push for this PR because AEC_TOOLS_FEED_TOKEN is unavailable (or PR is from a fork)."
+          Write-Warning "Skipping NuGet push for fork PR."
 
       - name: Push package to NuGet.org
         if: ${{ steps.publish_gate.outputs.CAN_PUBLISH == 'True' }}
         shell: pwsh
-        env:
-          NUGET_API_KEY: ${{ secrets.AEC_TOOLS_FEED_TOKEN }}
         run: |
           $packageDirectory = Join-Path "${{ github.workspace }}" "artifacts/nuget"
           $packages = Get-ChildItem -Path $packageDirectory -Filter *.nupkg -File
@@ -105,8 +102,8 @@ jobs:
           foreach ($package in $packages) {
             Write-Host "Pushing $($package.FullName)"
             dotnet nuget push $package.FullName `
-              --api-key "$env:NUGET_API_KEY" `
-              --source "https://api.nuget.org/v3/index.json" `
+              --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" `
+              --source "$env:NUGET_SOURCE" `
               --skip-duplicate
 
             if ($LASTEXITCODE -ne 0) {

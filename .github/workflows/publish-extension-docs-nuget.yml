@@ -95,7 +95,21 @@ jobs:
         env:
           NUGET_API_KEY: ${{ secrets.AEC_TOOLS_FEED_TOKEN }}
         run: |
-          dotnet nuget push "${{ github.workspace }}/artifacts/nuget/*.nupkg" `
-            --api-key "$env:NUGET_API_KEY" `
-            --source "https://api.nuget.org/v3/index.json" `
-            --skip-duplicate
+          $packageDirectory = Join-Path "${{ github.workspace }}" "artifacts/nuget"
+          $packages = Get-ChildItem -Path $packageDirectory -Filter *.nupkg -File
+
+          if ($packages.Count -eq 0) {
+            throw "No .nupkg files found in $packageDirectory"
+          }
+
+          foreach ($package in $packages) {
+            Write-Host "Pushing $($package.FullName)"
+            dotnet nuget push $package.FullName `
+              --api-key "$env:NUGET_API_KEY" `
+              --source "https://api.nuget.org/v3/index.json" `
+              --skip-duplicate
+
+            if ($LASTEXITCODE -ne 0) {
+              throw "dotnet nuget push failed for $($package.FullName)"
+            }
+          }

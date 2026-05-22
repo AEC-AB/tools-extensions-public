@@ -62,20 +62,35 @@ jobs:
           -p:PackageVersion=${{ env.PACKAGE_VERSION }}
           --output ${{ github.workspace }}/artifacts/nuget
 
+      - name: Evaluate publish conditions
+        id: publish_gate
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ secrets.AEC_TOOLS_FEED_TOKEN }}
+        run: |
+          $hasToken = -not [string]::IsNullOrWhiteSpace($env:NUGET_API_KEY)
+          $isPr = "${{ github.event_name }}" -eq "pull_request"
+          $isSameRepoPr = "${{ github.event.pull_request.head.repo.full_name }}" -eq "${{ github.repository }}"
+
+          $canPublish = $hasToken -and (-not $isPr -or $isSameRepoPr)
+
+          "HAS_TOKEN=$hasToken" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "CAN_PUBLISH=$canPublish" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
       - name: Validate publish token for main pushes
-        if: ${{ github.event_name == 'push' && secrets.AEC_TOOLS_FEED_TOKEN == '' }}
+        if: ${{ github.event_name == 'push' && steps.publish_gate.outputs.HAS_TOKEN != 'True' }}
         shell: pwsh
         run: |
           throw "AEC_TOOLS_FEED_TOKEN is not configured."
 
       - name: Skip publish notice for PR without token access
-        if: ${{ github.event_name == 'pull_request' && (secrets.AEC_TOOLS_FEED_TOKEN == '' || github.event.pull_request.head.repo.full_name != github.repository) }}
+        if: ${{ github.event_name == 'pull_request' && steps.publish_gate.outputs.CAN_PUBLISH != 'True' }}
         shell: pwsh
         run: |
           Write-Warning "Skipping NuGet push for this PR because AEC_TOOLS_FEED_TOKEN is unavailable (or PR is from a fork)."
 
       - name: Push package to NuGet.org
-        if: ${{ secrets.AEC_TOOLS_FEED_TOKEN != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        if: ${{ steps.publish_gate.outputs.CAN_PUBLISH == 'True' }}
         shell: pwsh
         env:
           NUGET_API_KEY: ${{ secrets.AEC_TOOLS_FEED_TOKEN }}

@@ -71,7 +71,7 @@ jobs:
         id: login
         uses: NuGet/login@v1
         with:
-          user: ${{ secrets.NUGET_USER }}
+          user: ${{ secrets.NUGET_USER || vars.NUGET_USER || github.repository_owner }}
 
       - name: Evaluate publish conditions
         id: publish_gate

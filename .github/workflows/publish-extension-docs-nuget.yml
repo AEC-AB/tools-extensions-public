@@ -62,15 +62,24 @@ jobs:
           -p:PackageVersion=${{ env.PACKAGE_VERSION }}
           --output ${{ github.workspace }}/artifacts/nuget
 
+      - name: Validate publish token for main pushes
+        if: ${{ github.event_name == 'push' && secrets.AEC_TOOLS_FEED_TOKEN == '' }}
+        shell: pwsh
+        run: |
+          throw "AEC_TOOLS_FEED_TOKEN is not configured."
+
+      - name: Skip publish notice for PR without token access
+        if: ${{ github.event_name == 'pull_request' && (secrets.AEC_TOOLS_FEED_TOKEN == '' || github.event.pull_request.head.repo.full_name != github.repository) }}
+        shell: pwsh
+        run: |
+          Write-Warning "Skipping NuGet push for this PR because AEC_TOOLS_FEED_TOKEN is unavailable (or PR is from a fork)."
+
       - name: Push package to NuGet.org
+        if: ${{ secrets.AEC_TOOLS_FEED_TOKEN != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         shell: pwsh
         env:
           NUGET_API_KEY: ${{ secrets.AEC_TOOLS_FEED_TOKEN }}
         run: |
-          if ([string]::IsNullOrWhiteSpace($env:NUGET_API_KEY)) {
-            throw "AEC_TOOLS_FEED_TOKEN is not configured."
-          }
-
           dotnet nuget push "${{ github.workspace }}/artifacts/nuget/*.nupkg" `
             --api-key "$env:NUGET_API_KEY" `
             --source "https://api.nuget.org/v3/index.json" `

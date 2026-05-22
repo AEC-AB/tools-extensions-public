@@ -25,9 +25,9 @@ env:
   NUGET_SOURCE: https://api.nuget.org/v3/index.json
 
 jobs:
-  pack-and-publish:
-    name: Pack and publish docs package
-    runs-on: windows-latest
+  build_packages:
+    name: Build and Pack
+    runs-on: windows-2022
 
     steps:
       - name: Checkout
@@ -65,35 +65,44 @@ jobs:
           --configuration Release
           --no-restore
           -p:PackageVersion=${{ env.PACKAGE_VERSION }}
-          --output ${{ github.workspace }}/artifacts/nuget
+          --output artifacts/packages
 
-      - name: NuGet login (Trusted Publishing)
-        id: login
-        uses: NuGet/login@v1
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
         with:
-          user: ${{ secrets.NUGET_USER || vars.NUGET_USER || github.repository_owner }}
+          name: packages
+          path: artifacts/packages/*.nupkg
+          if-no-files-found: error
 
-      - name: Evaluate publish conditions
-        id: publish_gate
-        shell: pwsh
-        run: |
-          $isPr = "${{ github.event_name }}" -eq "pull_request"
-          $isSameRepoPr = "${{ github.event.pull_request.head.repo.full_name }}" -eq "${{ github.repository }}"
-          $canPublish = -not $isPr -or $isSameRepoPr
-          "CAN_PUBLISH=$canPublish" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+  publish_packages:
+    name: Publish Packages
+    needs: build_packages
+    runs-on: windows-2022
 
-      - name: Skip publish notice for fork PR
-        if: ${{ github.event_name == 'pull_request' && steps.publish_gate.outputs.CAN_PUBLISH != 'True' }}
-        shell: pwsh
-        run: |
-          Write-Warning "Skipping NuGet push for fork PR."
+    steps:
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: NuGet login
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: 'packages'
+          path: artifacts/packages
+          merge-multiple: true
 
       - name: Push package to NuGet.org
-        if: ${{ steps.publish_gate.outputs.CAN_PUBLISH == 'True' }}
         shell: pwsh
         run: |
-          $packageDirectory = Join-Path "${{ github.workspace }}" "artifacts/nuget"
-          $packages = Get-ChildItem -Path $packageDirectory -Filter *.nupkg -File
+          $packageDirectory = Join-Path "${{ github.workspace }}" "artifacts/packages"
+          $packages = Get-ChildItem -Path $packageDirectory -Recurse -Filter *.nupkg -File
 
           if ($packages.Count -eq 0) {
             throw "No .nupkg files found in $packageDirectory"

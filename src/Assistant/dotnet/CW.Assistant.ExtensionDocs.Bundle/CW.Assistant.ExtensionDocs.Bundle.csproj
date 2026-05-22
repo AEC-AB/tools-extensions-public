@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoWarn>NU5128</NoWarn>
+
+    <PackageId>CW.Assistant.ExtensionDocs.Bundle</PackageId>
+    <Title>CW Assistant Extension Docs Bundle</Title>
+    <Description>Versioned extension implementation docs bundle for Assistant MCP consumers.</Description>
+    <Authors>CW</Authors>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/calmforest/tools-extensions-public</RepositoryUrl>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../../../../'))</RepoRoot>
+    <BundleOutputPath>$(RepoRoot)artifacts/extension-docs.bundle.json</BundleOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="buildTransitive\CW.Assistant.ExtensionDocs.Bundle.targets" Pack="true" PackagePath="buildTransitive\CW.Assistant.ExtensionDocs.Bundle.targets" />
+    <None Include="$(BundleOutputPath)" Pack="true" PackagePath="contentFiles/any/any/Resources/ExtensionDocs/" PackageCopyToOutput="true" Visible="false" Link="Resources/ExtensionDocs/extension-docs.bundle.json" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,8 @@
+<Project>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)..\contentFiles\any\any\Resources\ExtensionDocs\extension-docs.bundle.json"
+             Link="Resources\ExtensionDocs\extension-docs.bundle.json"
+             CopyToOutputDirectory="PreserveNewest"
+             Visible="false" />
+  </ItemGroup>
+</Project>

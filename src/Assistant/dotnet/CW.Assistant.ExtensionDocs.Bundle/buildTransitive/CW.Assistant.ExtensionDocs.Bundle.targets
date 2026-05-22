@@ -1,7 +1,7 @@
 <Project>
   <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)..\contentFiles\any\any\Resources\ExtensionDocs\extension-docs.bundle.json"
-             Link="Resources\ExtensionDocs\extension-docs.bundle.json"
+    <Content Include="$(MSBuildThisFileDirectory)..\contentFiles\any\any\Resources\ExtensionDocs\**\*.md"
+             Link="Resources\ExtensionDocs\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest"
              Visible="false" />
   </ItemGroup>

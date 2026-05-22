@@ -18,12 +18,20 @@
 
   <PropertyGroup>
     <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../../../../'))</RepoRoot>
-    <BundleOutputPath>$(RepoRoot)artifacts/extension-docs.bundle.json</BundleOutputPath>
+    <DocsSourceRoot>$(RepoRoot)docs/dotnet</DocsSourceRoot>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
     <None Include="buildTransitive\CW.Assistant.ExtensionDocs.Bundle.targets" Pack="true" PackagePath="buildTransitive\CW.Assistant.ExtensionDocs.Bundle.targets" />
-    <None Include="$(BundleOutputPath)" Pack="true" PackagePath="contentFiles/any/any/Resources/ExtensionDocs/" PackageCopyToOutput="true" Visible="false" Link="Resources/ExtensionDocs/extension-docs.bundle.json" />
+    <None Include="$(DocsSourceRoot)\QUICK_START.md" Pack="true" PackagePath="contentFiles/any/any/Resources/ExtensionDocs/" Link="Resources/ExtensionDocs/QUICK_START.md" />
+    <None Include="$(DocsSourceRoot)\ARGS_DEVELOPER_GUIDE.md" Pack="true" PackagePath="contentFiles/any/any/Resources/ExtensionDocs/" Link="Resources/ExtensionDocs/ARGS_DEVELOPER_GUIDE.md" />
+    <None Include="$(DocsSourceRoot)\COOKBOOK.md" Pack="true" PackagePath="contentFiles/any/any/Resources/ExtensionDocs/" Link="Resources/ExtensionDocs/COOKBOOK.md" />
+    <None Include="$(DocsSourceRoot)\REFERENCE.md" Pack="true" PackagePath="contentFiles/any/any/Resources/ExtensionDocs/" Link="Resources/ExtensionDocs/REFERENCE.md" />
+    <None Include="$(DocsSourceRoot)\PLATFORM_GUIDES\ASSISTANT.md" Pack="true" PackagePath="contentFiles/any/any/Resources/ExtensionDocs/PLATFORM_GUIDES/" Link="Resources/ExtensionDocs/PLATFORM_GUIDES/ASSISTANT.md" />
+    <None Include="$(DocsSourceRoot)\PLATFORM_GUIDES\REVIT.md" Pack="true" PackagePath="contentFiles/any/any/Resources/ExtensionDocs/PLATFORM_GUIDES/" Link="Resources/ExtensionDocs/PLATFORM_GUIDES/REVIT.md" />
+    <None Include="$(DocsSourceRoot)\PLATFORM_GUIDES\AUTOCAD.md" Pack="true" PackagePath="contentFiles/any/any/Resources/ExtensionDocs/PLATFORM_GUIDES/" Link="Resources/ExtensionDocs/PLATFORM_GUIDES/AUTOCAD.md" />
+    <None Include="$(DocsSourceRoot)\PLATFORM_GUIDES\TEKLA.md" Pack="true" PackagePath="contentFiles/any/any/Resources/ExtensionDocs/PLATFORM_GUIDES/" Link="Resources/ExtensionDocs/PLATFORM_GUIDES/TEKLA.md" />
+    <None Include="$(DocsSourceRoot)\PLATFORM_GUIDES\NAVISWORKS.md" Pack="true" PackagePath="contentFiles/any/any/Resources/ExtensionDocs/PLATFORM_GUIDES/" Link="Resources/ExtensionDocs/PLATFORM_GUIDES/NAVISWORKS.md" />
   </ItemGroup>
 </Project>

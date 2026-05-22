@@ -1,16 +1,17 @@
 # CW.Assistant.ExtensionDocs.Bundle
 
-This package ships a generated `extension-docs.bundle.json` for Assistant MCP consumers.
+This package ships the raw extension implementation Markdown docs for Assistant MCP consumers.
 
 ## What it provides
 
-- `contentFiles/any/any/Resources/ExtensionDocs/extension-docs.bundle.json`
-- A transitive MSBuild target that copies the bundle to consumer output under:
-  - `Resources/ExtensionDocs/extension-docs.bundle.json`
+- `contentFiles/any/any/Resources/ExtensionDocs/*.md`
+- `contentFiles/any/any/Resources/ExtensionDocs/PLATFORM_GUIDES/*.md`
+- A transitive MSBuild target that copies the docs to consumer output under:
+  - `Resources/ExtensionDocs/`
 
 ## Source of truth
 
-The bundle is generated from markdown docs in:
+The package source of truth is the markdown docs in:
 
 - `docs/dotnet/QUICK_START.md`
 - `docs/dotnet/ARGS_DEVELOPER_GUIDE.md`
@@ -18,19 +19,7 @@ The bundle is generated from markdown docs in:
 - `docs/dotnet/REFERENCE.md`
 - `docs/dotnet/PLATFORM_GUIDES/*.md`
 
-Generation script:
-
-- `build/Generate-ExtensionDocsBundle.ps1`
-
-Recommended packaging flow:
-
-1. Generate the bundle.
-2. Pack this project.
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File build/Generate-ExtensionDocsBundle.ps1
-dotnet pack src/Assistant/dotnet/CW.Assistant.ExtensionDocs.Bundle/CW.Assistant.ExtensionDocs.Bundle.csproj -c Release
-```
+The package is a thin wrapper around the repo docs and does not require a parsed JSON bundle.
 
 ## Consumption (CLI project)
 
@@ -42,6 +31,4 @@ Add a package reference in the consumer project:
 </ItemGroup>
 ```
 
-Then ensure your loader reads:
-
-- `Resources/ExtensionDocs/extension-docs.bundle.json` from output/base directory.
+Then ensure your loader reads the copied markdown files from `Resources/ExtensionDocs/`.

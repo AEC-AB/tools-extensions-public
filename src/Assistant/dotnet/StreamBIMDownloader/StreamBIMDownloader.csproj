@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <ExtensionId>StreamBIMDownloader</ExtensionId>
-    <Version>0.1.0</Version>
+    <Version>1.0.1</Version>
     <Title>StreamBIM File Downloader</Title>
     <Description>Download files from StreamBIM to a local folder.</Description>
     <PackageTags>StreamBIM;Download;Assistant;Extension;AssistantExtension</PackageTags>

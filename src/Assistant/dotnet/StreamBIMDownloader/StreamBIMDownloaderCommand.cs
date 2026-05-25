@@ -136,7 +136,7 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
     private static async Task<StreamBimDownloadResult> DownloadFilesAsync(StreamBIMDownloaderArgs args, AsyncFtpClient client, CancellationToken cancellationToken)
     {
         var result = new StreamBimDownloadResult();
-        var rootFolder = NormalizeRootFolder(args.RootFolder);
+        var projectPath = NormalizeProjectPath(args.Project);
 
         foreach (var file in args.Files)
         {
@@ -146,7 +146,7 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
             {
                 try
                 {
-                    await DownloadConfiguredFile(args, client, result, rootFolder, file, cancellationToken);
+                    await DownloadConfiguredFile(args, client, result, projectPath, file, cancellationToken);
                     break;
                 }
                 catch when (attempt < 3)
@@ -164,17 +164,18 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
         StreamBIMDownloaderArgs args,
         AsyncFtpClient client,
         StreamBimDownloadResult result,
-        string rootFolder,
+        string projectPath,
         string configuredFile,
         CancellationToken cancellationToken)
     {
-        var fullFilePath = rootFolder;
-        if (!string.IsNullOrWhiteSpace(configuredFile))
+        var fullFilePath = projectPath;
+        var normalizedConfiguredFile = NormalizeConfiguredFile(projectPath, configuredFile);
+        if (!string.IsNullOrWhiteSpace(normalizedConfiguredFile))
         {
-            fullFilePath += "/" + configuredFile.TrimStart('/');
+            fullFilePath += "/" + normalizedConfiguredFile;
         }
 
-        var fileName = Path.GetFileName(configuredFile);
+        var fileName = Path.GetFileName(normalizedConfiguredFile);
         if (ContainsWildcard(fileName))
         {
             await DownloadFilesByWildcardAsync(args, client, result, fullFilePath, cancellationToken);
@@ -352,14 +353,42 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
         return !string.IsNullOrEmpty(fileName) && (fileName.Contains('*') || fileName.Contains('?'));
     }
 
-    private static string NormalizeRootFolder(string? rootFolder)
+    private static string NormalizeProjectPath(string? project)
     {
-        if (string.IsNullOrWhiteSpace(rootFolder))
+        if (string.IsNullOrWhiteSpace(project))
         {
             return "/";
         }
 
-        return rootFolder.StartsWith('/') ? rootFolder : "/" + rootFolder;
+        var normalized = project.Trim();
+        if (!normalized.StartsWith('/'))
+        {
+            normalized = "/" + normalized;
+        }
+
+        return normalized.TrimEnd('/');
+    }
+
+    private static string NormalizeConfiguredFile(string projectPath, string? configuredFile)
+    {
+        if (string.IsNullOrWhiteSpace(configuredFile))
+        {
+            return string.Empty;
+        }
+
+        var normalized = configuredFile.Trim().TrimStart('/');
+        var trimmedProjectPath = projectPath.Trim('/');
+        if (!string.IsNullOrEmpty(trimmedProjectPath) &&
+            normalized.StartsWith(trimmedProjectPath + "/", StringComparison.OrdinalIgnoreCase))
+        {
+            normalized = normalized[(trimmedProjectPath.Length + 1)..];
+        }
+        else if (string.Equals(normalized, trimmedProjectPath, StringComparison.OrdinalIgnoreCase))
+        {
+            normalized = string.Empty;
+        }
+
+        return normalized;
     }
 }
 

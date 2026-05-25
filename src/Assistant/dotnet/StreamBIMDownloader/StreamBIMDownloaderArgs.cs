@@ -16,7 +16,8 @@ public class StreamBIMDownloaderArgs
 
     [TextField(
         Label = "Project",
-        ToolTip = "Select the StreamBIM project to browse files from.",
+        ToolTip = "Select the StreamBIM project to browse files from. After changing this field, click Reload to refresh the file suggestions.",
+        HelperText = "After selecting a project, click Reload before opening Files to download.",
         CollectorType = typeof(StreamBIMProjectRootFolderAutoFillCollector),
         CollectorSortOrder = SortOrder.SortByAscending)]
     [Required(ErrorMessage = "Project is required.")]
@@ -28,9 +29,10 @@ public class StreamBIMDownloaderArgs
     [Required(ErrorMessage = "Download folder is required.")]
     public string DownloadFolder { get; set; } = string.Empty;
 
-    [OptionsField(
+    [ListField(
         Label = "Files to download",
-        ToolTip = "Paths inside the selected project. Wildcards with * and ? are supported.",
+        ToolTip = "Enter one project-relative file or folder path per row. Wildcards with * and ? are supported. Type part of a path, then click Reload to refresh suggestions for that location.",
+        HelperText = "This list updates only when you click Reload. If the first suggestion tells you to select a folder ending with /, choose that folder and click Reload again to browse deeper.",
         CollectorType = typeof(StreamBIMFilesAndFolderAutoFillCollector),
         CollectorSortOrder = SortOrder.SortByAscending)]
     public List<string> Files { get; set; } = [];

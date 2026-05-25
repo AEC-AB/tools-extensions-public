@@ -168,12 +168,10 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
         string configuredFile,
         CancellationToken cancellationToken)
     {
-        var fullFilePath = projectPath;
         var normalizedConfiguredFile = NormalizeConfiguredFile(projectPath, configuredFile);
-        if (!string.IsNullOrWhiteSpace(normalizedConfiguredFile))
-        {
-            fullFilePath += "/" + normalizedConfiguredFile;
-        }
+        var fullFilePath = CombineFtpPath(projectPath, normalizedConfiguredFile);
+
+        var displayPath = fullFilePath.TrimStart('/');
 
         var fileName = Path.GetFileName(normalizedConfiguredFile);
         if (ContainsWildcard(fileName))
@@ -185,7 +183,7 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
         var item = await client.GetObjectInfo(fullFilePath);
         if (item is null)
         {
-            result.FailedFiles.Add(new FailedFile(configuredFile, "File not found."));
+            result.FailedFiles.Add(new FailedFile(displayPath, "File not found."));
             return;
         }
 
@@ -376,7 +374,7 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
             return string.Empty;
         }
 
-        var normalized = configuredFile.Trim().TrimStart('/');
+        var normalized = configuredFile.Trim().TrimStart('/').TrimEnd('/');
         var trimmedProjectPath = projectPath.Trim('/');
         if (!string.IsNullOrEmpty(trimmedProjectPath) &&
             normalized.StartsWith(trimmedProjectPath + "/", StringComparison.OrdinalIgnoreCase))
@@ -389,6 +387,22 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
         }
 
         return normalized;
+    }
+
+    private static string CombineFtpPath(string basePath, string? relativePath)
+    {
+        var normalizedBasePath = string.IsNullOrWhiteSpace(basePath)
+            ? "/"
+            : "/" + basePath.Trim('/');
+
+        if (string.IsNullOrWhiteSpace(relativePath))
+        {
+            return normalizedBasePath;
+        }
+
+        return normalizedBasePath == "/"
+            ? "/" + relativePath.Trim('/')
+            : normalizedBasePath + "/" + relativePath.Trim('/');
     }
 }
 

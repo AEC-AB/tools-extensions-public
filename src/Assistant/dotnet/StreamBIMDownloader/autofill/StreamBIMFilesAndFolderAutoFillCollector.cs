@@ -146,8 +146,7 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
             .Where(item => item.Type is FtpObjectType.File or FtpObjectType.Directory)
             .Where(item => !string.IsNullOrWhiteSpace(item.Name))
             .Where(item => item.Type != FtpObjectType.Directory
-                || (!item.Name.EndsWith("-revs", StringComparison.OrdinalIgnoreCase)
-                 && !item.Name.EndsWith("_backup", StringComparison.OrdinalIgnoreCase)))
+                || !StreamBimPathHelper.IsIgnoredDirectoryName(item.Name))
             .Select(item => new FolderItem(item.Name, item.Type == FtpObjectType.Directory))
             .ToArray();
 

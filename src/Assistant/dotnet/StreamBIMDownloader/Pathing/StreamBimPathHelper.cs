@@ -7,6 +7,31 @@ namespace StreamBIMDownloader;
 
 internal static class StreamBimPathHelper
 {
+    internal static bool ContainsIgnoredFolder(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return false;
+        }
+
+        var segments = path
+            .Replace('\\', '/')
+            .Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        return segments.Any(IsIgnoredDirectoryName);
+    }
+
+    internal static bool IsIgnoredDirectoryName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return false;
+        }
+
+        return name.EndsWith("-revs", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(name, "_backup", StringComparison.OrdinalIgnoreCase);
+    }
+
     internal static bool AreEquivalentTimestamps(DateTime remoteTimestamp, DateTime localTimestamp)
     {
         if (remoteTimestamp == default || localTimestamp == default)

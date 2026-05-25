@@ -30,7 +30,7 @@ internal static class StreamBimFtpClientFactory
 
             try
             {
-                await client.Connect(profile);
+                await client.Connect(profile, cancellationToken);
                 return client;
             }
             catch (Exception exception) when (attempt < 2 && StreamBimExceptionHelper.IsTransientFtpFailure(exception))

@@ -92,12 +92,17 @@ internal static class StreamBimDownloadService
         var fullFilePath = StreamBimPathHelper.CombineFtpPath(projectPath, normalizedConfiguredFile);
         var displayPath = fullFilePath.TrimStart('/');
 
+        if (StreamBimPathHelper.ContainsIgnoredFolder(fullFilePath))
+        {
+            return StreamBimItemDownloadResult.FromSingle(StreamBimSingleFileDownloadResult.Skipped(displayPath));
+        }
+
         if (StreamBimPathHelper.ContainsWildcard(Path.GetFileName(normalizedConfiguredFile)))
         {
             return await DownloadFilesByWildcardAsync(args, client, projectPath, fullFilePath, cancellationToken);
         }
 
-        var item = await client.GetObjectInfo(fullFilePath);
+        var item = await client.GetObjectInfo(fullFilePath, token: cancellationToken);
         if (item is null)
         {
             return StreamBimItemDownloadResult.Failed(displayPath, "File not found.");

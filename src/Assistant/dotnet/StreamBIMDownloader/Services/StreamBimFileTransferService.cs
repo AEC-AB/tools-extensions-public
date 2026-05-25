@@ -21,6 +21,11 @@ internal static class StreamBimFileTransferService
     {
         try
         {
+            if (StreamBimPathHelper.ContainsIgnoredFolder(file.FullName))
+            {
+                return StreamBimSingleFileDownloadResult.Skipped(file.FullName);
+            }
+
             var localPath = StreamBimPathHelper.CreateLocalPath(args.DownloadFolder, projectPath, file.FullName);
 
             if (args.SkipUnchangedFiles &&
@@ -89,7 +94,7 @@ internal static class StreamBimFileTransferService
                 tempPath = Path.GetTempFileName();
                 File.Delete(tempPath);
 
-                var downloadStatus = await client.DownloadFile(tempPath, item.FullName);
+                var downloadStatus = await client.DownloadFile(tempPath, item.FullName, token: cancellationToken);
                 if (downloadStatus == FtpStatus.Failed)
                 {
                     continue;

@@ -35,8 +35,7 @@ internal class StreamBIMProjectRootFolderAutoFillCollector : IAsyncAutoFillColle
 
                 var name = item.Name;
                 if (string.IsNullOrWhiteSpace(name)
-                    || name.EndsWith("-revs", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(name, "_backup", StringComparison.OrdinalIgnoreCase))
+                    || StreamBimPathHelper.IsIgnoredDirectoryName(name))
                 {
                     continue;
                 }

@@ -18,13 +18,13 @@ internal class StreamBIMProjectRootFolderAutoFillCollector : IAsyncAutoFillColle
 
         try
         {
-            var credentials = StreamBIMDownloaderCommand.TryGetUserCredentials(args.ApplicationName);
+            var credentials = StreamBimCredentialProvider.TryGetUserCredentials(args.ApplicationName);
             if (credentials is null)
             {
                 return result;
             }
 
-            using var client = await StreamBIMDownloaderCommand.CreateAndConnectClientAsync(credentials, cancellationToken);
+            using var client = await StreamBimFtpClientFactory.CreateAndConnectClientAsync(credentials, cancellationToken);
             var listing = await client.GetListing("/", cancellationToken);
             foreach (var item in listing)
             {
@@ -48,26 +48,14 @@ internal class StreamBIMProjectRootFolderAutoFillCollector : IAsyncAutoFillColle
         {
             throw;
         }
-        catch (FtpException)
-        {
-            return result;
-        }
-        catch (System.IO.IOException)
-        {
-            return result;
-        }
-        catch (System.Net.Sockets.SocketException)
-        {
-            return result;
-        }
-        catch (TimeoutException)
-        {
-            return result;
-        }
         catch (System.Security.Authentication.AuthenticationException e)
         {
             result["auth_message"] = "Authentication failed. Please check your credentials.";
             result["auth_error_message"] = e.Message;
+            return result;
+        }
+        catch (Exception exception) when (StreamBimExceptionHelper.IsTransientFtpFailure(exception))
+        {
             return result;
         }
 

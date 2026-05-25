@@ -27,18 +27,18 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
             return CreateSelectProjectResult();
         }
 
-        var projectPath = NormalizeProjectPath(args.Project);
+        var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.Project);
         var lookupContexts = CreateLookupContexts(args.Files);
 
         try
         {
-            var credentials = StreamBIMDownloaderCommand.TryGetUserCredentials(args.ApplicationName);
+            var credentials = StreamBimCredentialProvider.TryGetUserCredentials(args.ApplicationName);
             if (credentials is null)
             {
                 return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
 
-            using var client = await StreamBIMDownloaderCommand.CreateAndConnectClientAsync(credentials, cancellationToken);
+            using var client = await StreamBimFtpClientFactory.CreateAndConnectClientAsync(credentials, cancellationToken);
             var folderListings = await GetFolderListingsAsync(client, args, projectPath, lookupContexts, cancellationToken);
             return BuildResult(folderListings);
         }
@@ -46,23 +46,7 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
         {
             throw;
         }
-        catch (FtpException)
-        {
-            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        }
-        catch (System.IO.IOException)
-        {
-            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        }
-        catch (System.Net.Sockets.SocketException)
-        {
-            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        }
-        catch (TimeoutException)
-        {
-            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        }
-        catch (System.Security.Authentication.AuthenticationException)
+        catch (Exception exception) when (StreamBimExceptionHelper.IsTransientFtpFailure(exception))
         {
             return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
@@ -102,23 +86,8 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
                 var items = await GetSubtreeItemsAsync(client, args, projectPath, currentContext.RelativeFolderPath, cancellationToken);
                 return new FolderListingResult(currentContext.RelativeFolderPath, currentContext.NamePrefix, items);
             }
-            catch (FtpException) when (TryFallbackToParentContext(currentContext, out var fallbackContext))
-            {
-                currentContext = fallbackContext;
-            }
-            catch (System.IO.IOException) when (TryFallbackToParentContext(currentContext, out var fallbackContext))
-            {
-                currentContext = fallbackContext;
-            }
-            catch (System.Net.Sockets.SocketException) when (TryFallbackToParentContext(currentContext, out var fallbackContext))
-            {
-                currentContext = fallbackContext;
-            }
-            catch (TimeoutException) when (TryFallbackToParentContext(currentContext, out var fallbackContext))
-            {
-                currentContext = fallbackContext;
-            }
-            catch (System.Security.Authentication.AuthenticationException) when (TryFallbackToParentContext(currentContext, out var fallbackContext))
+            catch (Exception exception) when (StreamBimExceptionHelper.IsTransientFtpFailure(exception) &&
+                TryFallbackToParentContext(currentContext, out var fallbackContext))
             {
                 currentContext = fallbackContext;
             }
@@ -225,16 +194,7 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
 
     private static string GetLeafName(string path)
     {
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            return string.Empty;
-        }
-
-        var normalized = path.TrimEnd('/');
-        var lastSeparatorIndex = normalized.LastIndexOf('/');
-        return lastSeparatorIndex < 0
-            ? normalized
-            : normalized[(lastSeparatorIndex + 1)..];
+        return StreamBimPathHelper.GetLeafName(path);
     }
 
     private static IReadOnlyList<LookupContext> CreateLookupContexts(IReadOnlyList<string> configuredFiles)
@@ -359,40 +319,17 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
 
     private static string CombinePath(string projectPath, string relativeFolderPath)
     {
-        if (string.IsNullOrWhiteSpace(relativeFolderPath))
-        {
-            return projectPath;
-        }
-
-        return projectPath == "/"
-            ? "/" + relativeFolderPath.Trim('/')
-            : projectPath + "/" + relativeFolderPath.Trim('/');
+        return StreamBimPathHelper.CombineFtpPath(projectPath, relativeFolderPath);
     }
 
     private static string CombineRelativePath(string relativeFolderPath, string name)
     {
-        if (string.IsNullOrWhiteSpace(relativeFolderPath))
-        {
-            return name;
-        }
-
-        return relativeFolderPath.Trim('/') + "/" + name;
+        return StreamBimPathHelper.CombineRelativePath(relativeFolderPath, name);
     }
 
     private static string NormalizeProjectPath(string? project)
     {
-        if (string.IsNullOrWhiteSpace(project) || project == "/")
-        {
-            return "/";
-        }
-
-        var normalized = project.Trim();
-        if (!normalized.StartsWith('/'))
-        {
-            normalized = "/" + normalized;
-        }
-
-        return normalized.TrimEnd('/');
+        return StreamBimPathHelper.NormalizeProjectPath(project);
     }
 
     private static string CreateCacheKey(StreamBIMDownloaderArgs args, string projectPath, string relativeFolderPath)

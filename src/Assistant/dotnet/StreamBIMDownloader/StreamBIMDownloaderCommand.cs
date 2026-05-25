@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
+using System.Runtime.Versioning;
+using System.Security.Authentication;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -10,10 +14,12 @@ using System.Threading.Tasks;
 using CW.Assistant.Extensions.Assistant;
 using CW.Assistant.Extensions.Contracts;
 using FluentFTP;
+using FluentFTP.Exceptions;
 using Meziantou.Framework.Win32;
 
 namespace StreamBIMDownloader;
 
+[SupportedOSPlatform("windows")]
 public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloaderArgs>
 {
     public async Task<IExtensionResult> RunAsync(IAssistantExtensionContext context, StreamBIMDownloaderArgs args, CancellationToken cancellationToken)
@@ -103,18 +109,18 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
     internal static async Task<AsyncFtpClient> CreateAndConnectClientAsync(UserCredentials credentials, CancellationToken cancellationToken)
     {
         var client = new AsyncFtpClient();
-        client.Config.ValidateAnyCertificate = true;
         client.Config.RetryAttempts = 5;
 
         var profile = new FtpProfile
         {
-            Host = "ftp.o.rendra.io",
+            Host = "ftp.streambim.com",
             Encoding = Encoding.UTF8,
             Encryption = FtpEncryptionMode.Explicit,
             Protocols = System.Security.Authentication.SslProtocols.Tls12,
             Credentials = new NetworkCredential(credentials.UserName, credentials.Password),
         };
 
+        Exception? lastException = null;
         for (var attempt = 0; attempt < 3; attempt++)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -124,13 +130,34 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
                 await client.Connect(profile);
                 return client;
             }
-            catch when (attempt < 2)
+            catch (FtpException exception) when (attempt < 2)
             {
+                lastException = exception;
+                await Task.Delay(1000, cancellationToken);
+            }
+            catch (IOException exception) when (attempt < 2)
+            {
+                lastException = exception;
+                await Task.Delay(1000, cancellationToken);
+            }
+            catch (SocketException exception) when (attempt < 2)
+            {
+                lastException = exception;
+                await Task.Delay(1000, cancellationToken);
+            }
+            catch (TimeoutException exception) when (attempt < 2)
+            {
+                lastException = exception;
+                await Task.Delay(1000, cancellationToken);
+            }
+            catch (AuthenticationException exception) when (attempt < 2)
+            {
+                lastException = exception;
                 await Task.Delay(1000, cancellationToken);
             }
         }
 
-        throw new InvalidOperationException("Unable to connect to StreamBIM.");
+        throw new InvalidOperationException("Unable to connect to StreamBIM.", lastException);
     }
 
     private static async Task<StreamBimDownloadResult> DownloadFilesAsync(StreamBIMDownloaderArgs args, AsyncFtpClient client, CancellationToken cancellationToken)
@@ -149,10 +176,64 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
                     await DownloadConfiguredFile(args, client, result, projectPath, file, cancellationToken);
                     break;
                 }
-                catch when (attempt < 3)
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (ArgumentException exception)
+                {
+                    result.FailedFiles.Add(new FailedFile(CreateDisplayPath(projectPath, file), exception.Message));
+                    break;
+                }
+                catch (FtpException) when (attempt < 3)
                 {
                     var delay = (int)Math.Pow(attempt + 1, 2) * 1000;
                     await Task.Delay(delay, cancellationToken);
+                }
+                catch (IOException) when (attempt < 3)
+                {
+                    var delay = (int)Math.Pow(attempt + 1, 2) * 1000;
+                    await Task.Delay(delay, cancellationToken);
+                }
+                catch (SocketException) when (attempt < 3)
+                {
+                    var delay = (int)Math.Pow(attempt + 1, 2) * 1000;
+                    await Task.Delay(delay, cancellationToken);
+                }
+                catch (TimeoutException) when (attempt < 3)
+                {
+                    var delay = (int)Math.Pow(attempt + 1, 2) * 1000;
+                    await Task.Delay(delay, cancellationToken);
+                }
+                catch (AuthenticationException) when (attempt < 3)
+                {
+                    var delay = (int)Math.Pow(attempt + 1, 2) * 1000;
+                    await Task.Delay(delay, cancellationToken);
+                }
+                catch (FtpException exception)
+                {
+                    result.FailedFiles.Add(new FailedFile(CreateDisplayPath(projectPath, file), GetInnermostException(exception).Message));
+                    break;
+                }
+                catch (IOException exception)
+                {
+                    result.FailedFiles.Add(new FailedFile(CreateDisplayPath(projectPath, file), GetInnermostException(exception).Message));
+                    break;
+                }
+                catch (SocketException exception)
+                {
+                    result.FailedFiles.Add(new FailedFile(CreateDisplayPath(projectPath, file), GetInnermostException(exception).Message));
+                    break;
+                }
+                catch (TimeoutException exception)
+                {
+                    result.FailedFiles.Add(new FailedFile(CreateDisplayPath(projectPath, file), GetInnermostException(exception).Message));
+                    break;
+                }
+                catch (AuthenticationException exception)
+                {
+                    result.FailedFiles.Add(new FailedFile(CreateDisplayPath(projectPath, file), GetInnermostException(exception).Message));
+                    break;
                 }
             }
         }
@@ -176,7 +257,7 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
         var fileName = Path.GetFileName(normalizedConfiguredFile);
         if (ContainsWildcard(fileName))
         {
-            await DownloadFilesByWildcardAsync(args, client, result, fullFilePath, cancellationToken);
+            await DownloadFilesByWildcardAsync(args, client, result, projectPath, fullFilePath, cancellationToken);
             return;
         }
 
@@ -189,11 +270,11 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
 
         if (item.Type == FtpObjectType.File)
         {
-            await DownloadSingleFileAsync(args, client, result, item, cancellationToken);
+            await DownloadSingleFileAsync(args, client, result, projectPath, item, cancellationToken);
         }
         else if (item.Type == FtpObjectType.Directory)
         {
-            await DownloadFilesByWildcardAsync(args, client, result, fullFilePath + "/*", cancellationToken);
+            await DownloadFilesByWildcardAsync(args, client, result, projectPath, fullFilePath + "/*", cancellationToken);
         }
     }
 
@@ -201,6 +282,7 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
         StreamBIMDownloaderArgs args,
         AsyncFtpClient client,
         StreamBimDownloadResult result,
+        string projectPath,
         string file,
         CancellationToken cancellationToken)
     {
@@ -222,7 +304,7 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
 
             if (MatchesWildcard(itemInFolder.Name, pattern))
             {
-                await DownloadSingleFileAsync(args, client, result, itemInFolder, cancellationToken);
+                await DownloadSingleFileAsync(args, client, result, projectPath, itemInFolder, cancellationToken);
             }
         }
     }
@@ -237,13 +319,15 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
         StreamBIMDownloaderArgs args,
         AsyncFtpClient client,
         StreamBimDownloadResult result,
+        string projectPath,
         FtpListItem file,
         CancellationToken cancellationToken)
     {
-        var localPath = Path.Combine(args.DownloadFolder, file.Name);
         try
         {
-            if (args.SkipUnchangedFiles && File.Exists(localPath) && file.Modified == File.GetLastWriteTimeUtc(localPath))
+            var localPath = CreateLocalPath(args.DownloadFolder, projectPath, file.FullName);
+
+            if (args.SkipUnchangedFiles && File.Exists(localPath) && AreEquivalentTimestamps(file.Modified, File.GetLastWriteTimeUtc(localPath)))
             {
                 result.SkippedFiles.Add(file.FullName);
                 return;
@@ -259,7 +343,39 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
                 result.DownloadedFiles.Add(file.FullName);
             }
         }
-        catch (Exception exception)
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (ArgumentException exception)
+        {
+            result.FailedFiles.Add(new FailedFile(file.FullName, GetInnermostException(exception).Message));
+        }
+        catch (InvalidOperationException exception)
+        {
+            result.FailedFiles.Add(new FailedFile(file.FullName, GetInnermostException(exception).Message));
+        }
+        catch (FtpException exception)
+        {
+            result.FailedFiles.Add(new FailedFile(file.FullName, GetInnermostException(exception).Message));
+        }
+        catch (IOException exception)
+        {
+            result.FailedFiles.Add(new FailedFile(file.FullName, GetInnermostException(exception).Message));
+        }
+        catch (UnauthorizedAccessException exception)
+        {
+            result.FailedFiles.Add(new FailedFile(file.FullName, GetInnermostException(exception).Message));
+        }
+        catch (SocketException exception)
+        {
+            result.FailedFiles.Add(new FailedFile(file.FullName, GetInnermostException(exception).Message));
+        }
+        catch (TimeoutException exception)
+        {
+            result.FailedFiles.Add(new FailedFile(file.FullName, GetInnermostException(exception).Message));
+        }
+        catch (AuthenticationException exception)
         {
             result.FailedFiles.Add(new FailedFile(file.FullName, GetInnermostException(exception).Message));
         }
@@ -283,6 +399,12 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
                     continue;
                 }
 
+                var targetDirectory = Path.GetDirectoryName(localPath);
+                if (!string.IsNullOrWhiteSpace(targetDirectory))
+                {
+                    Directory.CreateDirectory(targetDirectory);
+                }
+
                 File.Move(tempPath, localPath, true);
                 tempPath = null;
 
@@ -298,7 +420,22 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
 
                 return downloadStatus;
             }
-            catch when (attempt < 2)
+            catch (FtpException) when (attempt < 2)
+            {
+            }
+            catch (IOException) when (attempt < 2)
+            {
+            }
+            catch (UnauthorizedAccessException) when (attempt < 2)
+            {
+            }
+            catch (SocketException) when (attempt < 2)
+            {
+            }
+            catch (TimeoutException) when (attempt < 2)
+            {
+            }
+            catch (AuthenticationException) when (attempt < 2)
             {
             }
             finally
@@ -313,6 +450,7 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
         return FtpStatus.Failed;
     }
 
+    [SupportedOSPlatform("windows")]
     internal static UserCredentials? TryGetUserCredentials(string applicationName)
     {
         if (string.IsNullOrWhiteSpace(applicationName))
@@ -320,17 +458,32 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
             return null;
         }
 
+        if (!OperatingSystem.IsWindows())
+        {
+            return null;
+        }
+
         try
         {
             var credentials = CredentialManager.ReadCredential(applicationName);
-            if (credentials is null || string.IsNullOrWhiteSpace(credentials.UserName))
+            if (credentials is null ||
+                string.IsNullOrWhiteSpace(credentials.UserName) ||
+                string.IsNullOrWhiteSpace(credentials.Password))
             {
                 return null;
             }
 
             return new UserCredentials(credentials.UserName, credentials.Password);
         }
-        catch
+        catch (Win32Exception)
+        {
+            return null;
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
+        catch (UnauthorizedAccessException)
         {
             return null;
         }
@@ -374,7 +527,7 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
             return string.Empty;
         }
 
-        var normalized = configuredFile.Trim().TrimStart('/').TrimEnd('/');
+        var normalized = NormalizeRelativePath(configuredFile.Trim().TrimStart('/').TrimEnd('/'));
         var trimmedProjectPath = projectPath.Trim('/');
         if (!string.IsNullOrEmpty(trimmedProjectPath) &&
             normalized.StartsWith(trimmedProjectPath + "/", StringComparison.OrdinalIgnoreCase))
@@ -387,6 +540,78 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
         }
 
         return normalized;
+    }
+
+    private static string NormalizeRelativePath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return string.Empty;
+        }
+
+        var segments = path
+            .Replace('\\', '/')
+            .Split('/', StringSplitOptions.RemoveEmptyEntries)
+            .Select(segment =>
+            {
+                if (segment == "." || segment == "..")
+                {
+                    throw new ArgumentException("Path segments cannot contain '.' or '..'.");
+                }
+
+                return segment;
+            });
+
+        return string.Join("/", segments);
+    }
+
+    private static string CreateDisplayPath(string projectPath, string configuredFile)
+    {
+        var safeProjectPath = NormalizeProjectPath(projectPath);
+        var normalizedConfiguredFile = configuredFile.Trim().Replace('\\', '/').TrimStart('/');
+        return CombineFtpPath(safeProjectPath, normalizedConfiguredFile).TrimStart('/');
+    }
+
+    private static string CreateLocalPath(string downloadFolder, string projectPath, string remotePath)
+    {
+        var projectPrefix = NormalizeProjectPath(projectPath).TrimEnd('/');
+        var normalizedRemotePath = remotePath.Replace('\\', '/');
+
+        var relativeRemotePath = projectPrefix.Length == 0 || projectPrefix == "/"
+            ? normalizedRemotePath.TrimStart('/')
+            : normalizedRemotePath.StartsWith(projectPrefix + "/", StringComparison.OrdinalIgnoreCase)
+                ? normalizedRemotePath[(projectPrefix.Length + 1)..]
+                : normalizedRemotePath.TrimStart('/');
+
+        var relativePath = NormalizeRelativePath(relativeRemotePath);
+        var segments = relativePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        var localPath = downloadFolder;
+        foreach (var segment in segments)
+        {
+            localPath = Path.Combine(localPath, segment);
+        }
+
+        var downloadRoot = Path.GetFullPath(downloadFolder)
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var fullLocalPath = Path.GetFullPath(localPath);
+        if (!fullLocalPath.StartsWith(downloadRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(fullLocalPath, downloadRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Resolved download path escapes the selected download folder.");
+        }
+
+        return fullLocalPath;
+    }
+
+    private static bool AreEquivalentTimestamps(DateTime remoteTimestamp, DateTime localTimestamp)
+    {
+        if (remoteTimestamp == default || localTimestamp == default)
+        {
+            return false;
+        }
+
+        return (remoteTimestamp - localTimestamp).Duration() <= TimeSpan.FromSeconds(2);
     }
 
     private static string CombineFtpPath(string basePath, string? relativePath)

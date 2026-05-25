@@ -14,8 +14,7 @@
             "name": "Attach to Assistant by process id",
             "type": "coreclr",
             "request": "attach",
-            "processId": "${command:pickProcess}",
-            "processName": "CW.Assistant.Cli"
+            "processId": "${command:pickProcess}"
         }
     ]
 }

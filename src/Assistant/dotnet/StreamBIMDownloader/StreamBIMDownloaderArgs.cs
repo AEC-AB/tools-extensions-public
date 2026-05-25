@@ -35,6 +35,7 @@ public class StreamBIMDownloaderArgs
         HelperText = "This list updates only when you click Reload. If the first suggestion tells you to select a folder ending with /, choose that folder and click Reload again to browse deeper.",
         CollectorType = typeof(StreamBIMFilesAndFolderAutoFillCollector),
         CollectorSortOrder = SortOrder.SortByAscending)]
+    [MinLength(1, ErrorMessage = "Select at least one file or folder to download.")]
     public List<string> Files { get; set; } = [];
 
     [BooleanField(

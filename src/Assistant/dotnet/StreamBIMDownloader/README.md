@@ -17,11 +17,11 @@ Downloads selected files from StreamBIM to a local folder.
 3. Click Reload.
 4. Open Files to download and type part of a folder or file path.
 5. Click Reload again to refresh suggestions for the current path.
-6. If the first suggestion tells you to select a folder ending with `/`, choose one of the folder suggestions ending with `/` and click Reload once more to load suggestions up to 3 levels deeper from that folder.
+6. If the first suggestion tells you to select a folder ending with `/`, choose one of the folder suggestions ending with `/` and click Reload once more to load suggestions up to 2 levels deeper from that folder.
 7. Repeat the type-and-reload flow until the wanted file or folder appears, then run the extension.
 
 ## Notes
 
 - The project and file picker options are loaded from StreamBIM using the configured credentials.
 - The UI does not refresh autofill suggestions automatically. Changing Project or Files to download does not update suggestions until Reload is clicked.
-- Folders ending with `-revs`, and anything inside them, are ignored.
+- Folders named `_backup` and folders ending with `-revs`, and anything inside them, are ignored.

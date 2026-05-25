@@ -4,11 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.Versioning;
 using CW.Assistant.Extensions.Assistant.Collectors;
 using FluentFTP;
+using FluentFTP.Exceptions;
 
 namespace StreamBIMDownloader;
 
+[SupportedOSPlatform("windows")]
 internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollector<StreamBIMDownloaderArgs>
 {
     private const int MaxSuggestionDepth = 2;
@@ -39,7 +42,27 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
             var folderListings = await GetFolderListingsAsync(client, args, projectPath, lookupContexts, cancellationToken);
             return BuildResult(folderListings);
         }
-        catch
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (FtpException)
+        {
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        }
+        catch (System.IO.IOException)
+        {
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        }
+        catch (System.Net.Sockets.SocketException)
+        {
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        }
+        catch (TimeoutException)
+        {
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        }
+        catch (System.Security.Authentication.AuthenticationException)
         {
             return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
@@ -79,7 +102,23 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
                 var items = await GetSubtreeItemsAsync(client, args, projectPath, currentContext.RelativeFolderPath, cancellationToken);
                 return new FolderListingResult(currentContext.RelativeFolderPath, currentContext.NamePrefix, items);
             }
-            catch when (TryFallbackToParentContext(currentContext, out var fallbackContext))
+            catch (FtpException) when (TryFallbackToParentContext(currentContext, out var fallbackContext))
+            {
+                currentContext = fallbackContext;
+            }
+            catch (System.IO.IOException) when (TryFallbackToParentContext(currentContext, out var fallbackContext))
+            {
+                currentContext = fallbackContext;
+            }
+            catch (System.Net.Sockets.SocketException) when (TryFallbackToParentContext(currentContext, out var fallbackContext))
+            {
+                currentContext = fallbackContext;
+            }
+            catch (TimeoutException) when (TryFallbackToParentContext(currentContext, out var fallbackContext))
+            {
+                currentContext = fallbackContext;
+            }
+            catch (System.Security.Authentication.AuthenticationException) when (TryFallbackToParentContext(currentContext, out var fallbackContext))
             {
                 currentContext = fallbackContext;
             }
@@ -137,7 +176,9 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
         var items = listing
             .Where(item => item.Type is FtpObjectType.File or FtpObjectType.Directory)
             .Where(item => !string.IsNullOrWhiteSpace(item.Name))
-            .Where(item => item.Type != FtpObjectType.Directory || !item.Name.EndsWith("-revs", StringComparison.OrdinalIgnoreCase))
+            .Where(item => item.Type != FtpObjectType.Directory
+                || (!item.Name.EndsWith("-revs", StringComparison.OrdinalIgnoreCase)
+                 && !item.Name.EndsWith("_backup", StringComparison.OrdinalIgnoreCase)))
             .Select(item => new FolderItem(item.Name, item.Type == FtpObjectType.Directory))
             .ToArray();
 

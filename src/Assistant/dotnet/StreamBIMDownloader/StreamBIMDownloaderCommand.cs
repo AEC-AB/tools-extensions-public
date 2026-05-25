@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -53,7 +54,39 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
         {
             throw;
         }
-        catch (Exception exception)
+        catch (ArgumentException exception)
+        {
+            return Result.Text.Failed(GetInnermostException(exception).Message);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return Result.Text.Failed(GetInnermostException(exception).Message);
+        }
+        catch (UnauthorizedAccessException exception)
+        {
+            return Result.Text.Failed(GetInnermostException(exception).Message);
+        }
+        catch (FtpException exception)
+        {
+            return Result.Text.Failed(GetInnermostException(exception).Message);
+        }
+        catch (IOException exception)
+        {
+            return Result.Text.Failed(GetInnermostException(exception).Message);
+        }
+        catch (SocketException exception)
+        {
+            return Result.Text.Failed(GetInnermostException(exception).Message);
+        }
+        catch (TimeoutException exception)
+        {
+            return Result.Text.Failed(GetInnermostException(exception).Message);
+        }
+        catch (AuthenticationException exception)
+        {
+            return Result.Text.Failed(GetInnermostException(exception).Message);
+        }
+        catch (Win32Exception exception)
         {
             return Result.Text.Failed(GetInnermostException(exception).Message);
         }
@@ -420,23 +453,29 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
 
                 return downloadStatus;
             }
-            catch (FtpException) when (attempt < 2)
+            catch (FtpException exception) when (attempt < 2)
             {
+                LogRetryFailure(item.FullName, attempt, exception);
             }
-            catch (IOException) when (attempt < 2)
+            catch (IOException exception) when (attempt < 2)
             {
+                LogRetryFailure(item.FullName, attempt, exception);
             }
-            catch (UnauthorizedAccessException) when (attempt < 2)
+            catch (UnauthorizedAccessException exception) when (attempt < 2)
             {
+                LogRetryFailure(item.FullName, attempt, exception);
             }
-            catch (SocketException) when (attempt < 2)
+            catch (SocketException exception) when (attempt < 2)
             {
+                LogRetryFailure(item.FullName, attempt, exception);
             }
-            catch (TimeoutException) when (attempt < 2)
+            catch (TimeoutException exception) when (attempt < 2)
             {
+                LogRetryFailure(item.FullName, attempt, exception);
             }
-            catch (AuthenticationException) when (attempt < 2)
+            catch (AuthenticationException exception) when (attempt < 2)
             {
+                LogRetryFailure(item.FullName, attempt, exception);
             }
             finally
             {
@@ -589,6 +628,11 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
         var localPath = downloadFolder;
         foreach (var segment in segments)
         {
+            if (Path.IsPathRooted(segment) || segment.Contains(Path.VolumeSeparatorChar))
+            {
+                throw new InvalidOperationException("Remote path contains an invalid rooted path segment.");
+            }
+
             localPath = Path.Combine(localPath, segment);
         }
 
@@ -602,6 +646,16 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
         }
 
         return fullLocalPath;
+    }
+
+    private static void LogRetryFailure(string itemPath, int attempt, Exception exception)
+    {
+        Trace.TraceWarning(
+            "Retrying download for '{0}' after attempt {1} failed with {2}: {3}",
+            itemPath,
+            attempt + 1,
+            exception.GetType().Name,
+            GetInnermostException(exception).Message);
     }
 
     private static bool AreEquivalentTimestamps(DateTime remoteTimestamp, DateTime localTimestamp)

@@ -247,9 +247,8 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
         var currentContext = CreateLookupContext(currentInput);
         AddLookupContext(contexts, seen, currentContext);
 
-        foreach (var configuredFile in configuredFiles)
+        foreach (var folderPath in configuredFiles.Select(GetFolderPath))
         {
-            var folderPath = GetFolderPath(configuredFile);
             AddLookupContext(contexts, seen, new LookupContext(folderPath, string.Empty));
         }
 

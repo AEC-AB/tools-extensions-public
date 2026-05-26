@@ -14,6 +14,16 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
 {
     public async Task<IExtensionResult> RunAsync(IAssistantExtensionContext context, StreamBIMDownloaderArgs args, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(args.ApplicationName))
+        {
+            return Result.Text.Failed("Credential application id is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(args.Project))
+        {
+            return Result.Text.Failed("Project is required.");
+        }
+
         if (string.IsNullOrWhiteSpace(args.DownloadFolder))
         {
             return Result.Text.Failed("Download folder is required.");

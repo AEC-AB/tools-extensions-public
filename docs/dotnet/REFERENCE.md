@@ -91,6 +91,34 @@ internal class CustomRevitAutoFillCollector : IRevitAutoFillCollector<RevitExten
 
 All field attributes are in `CW.Assistant.Extensions.Contracts.Fields`.
 
+### Namespace Imports
+
+Prefer using a `GlobalUsings.cs` file (when available) for extension projects that combine fields, upgrades, and custom autofill collectors.
+
+```csharp
+global using CW.Assistant.Extensions.Contracts.Fields;
+global using CW.Assistant.Extensions.Contracts.Fields.Revit;
+global using CW.Assistant.Extensions.Contracts.Upgrade;
+global using CW.Assistant.Extensions.Assistant.Collectors;
+
+// Platform-specific custom autofill attributes
+global using CW.Assistant.Extensions.Revit.Attributes;
+global using CW.Assistant.Extensions.Tekla.Attributes;
+global using CW.Assistant.Extensions.Navisworks.Attributes;
+global using CW.Assistant.Extensions.AutoCAD.Attributes;
+```
+
+These imports cover:
+
+- Field attributes and Revit-specific field attributes.
+- Args upgrade handlers with `IArgsUpgrade<TFrom, TTo>`.
+- Async autofill collectors with `IAsyncAutoFillCollector<TArgs>`.
+- Platform custom autofill attributes:
+    - `CustomRevitAutoFillAttribute`
+    - `CustomTeklaAutoFillAttribute`
+    - `CustomNavisworksAutoFillAttribute`
+    - `CustomAutoCADAutoFillAttribute`
+
 ### Text Input Fields
 
 #### TextField

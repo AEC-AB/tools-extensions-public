@@ -11,6 +11,7 @@ This is the comprehensive technical reference for writing and managing Args clas
 - [Features](#features) (Groups, Visibility, Enable/Disable, Versioning)
 - [Serialization & Persistence](#serialization--persistence)
 - [Troubleshooting](#troubleshooting)
+- [Extension README Help Files](#extension-readme-help-files)
 
 ---
 
@@ -1089,11 +1090,27 @@ public async Task<IExtensionResult> RunAsync(
 
 ---
 
+## Extension README Help Files
+
+In addition to Args and command code, each extension root `README.md` should contain a user guide that explains:
+
+1. What the extension does for users
+2. How each configuration field should be filled
+3. What happens when the extension runs
+4. Common issues and troubleshooting steps
+
+Use this guide when writing or updating extension root help documentation:
+
+- [Writing Extension README Help Files](../WRITING_EXTENSION_README_HELP_FILES.md)
+
+---
+
 ## See Also
 
 - [Quick Start](./QUICK_START.md) — 5-10 minute hands-on intro
 - [Cookbook](./COOKBOOK.md) — Copy-paste ready patterns
 - [Reference](./REFERENCE.md) — Attribute and validator catalog
+- [Writing Extension README Help Files](../WRITING_EXTENSION_README_HELP_FILES.md) — User-facing README guidance for extension roots
 - [Platform Guides](./PLATFORM_GUIDES/) — Platform-specific details
 
 ---

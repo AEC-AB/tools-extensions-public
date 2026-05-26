@@ -13,6 +13,9 @@ Welcome to the comprehensive guide for building Assistant extensions. This docum
 **Need Deep Technical Reference?**
 → Read [Args Developer Guide](./dotnet/ARGS_DEVELOPER_GUIDE.md) for complete lifecycle, validation, features
 
+**Need to Write Extension Root README Help Files?**
+→ Read [Writing Extension README Help Files](./WRITING_EXTENSION_README_HELP_FILES.md)
+
 **Looking Up Field Types or DSL Syntax?**
 → Check [Reference](./dotnet/REFERENCE.md) for quick lookup tables and detailed narratives
 
@@ -45,6 +48,7 @@ For Revit and Tekla specifically, see the platform guides for when to choose **A
 | [Args Developer Guide](./dotnet/ARGS_DEVELOPER_GUIDE.md) | All developers | Complete reference on configuration classes and UI binding |
 | [Cookbook](./dotnet/COOKBOOK.md) | All developers | Real-world patterns ready to copy-paste |
 | [Reference](./dotnet/REFERENCE.md) | All developers | Quick lookup tables, DSL syntax, validation rules |
+| [Writing Extension README Help Files](./WRITING_EXTENSION_README_HELP_FILES.md) | All developers | How to write user-facing README guides in extension roots |
 | [Platform Guides](./dotnet/PLATFORM_GUIDES/) | Integration-specific developers | Host API context, transaction patterns, platform-specific behaviors |
 
 ### Platform-Specific Guides
@@ -70,6 +74,36 @@ The Args attributes are rendered by the Assistant Forms library into a configura
 
 ### Versioning & Upgrades
 As your Args evolve, use `[ArgsVersion]` and implement `IArgsUpgrade<TFrom, TTo>` to migrate persisted configurations automatically. The framework chains upgrades and handles version tracking.
+
+---
+
+## Recommended Namespaces
+
+If your extension project has a `GlobalUsings.cs` file, prefer placing common imports there so Args, upgrade handlers, and collectors stay clean.
+
+```csharp
+global using CW.Assistant.Extensions.Contracts.Fields;
+global using CW.Assistant.Extensions.Contracts.Fields.Revit;
+global using CW.Assistant.Extensions.Contracts.Upgrade;
+global using CW.Assistant.Extensions.Assistant.Collectors;
+
+// Platform-specific custom autofill attributes
+global using CW.Assistant.Extensions.Revit.Attributes;
+global using CW.Assistant.Extensions.Tekla.Attributes;
+global using CW.Assistant.Extensions.Navisworks.Attributes;
+global using CW.Assistant.Extensions.AutoCAD.Attributes;
+```
+
+Use these namespaces for:
+
+- Field attributes such as `[TextField]`, `[IntegerField]`, and integration-specific field attributes.
+- Args version migration with `IArgsUpgrade<TFrom, TTo>`.
+- Async collectors implementing `IAsyncAutoFillCollector<TArgs>`.
+- Platform custom autofill attributes:
+	- `CustomRevitAutoFillAttribute`
+	- `CustomTeklaAutoFillAttribute`
+	- `CustomNavisworksAutoFillAttribute`
+	- `CustomAutoCADAutoFillAttribute`
 
 ---
 

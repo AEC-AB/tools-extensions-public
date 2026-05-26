@@ -21,6 +21,7 @@ internal class StreamBIMProjectRootFolderAutoFillCollector : IAsyncAutoFillColle
             var credentials = StreamBimCredentialProvider.TryGetUserCredentials(args.ApplicationName);
             if (credentials is null)
             {
+                result["auth_message"] = "Enter username and password and click Reload to see available projects.";
                 return result;
             }
 

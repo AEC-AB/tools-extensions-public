@@ -42,14 +42,47 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          $baseVersion = "1.0.${{ github.run_number }}"
+          function Get-LatestStableNuGetVersion {
+            param([string]$PackageId)
+
+            $lowerPackageId = $PackageId.ToLowerInvariant()
+            $indexUrl = "https://api.nuget.org/v3-flatcontainer/$lowerPackageId/index.json"
+
+            try {
+              $response = Invoke-RestMethod -Uri $indexUrl -Method Get
+            }
+            catch {
+              Write-Warning "Unable to query NuGet versions for '$PackageId': $($_.Exception.Message)"
+              return $null
+            }
+
+            if ($null -eq $response.versions) {
+              return $null
+            }
+
+            $stableVersions = $response.versions | Where-Object { $_ -match '^\d+\.\d+\.\d+$' }
+            if ($stableVersions.Count -eq 0) {
+              return $null
+            }
+
+            return $stableVersions | Sort-Object { [Version]$_ } | Select-Object -Last 1
+          }
 
           if ("${{ github.event_name }}" -eq "pull_request") {
+            $packageId = "CW.Assistant.ExtensionDocs.Bundle"
+            $baseVersion = Get-LatestStableNuGetVersion -PackageId $packageId
+            if ([string]::IsNullOrWhiteSpace($baseVersion)) {
+              $baseVersion = "1.0.0"
+              Write-Warning "Falling back to base version $baseVersion for PR package versioning."
+            }
+
             $prNumber = "${{ github.event.pull_request.number }}"
-            $suffix = "pr.$prNumber.${{ github.run_attempt }}"
+            $prRevision = "${{ github.event.pull_request.commits }}"
+            $suffix = "pr.$prNumber.$prRevision"
             $packageVersion = "$baseVersion-$suffix"
           }
           else {
+            $baseVersion = "1.0.${{ github.run_number }}"
             $packageVersion = $baseVersion
           }
 

@@ -47,25 +47,37 @@ jobs:
 
             $lowerPackageId = $PackageId.ToLowerInvariant()
             $indexUrl = "https://api.nuget.org/v3-flatcontainer/$lowerPackageId/index.json"
+            Write-Host "Querying NuGet API: $indexUrl"
 
             try {
-              $response = Invoke-RestMethod -Uri $indexUrl -Method Get
+              $response = Invoke-RestMethod -Uri $indexUrl -Method Get -ErrorAction Stop
+              Write-Host "NuGet API response received. Response type: $($response.GetType().Name)"
+              Write-Host "Response keys: $($response | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name)"
             }
             catch {
               Write-Warning "Unable to query NuGet versions for '$PackageId': $($_.Exception.Message)"
+              Write-Host "Exception details: $($_ | ConvertTo-Json -Depth 2)"
               return $null
             }
 
             if ($null -eq $response.versions) {
+              Write-Warning "Response does not contain 'versions' property. Available properties: $($response | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name)"
               return $null
             }
 
+            Write-Host "Total versions found: $($response.versions.Count)"
             $stableVersions = $response.versions | Where-Object { $_ -match '^\d+\.\d+\.\d+$' }
+            Write-Host "Stable versions (matching semver): $($stableVersions.Count)"
+            
             if ($stableVersions.Count -eq 0) {
+              Write-Warning "No stable versions found matching pattern '^\d+\.\d+\.\d+$'"
+              Write-Host "Sample versions: $($response.versions | Select-Object -First 5 -Join ', ')"
               return $null
             }
 
-            return $stableVersions | Sort-Object { [Version]$_ } | Select-Object -Last 1
+            $latestVersion = $stableVersions | Sort-Object { [Version]$_ } | Select-Object -Last 1
+            Write-Host "Latest stable version: $latestVersion"
+            return $latestVersion
           }
 
           if ("${{ github.event_name }}" -eq "pull_request") {

@@ -52,32 +52,41 @@ jobs:
             try {
               $response = Invoke-RestMethod -Uri $indexUrl -Method Get -ErrorAction Stop
               Write-Host "NuGet API response received. Response type: $($response.GetType().Name)"
-              Write-Host "Response keys: $($response | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name)"
             }
             catch {
               Write-Warning "Unable to query NuGet versions for '$PackageId': $($_.Exception.Message)"
-              Write-Host "Exception details: $($_ | ConvertTo-Json -Depth 2)"
               return $null
             }
 
             if ($null -eq $response.versions) {
-              Write-Warning "Response does not contain 'versions' property. Available properties: $($response | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name)"
+              Write-Warning "Response does not contain 'versions' property."
               return $null
             }
 
             Write-Host "Total versions found: $($response.versions.Count)"
-            $stableVersions = $response.versions | Where-Object { $_ -match '^\d+\.\d+\.\d+$' }
-            Write-Host "Stable versions (matching semver): $($stableVersions.Count)"
-            
-            if ($stableVersions.Count -eq 0) {
-              Write-Warning "No stable versions found matching pattern '^\d+\.\d+\.\d+$'"
-              Write-Host "Sample versions: $($response.versions | Select-Object -First 5 -Join ', ')"
+            Write-Host "Available versions: $($response.versions -join ', ')"
+
+            # Sort all versions semantically and get the latest
+            # This includes both stable (1.0.0) and pre-release (1.0.0-pr.30.1) versions
+            try {
+              $sortedVersions = $response.versions | Sort-Object {
+                # Extract base version (e.g., "1.0.0" from "1.0.0-pr.30.1")
+                if ($_ -match '^(\d+\.\d+\.\d+)') {
+                  [Version]$matches[1]
+                }
+                else {
+                  [Version]"0.0.0"
+                }
+              } -Descending
+              
+              $latestVersion = $sortedVersions | Select-Object -First 1
+              Write-Host "Latest version (by semantic sort): $latestVersion"
+              return $latestVersion
+            }
+            catch {
+              Write-Warning "Failed to sort versions: $($_.Exception.Message)"
               return $null
             }
-
-            $latestVersion = $stableVersions | Sort-Object { [Version]$_ } | Select-Object -Last 1
-            Write-Host "Latest stable version: $latestVersion"
-            return $latestVersion
           }
 
           if ("${{ github.event_name }}" -eq "pull_request") {

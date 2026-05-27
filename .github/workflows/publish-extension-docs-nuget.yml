@@ -67,7 +67,7 @@ jobs:
             Write-Host "Available versions: $($response.versions -join ', ')"
 
             # Sort all versions semantically and get the latest
-            # This includes both stable (1.0.0) and pre-release (1.0.0-pr.30.1) versions
+            # Returns only the base version (e.g., "1.0.8" from "1.0.8-pr.30.1")
             try {
               $sortedVersions = $response.versions | Sort-Object {
                 # Extract base version (e.g., "1.0.0" from "1.0.0-pr.30.1")
@@ -79,9 +79,19 @@ jobs:
                 }
               } -Descending
               
-              $latestVersion = $sortedVersions | Select-Object -First 1
-              Write-Host "Latest version (by semantic sort): $latestVersion"
-              return $latestVersion
+              $latestFullVersion = $sortedVersions | Select-Object -First 1
+              Write-Host "Latest full version on NuGet: $latestFullVersion"
+              
+              # Extract only the base version part (before the hyphen if present)
+              if ($latestFullVersion -match '^(\d+\.\d+\.\d+)') {
+                $baseVersion = $matches[1]
+              }
+              else {
+                $baseVersion = $latestFullVersion
+              }
+              
+              Write-Host "Extracted base version for PR suffix: $baseVersion"
+              return $baseVersion
             }
             catch {
               Write-Warning "Failed to sort versions: $($_.Exception.Message)"

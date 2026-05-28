@@ -817,7 +817,7 @@ Groups fields in a plain stack with no card or heading. Default orientation is *
 |-------|--------|
 | `Horizontal` | Fields arranged horizontally with wrapping (default) |
 | `Vertical` | Fields stacked vertically |
-| `Grid` | Fields arranged in a evenly distubuted column grid |
+| `Grid` | Fields arranged in an evenly distributed column grid |
 | `HorizontalLastFill` | Fields horizontal; the **last** field fills remaining width |
 | `HorizontalFirstFill` | Fields horizontal; the **first** field fills remaining width |
 

@@ -153,7 +153,7 @@ Use these namespaces for:
 ## Key Resources
 
 - **Living Reference**: All examples in this documentation are drawn from or traceable to [`AssistantDemoExtension`](../src/Assistant/dotnet/AssistantDemoExtension/AssistantDemoExtensionArgs.cs)
-- **Authoritative Source**: Field attribute contracts are defined in [`CW.Assistant.Extensions.Contracts.Fields`](../../tools/src/platform/Assistant/CW.Assistant.Extensions.Contracts/Fields)
+- **Authoritative Source**: Field attribute contracts are defined in `CW.Assistant.Extensions.Contracts.Fields`
 - **Rendering Pipeline**: Forms are rendered by `Assistant by AEC`
 
 ---

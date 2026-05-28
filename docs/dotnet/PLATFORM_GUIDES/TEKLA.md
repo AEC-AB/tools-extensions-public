@@ -4,7 +4,7 @@ This guide covers Tekla Structures-specific patterns for writing extensions that
 
 ## Quick Reference
 
-- **Extension interface:** `IAssistantExtension` (via Tekla integration layer)
+- **Extension interface:** `ITeklaExtension<TArgs>`
 - **Execution context:** Tekla Structures process with Model API access
 - **Model transactions:** Commit required for model changes
 - **Model access:** Through Tekla Model singleton
@@ -45,7 +45,7 @@ Tekla extensions access the model through the Tekla Model API.
 
 ```csharp
 public async Task<IExtensionResult> RunAsync(
-    IAssistantExtensionContext context,
+    ITeklaExtensionContext context,
     MyArgs args,
     CancellationToken cancellationToken)
 {

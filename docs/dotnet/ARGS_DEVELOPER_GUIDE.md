@@ -313,6 +313,9 @@ Collector interface must match your platform context:
 
 - Assistant extensions use `IAsyncAutoFillCollector<TArgs>`
 - Revit extensions use `IRevitAutoFillCollector<TArgs>`
+- AutoCAD extensions use `IAutoCADAutoFillCollector<TArgs>`
+- Tekla extensions use `ITeklaAutoFillCollector<TArgs>`
+- Navisworks extensions use `INavisworksAutoFillCollector<TArgs>`
 
 See [Reference: CollectorType Rules (ICollectorTypeAttribute)](./REFERENCE.md#collectortype-rules-icollectortypeattribute) for full examples.
 

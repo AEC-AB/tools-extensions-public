@@ -49,8 +49,8 @@ All Revit document modifications must occur within a transaction.
 ### Transaction Pattern
 
 ```csharp
-public async Task<IExtensionResult> RunAsync(
-    IAssistantExtensionContext context,
+public IExtensionResult Run(
+    IRevitExtensionContext context,
     MyArgs args,
     CancellationToken cancellationToken)
 {

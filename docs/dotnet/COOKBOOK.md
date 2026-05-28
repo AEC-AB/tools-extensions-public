@@ -170,7 +170,7 @@ public class MyArgs
 **Command usage:**
 ```csharp
 if (string.IsNullOrEmpty(args.TemplateFile))
-    return Result.Error("Template file is required");
+    return Result.Text.Failed("Template file is required");
 
 var content = File.ReadAllText(args.TemplateFile);
 // Process the file

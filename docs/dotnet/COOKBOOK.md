@@ -393,7 +393,7 @@ public string Timestamp => DateTime.Now.ToString("O");
 - Version field renders as text but cannot be edited
 - Useful for displaying computed values or metadata
 
-**Reference:** [IsReadOnly property](./REFERENCE.md#textfield)
+**Reference:** [Why is my field read-only?](./REFERENCE.md#why-is-my-field-read-only), [Issue: Field Is Read-Only Unexpectedly](./ARGS_DEVELOPER_GUIDE.md#issue-field-is-read-only-unexpectedly)
 
 ---
 

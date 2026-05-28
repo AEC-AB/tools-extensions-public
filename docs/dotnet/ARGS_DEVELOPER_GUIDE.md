@@ -686,6 +686,8 @@ Use these patterns to keep large extension forms understandable and efficient fo
 4. In shared-label layouts, set the `StackField` label and set `ShowLabel = false` on child fields to avoid duplicate labels.
 5. Use `Visibility` to hide fields that are not needed based on current selections, especially in extensions with many conditional inputs.
 
+`Visibility` can reference either a local property name (inside the same group) or the full dotted path to another property (for example `BasicConfiguration.ConnectionBasics.EnableLogging`).
+
 **Example: shared label + enable dependency + horizontal layout**
 
 ```csharp
@@ -771,6 +773,13 @@ public bool IncludeArchive { get; set; }  // Property name
 
 [Visibility = "IncludeArchive"]  // Use the property name
 public string ArchiveLocation { get; set; }
+```
+
+You can also use the full path to a nested property from anywhere in the Args tree:
+
+```csharp
+[Visibility = "AdvancedReliability.IsDryRun"]
+public string? DryRunOutputPath { get; set; }
 ```
 
 **Nested paths:**

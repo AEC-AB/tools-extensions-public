@@ -10,8 +10,8 @@ Use this skill when the `extension-docs` assistant docs MCP tool is missing or w
 
 1. Find the MCP client configuration used by your agent framework or editor.
 2. Ensure it defines an `assistant` server entry.
-3. If the server entry is missing, recreate it from this repo's `.vscode/mcp.json` or copy equivalent values into your framework's MCP configuration format.
-4. Confirm the server launches `assistant` with args `[`"mcp"`]`.
+3. If the server entry is missing, recreate it in your framework's MCP configuration format using the required values listed below.
+4. Confirm the server uses transport `stdio`, launches command `assistant`, and passes args `["mcp"]`.
 5. Reload or restart the agent runtime after updating MCP configuration if required.
 
 ## Required server values

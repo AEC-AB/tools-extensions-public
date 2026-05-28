@@ -1,7 +1,6 @@
 ## name: platform-autocad
-description: Replace with description of the skill and when Claude should use it.
+description: Use this skill when editing `*Command.cs`, collector code, or AutoCAD-specific runtime logic
 
-# Insert skill instructions below
 
 # Platform guide
 
@@ -27,3 +26,4 @@ Use the `extension-docs` MCP tool:
 - Commit transactions only after successful model updates.
 - Return explicit failure messages when the document or drawing context is missing.
 - Prefer AutoCAD terminology in field labels and results.
+

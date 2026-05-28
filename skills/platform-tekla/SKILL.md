@@ -1,7 +1,6 @@
 ## name: platform-tekla
-description: Replace with description of the skill and when Claude should use it.
+description: Use this skill when editing `*Command.cs`, collector code, or Tekla-specific runtime logic
 
-# Insert skill instructions below
 
 # Platform guide
 
@@ -28,3 +27,4 @@ Use the `extension-docs` MCP tool:
 - Handle null and cast issues explicitly.
 - Commit only after successful updates.
 - Prefer Tekla terminology in labels and results.
+

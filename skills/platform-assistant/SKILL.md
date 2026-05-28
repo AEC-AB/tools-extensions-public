@@ -1,7 +1,6 @@
 ## name: platform-assistant
-description: Replace with description of the skill and when Claude should use it.
+description: Use this skill when editing `*Command.cs`, collector code, or Assistant-specific runtime logic
 
-# Insert skill instructions below
 
 # Platform guide
 
@@ -32,3 +31,4 @@ If the implementation must access a host CAD/BIM model, selection, or UI API, sw
 - Keep logic host-agnostic and testable.
 - Use Assistant variables only for small workflow state, not as a substitute for durable storage.
 - Return actionable failure messages that tell the user what to check next.
+

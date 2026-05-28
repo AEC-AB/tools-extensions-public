@@ -1,7 +1,6 @@
 ## name: args-evolution
-description: Replace with description of the skill and when Claude should use it.
+description: Use this skill when editing `*Args.cs` in any integration under this repository
 
-# Insert skill instructions below
 
 # Args evolution
 
@@ -35,3 +34,4 @@ If the answer is no: make the structural change directly without adding a versio
 - Use async collector interfaces when values should come from host APIs or external systems.
 - Keep field labels and descriptions user-focused and platform-accurate.
 - Add validation close to field definitions so failures are actionable in UI.
+

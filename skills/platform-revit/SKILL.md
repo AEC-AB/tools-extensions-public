@@ -1,7 +1,6 @@
 ## name: platform-revit
-description: Replace with description of the skill and when Claude should use it.
+description: Use this skill when editing `*Command.cs`, collector code, or Revit-specific runtime logic
 
-# Insert skill instructions below
 
 # Platform guide
 
@@ -28,3 +27,4 @@ Use the `extension-docs` MCP tool:
 - Verify parameter existence and storage types before setting values.
 - Use filtered collectors to avoid full-model scans and guard against empty selections when the command depends on user selection.
 - Prefer Revit terminology in labels and result messages.
+

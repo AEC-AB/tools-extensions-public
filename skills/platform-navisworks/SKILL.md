@@ -1,7 +1,6 @@
 ## name: platform-navisworks
-description: Replace with description of the skill and when Claude should use it.
+description: Use this skill when editing `*Command.cs`, collector code, or Navisworks-specific runtime logic
 
-# Insert skill instructions below
 
 # Platform guide
 
@@ -27,3 +26,4 @@ Use the `extension-docs` MCP tool:
 - Catch only known collector exceptions when you can provide a safe fallback.
 - Provide clear result messages for user feedback.
 - Prefer Navisworks terminology in labels and results.
+

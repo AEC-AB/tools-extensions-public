@@ -1,7 +1,6 @@
 ## name: docs-routing
-description: Replace with description of the skill and when Claude should use it.
+description: Use this skill when you need extension framework guidance before changing code in this repository
 
-# Insert skill instructions below
 
 # Docs routing
 
@@ -24,3 +23,4 @@ Use the `extension-docs` MCP tool:
 3. `args-developer-guide` when changing configuration classes
 4. `cookbook` for reusable implementation patterns
 5. `reference` for exact field syntax and validation rules
+

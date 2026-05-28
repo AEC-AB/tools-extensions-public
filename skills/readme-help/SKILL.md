@@ -1,7 +1,6 @@
 ## name: readme-help
-description: Replace with description of the skill and when Claude should use it.
+description: Use this skill when updating extension `README.md` files for end users
 
-# Insert skill instructions below
 
 # README help
 
@@ -20,3 +19,4 @@ Use the `extension-docs` MCP tool:
 - Document prerequisites, configuration fields, expected outputs, and important limitations.
 - Include the exact user actions needed to recover from common configuration or runtime failures.
 - Use host-platform wording users recognize (Assistant, AutoCAD, Revit, Navisworks, Tekla).
+

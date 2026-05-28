@@ -51,8 +51,6 @@ Assistant itself is **not open source**; only the extensions are.
 - [Cookbook: Common Patterns](./docs/dotnet/COOKBOOK.md) — Copy-paste ready examples
 - [Platform-Specific Guides](./docs/dotnet/PLATFORM_GUIDES/) — Revit, AutoCAD, Tekla, Navisworks, Assistant details
 
-For Copilot and IDE support, see [`.github/instructions/`](./.github/instructions/).
-
 ## Who this repo is for
 
 - Developers building Assistant extensions.

@@ -4,8 +4,8 @@ This guide covers AutoCAD-specific patterns for writing extensions that integrat
 
 ## Quick Reference
 
-- **Extension interface:** `IAssistantExtension` (via AutoCAD integration layer)
-- **Execution context:** AutoCAD process with document/database access
+- **Extension interface:** `IAutoCADExtension<TArgs>`
+- **Execution context:** `IAutoCADExtensionContext` with AutoCAD process document/database access
 - **Database transactions:** Required for all model space modifications
 - **Document locking:** Managed by integration layer
 - **Supported versions:** AutoCAD 2020 and later

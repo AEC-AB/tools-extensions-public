@@ -20,7 +20,7 @@ Welcome to the comprehensive guide for building Tools extensions, including Assi
 → Read [App Extension Developer Guide](./dotnet/APP_EXTENSION_DEVELOPER_GUIDE.md)
 
 **Need to Write Extension Root README Help Files?**
-→ Read [Writing Extension README Help Files](./WRITING_EXTENSION_README_HELP_FILES.md)
+→ Read [Writing Extension README Help Files](./dotnet/WRITING_EXTENSION_README_HELP_FILES.md)
 
 **Looking Up Field Types or DSL Syntax?**
 → Check [Reference](./dotnet/REFERENCE.md) for quick lookup tables and detailed narratives
@@ -78,7 +78,7 @@ For Revit and Tekla specifically, see the platform guides for when to choose **A
 | [App Extension Developer Guide](./dotnet/APP_EXTENSION_DEVELOPER_GUIDE.md) | Revit/Tekla app extension developers | Shared architecture and runtime guidance for interactive app-style templates |
 | [Cookbook](./dotnet/COOKBOOK.md) | All developers | Real-world patterns ready to copy-paste |
 | [Reference](./dotnet/REFERENCE.md) | All developers | Quick lookup tables, DSL syntax, validation rules |
-| [Writing Extension README Help Files](./WRITING_EXTENSION_README_HELP_FILES.md) | All developers | How to write user-facing README guides in extension roots |
+| [Writing Extension README Help Files](./dotnet/WRITING_EXTENSION_README_HELP_FILES.md) | All developers | How to write user-facing README guides in extension roots |
 | [Platform Guides](./dotnet/PLATFORM_GUIDES/) | Integration-specific developers | Host API context, transaction patterns, platform-specific behaviors |
 
 ### Platform-Specific Guides

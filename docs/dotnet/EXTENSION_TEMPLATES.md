@@ -59,5 +59,5 @@ This creates a new Revit automation extension project named `MyRevitAutomationEx
 
 1. Update Args fields and labels for your use case.
 2. Implement command/app behavior.
-3. Add user-facing extension root README using [Writing Extension README Help Files](../WRITING_EXTENSION_README_HELP_FILES.md).
+3. Add user-facing extension root README using [Writing Extension README Help Files](./WRITING_EXTENSION_README_HELP_FILES.md).
 4. Validate against the relevant platform guide in `PLATFORM_GUIDES`.

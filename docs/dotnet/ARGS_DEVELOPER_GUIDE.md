@@ -1160,7 +1160,7 @@ In addition to Args and command code, each extension root `README.md` should con
 
 Use this guide when writing or updating extension root help documentation:
 
-- [Writing Extension README Help Files](../WRITING_EXTENSION_README_HELP_FILES.md)
+- [Writing Extension README Help Files](./WRITING_EXTENSION_README_HELP_FILES.md)
 
 ---
 
@@ -1169,7 +1169,7 @@ Use this guide when writing or updating extension root help documentation:
 - [Quick Start](./QUICK_START.md) — 5-10 minute hands-on intro
 - [Cookbook](./COOKBOOK.md) — Copy-paste ready patterns
 - [Reference](./REFERENCE.md) — Attribute and validator catalog
-- [Writing Extension README Help Files](../WRITING_EXTENSION_README_HELP_FILES.md) — User-facing README guidance for extension roots
+- [Writing Extension README Help Files](./WRITING_EXTENSION_README_HELP_FILES.md) — User-facing README guidance for extension roots
 - [Platform Guides](./PLATFORM_GUIDES/) — Platform-specific details
 
 ---

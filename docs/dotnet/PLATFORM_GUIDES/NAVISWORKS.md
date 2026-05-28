@@ -4,7 +4,7 @@ This guide covers Navisworks-specific patterns for writing extensions that integ
 
 ## Quick Reference
 
-- **Extension interface:** `IAssistantExtension` (via Navisworks integration layer)
+- **Extension interface:** `INavisworksExtension<TArgs>` with `INavisworksExtensionContext`
 - **Execution context:** Navisworks process with model and document access
 - **Document state:** Working with open Navisworks documents
 - **Selection & navigation:** Model tree and selection APIs

@@ -155,7 +155,6 @@ Use these namespaces for:
 - **Living Reference**: All examples in this documentation are drawn from or traceable to [`AssistantDemoExtension`](../src/Assistant/dotnet/AssistantDemoExtension/AssistantDemoExtensionArgs.cs)
 - **Authoritative Source**: Field attribute contracts are defined in [`CW.Assistant.Extensions.Contracts.Fields`](../../tools/src/platform/Assistant/CW.Assistant.Extensions.Contracts/Fields)
 - **Rendering Pipeline**: Forms are rendered by `Assistant by AEC`
-- **Instruction Files**: For Copilot agent scoping and IDE support, see [`.github/instructions/`](./.github/instructions/)
 
 ---
 

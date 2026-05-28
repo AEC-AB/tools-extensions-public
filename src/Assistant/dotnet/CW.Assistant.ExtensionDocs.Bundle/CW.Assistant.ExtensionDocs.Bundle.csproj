@@ -13,7 +13,7 @@
     <Authors>CW</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/calmforest/tools-extensions-public</RepositoryUrl>
+    <RepositoryUrl>https://github.com/AEC-AB/tools-extensions-public</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup>

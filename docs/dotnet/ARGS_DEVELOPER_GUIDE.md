@@ -206,6 +206,20 @@ return Result.Text.PartiallySucceeded("Exported 40 of 42. 2 elements skipped.");
 return Result.Text.Failed("Output folder not found.");
 ```
 
+**`Result.Markdown.*` — result with formatted markdown content:**
+```csharp
+var markdown = """
+## Export Summary
+
+- Exported: 40
+- Skipped: 2
+""";
+
+return Result.Markdown.Succeeded(markdown);
+return Result.Markdown.PartiallySucceeded(markdown);
+return Result.Markdown.Failed("## Export Failed\n\nOutput folder not found.");
+```
+
 **`Result.Empty.*` — result without a message (status only):**
 ```csharp
 return Result.Empty.Succeeded();

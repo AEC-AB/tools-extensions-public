@@ -80,7 +80,7 @@ public class HelloWorldCommand : IAssistantExtension<HelloWorldArgs>
 - `context` → Provides access to Assistant APIs (logging, messaging, etc.)
 - `args` → The user's configuration from the Args class (hydrated with their input, strongly typed)
 - `cancellationToken` → Allows cancelling long-running work
-- Build a result and return it using `Result.Text.Succeeded()` or `Result.Text.Failed()`
+- Build a result and return it using `Result.Text.*` for plain messages or `Result.Markdown.*` for structured rich output
 - `IAssistantExtension<TArgs>` is the Assistant integration interface. Other integrations use their own interfaces (for example Revit, AutoCAD, Navisworks, and Tekla-specific extension interfaces)
 
 ### Step 3: User Runs It in Assistant
@@ -165,7 +165,7 @@ public async Task<IExtensionResult> RunAsync(
 4. Assistant calls `RunAsync(context, args, cancellationToken)` with the hydrated instance
 5. Your code reads `args.YourName` and `args.RepeatCount`
 6. You perform your work (read models, write files, etc.)
-7. Return a result — `Result.Text.Succeeded(message)`, `Result.Text.PartiallySucceeded(message)`, `Result.Text.Failed(message)`, or `Result.Empty.*` when no message is needed
+7. Return a result — `Result.Text.*` for plain text, `Result.Markdown.*` for formatted output, or `Result.Empty.*` when no message is needed
 
 ---
 

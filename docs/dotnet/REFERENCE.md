@@ -655,6 +655,32 @@ return Result.Text.PartiallySucceeded($"Exported {ok} of {total} elements. {fail
 return Result.Text.Failed($"Export failed: output folder does not exist.");
 ```
 
+### Result.Markdown — result with markdown content
+
+Use when you want rich, structured output (headings, lists, tables, links, code blocks) in the execution result.
+
+| Factory | Status | Use when |
+|---------|--------|----------|
+| `Result.Markdown.Succeeded(markdown)` | ✅ Succeeded | Work completed and you want formatted output |
+| `Result.Markdown.PartiallySucceeded(markdown)` | ⚠️ Partially succeeded | Work completed with warnings and you want structured details |
+| `Result.Markdown.Failed(markdown)` | ❌ Failed | Work failed and you want a clear formatted error summary |
+
+```csharp
+var markdown = """
+## Export Summary
+
+- Processed: 42
+- Skipped: 2
+
+| Item | Status |
+|---|---|
+| Doors | Exported |
+| Windows | Skipped |
+""";
+
+return Result.Markdown.Succeeded(markdown);
+```
+
 ### Result.Empty — result without a message
 
 Use when execution status is enough and there is no meaningful message to display.
@@ -692,7 +718,7 @@ return new MyCustomResult
 };
 ```
 
-> Prefer `Result.Text.*` for the vast majority of extensions. Only implement `IExtensionResult` when you need to return structured data consumed by a downstream caller.
+> Prefer `Result.Text.*` for simple messages and `Result.Markdown.*` for rich, structured output. Only implement `IExtensionResult` when you need to return structured data consumed by a downstream caller.
 
 ---
 

@@ -44,10 +44,7 @@ Tekla extensions access the model through the Tekla Model API.
 ### Basic Pattern
 
 ```csharp
-public async Task<IExtensionResult> RunAsync(
-    ITeklaExtensionContext context,
-    MyArgs args,
-    CancellationToken cancellationToken)
+public IExtensionResult Run(ITeklaExtensionContext context, MyArgs args, CancellationToken cancellationToken)
 {
     var model = new Model();
     

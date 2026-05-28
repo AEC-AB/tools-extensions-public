@@ -84,7 +84,7 @@ Renders the form for user configuration
 ```csharp
 public class ExportCommand : IAssistantExtension<ExportArgs>
 {
-    public IExtensionResult Run(IAssistantExtensionContext context, ExportArgs args, CancellationToken cancellationToken)
+    public Task<IExtensionResult> RunAsync(IAssistantExtensionContext context, ExportArgs args, CancellationToken cancellationToken)
     {
         // args is already typed as ExportArgs
     }

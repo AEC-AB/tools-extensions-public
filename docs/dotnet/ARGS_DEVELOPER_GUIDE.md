@@ -676,6 +676,42 @@ public string? LogPath { get; set; }
 
 ---
 
+#### Field layout guidance
+
+Use these patterns to keep large extension forms understandable and efficient for users:
+
+1. Group related fields in `SectionField` with a clear label and icon. The section `Label` should act as the section header, and `HelperText` should explain what users should fill in that section.
+2. Put advanced settings in an expandable section by setting `IsExpandable = true` and `IsExpanded = false`.
+3. For tightly related fields (for example, a boolean that enables a text field), place them in a `StackField` with `Orientation = StackOrientation.HorizontalLastFill` so the text field naturally follows the boolean.
+4. In shared-label layouts, set the `StackField` label and set `ShowLabel = false` on child fields to avoid duplicate labels.
+5. Use `Visibility` to hide fields that are not needed based on current selections, especially in extensions with many conditional inputs.
+
+**Example: shared label + enable dependency + horizontal layout**
+
+```csharp
+[StackField(
+  Label = "Output naming",
+  HelperText = "Enable custom naming and enter a naming pattern.",
+  Orientation = StackOrientation.HorizontalLastFill)]
+public OutputNamingSettings OutputNaming { get; } = new();
+
+public class OutputNamingSettings
+{
+  [BooleanField(Label = "Use custom naming", ShowLabel = false)]
+  public bool UseCustomNaming { get; set; } = false;
+
+  [TextField(
+    Label = "Naming pattern",
+    ShowLabel = false,
+    IsEnabled = nameof(UseCustomNaming))]
+  public string NamingPattern { get; set; } = "{Project}_{Date}";
+}
+```
+
+This pattern gives one clear group label, keeps related controls aligned, and only shows or enables inputs when they are relevant.
+
+---
+
 ### Feature 2: Visibility Conditions
 
 Show/hide fields dynamically based on other field values using DSL expressions.

@@ -10,6 +10,9 @@ Welcome to the comprehensive guide for building Tools extensions, including Assi
 **Building Your First Extension?**
 → See [Cookbook: Common Patterns](./dotnet/COOKBOOK.md) for copy-paste ready examples
 
+**Scaffolding a New Extension from Templates?**
+→ Read [Extension Templates](./dotnet/EXTENSION_TEMPLATES.md)
+
 **Need Deep Technical Reference?**
 → Read [Args Developer Guide](./dotnet/ARGS_DEVELOPER_GUIDE.md) for complete lifecycle, validation, features
 
@@ -70,6 +73,7 @@ For Revit and Tekla specifically, see the platform guides for when to choose **A
 | Document | Audience | Purpose |
 |----------|----------|---------|
 | [Quick Start](./dotnet/QUICK_START.md) | All developers | Get a working extension in 5-10 minutes |
+| [Extension Templates](./dotnet/EXTENSION_TEMPLATES.md) | All developers | Template short names, install/list/create commands, and selection guidance |
 | [Args Developer Guide](./dotnet/ARGS_DEVELOPER_GUIDE.md) | All developers | Complete reference on configuration classes and UI binding |
 | [App Extension Developer Guide](./dotnet/APP_EXTENSION_DEVELOPER_GUIDE.md) | Revit/Tekla app extension developers | Shared architecture and runtime guidance for interactive app-style templates |
 | [Cookbook](./dotnet/COOKBOOK.md) | All developers | Real-world patterns ready to copy-paste |

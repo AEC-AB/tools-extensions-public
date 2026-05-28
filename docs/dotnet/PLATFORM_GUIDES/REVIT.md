@@ -4,7 +4,7 @@ This guide covers Revit-specific patterns for writing extensions that integrate 
 
 ## Quick Reference
 
-- **Extension interface:** `IRevitExtension` (or `IExternalCommand`)
+- **Extension interface:** `IRevitExtension<TArgs>`
 - **Execution context:** Inside Revit process with full API access
 - **Transaction handling:** Required for all document modifications
 - **Document access:** Current document + workset context

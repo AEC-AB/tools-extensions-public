@@ -40,9 +40,9 @@ public class HelloWorldArgs
 - `[Range]` → Ensures the number is between 1 and 10
 - Properties with get/set → User can change these in the UI
 
-### Step 2: Create the Command Class
+### Step 2: Use the Template Command Class
 
-Create `HelloWorldCommand.cs`—this executes when the extension runs:
+The template already includes `HelloWorldCommand.cs`. Assistant executes the `IAssistantExtension<HelloWorldArgs>` implementation when the extension runs:
 
 ```csharp
 using CW.Assistant.Extensions.Assistant;
@@ -81,6 +81,7 @@ public class HelloWorldCommand : IAssistantExtension<HelloWorldArgs>
 - `args` → The user's configuration from the Args class (hydrated with their input, strongly typed)
 - `cancellationToken` → Allows cancelling long-running work
 - Build a result and return it using `Result.Text.Succeeded()` or `Result.Text.Failed()`
+- `IAssistantExtension<TArgs>` is the Assistant integration interface. Other integrations use their own interfaces (for example Revit, AutoCAD, Navisworks, and Tekla-specific extension interfaces)
 
 ### Step 3: User Runs It in Assistant
 
@@ -142,7 +143,7 @@ Common validators:
 
 ### Command Class = Execution
 
-Your `*Command.cs` implements `IAssistantExtension<TArgs>`:
+Your template-provided `*Command.cs` implements `IAssistantExtension<TArgs>` for Assistant extensions:
 
 ```csharp
 public async Task<IExtensionResult> RunAsync(

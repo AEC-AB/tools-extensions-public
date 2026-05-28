@@ -1,3 +1,8 @@
+## name: mcp-setup
+description: Replace with description of the skill and when Claude should use it.
+
+# Insert skill instructions below
+
 # MCP setup
 
 Use this skill when the `extension-docs` assistant docs MCP tool is missing or when the agent runtime does not have the assistant MCP server configured.

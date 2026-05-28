@@ -1,8 +1,13 @@
+## name: docs-routing
+description: Replace with description of the skill and when Claude should use it.
+
+# Insert skill instructions below
+
 # Docs routing
 
 Use this skill when you need extension framework guidance before changing code in this repository.
 
-If the `extension-docs` assistant docs MCP tool is unavailable, use `../mcp-setup/README.md` first to restore the assistant MCP server in the active agent framework.
+If the `extension-docs` assistant docs MCP tool is unavailable, use `../mcp-setup/SKILL.md` first to restore the assistant MCP server in the active agent framework.
 
 ## MCP entry points
 

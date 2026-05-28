@@ -1,3 +1,8 @@
+## name: platform-autocad
+description: Replace with description of the skill and when Claude should use it.
+
+# Insert skill instructions below
+
 # Platform guide
 
 Use this skill when editing `*Command.cs`, collector code, or AutoCAD-specific runtime logic.

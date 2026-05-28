@@ -1,3 +1,8 @@
+## name: readme-help
+description: Replace with description of the skill and when Claude should use it.
+
+# Insert skill instructions below
+
 # README help
 
 Use this skill when updating extension `README.md` files for end users.

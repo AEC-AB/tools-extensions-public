@@ -1,0 +1,8 @@
+<Project>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)..\contentFiles\any\any\Resources\ExtensionDocs\**\*.md"
+             Link="Resources\ExtensionDocs\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest"
+             Visible="false" />
+  </ItemGroup>
+</Project>

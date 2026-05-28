@@ -1,0 +1,185 @@
+name: Publish Extension Docs NuGet
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - docs/**
+      - src/Assistant/dotnet/CW.Assistant.ExtensionDocs.Bundle/**
+      - .github/workflows/publish-extension-docs-nuget.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - docs/**
+      - src/Assistant/dotnet/CW.Assistant.ExtensionDocs.Bundle/**
+      - .github/workflows/publish-extension-docs-nuget.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  NUGET_SOURCE: https://api.nuget.org/v3/index.json
+
+jobs:
+  build_packages:
+    name: Build and Pack
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Compute package version
+        id: version
+        shell: pwsh
+        run: |
+          function Get-LatestStableNuGetVersion {
+            param([string]$PackageId)
+
+            $lowerPackageId = $PackageId.ToLowerInvariant()
+            $indexUrl = "https://api.nuget.org/v3-flatcontainer/$lowerPackageId/index.json"
+            Write-Host "Querying NuGet API: $indexUrl"
+
+            try {
+              $response = Invoke-RestMethod -Uri $indexUrl -Method Get -ErrorAction Stop
+              Write-Host "NuGet API response received. Response type: $($response.GetType().Name)"
+            }
+            catch {
+              Write-Warning "Unable to query NuGet versions for '$PackageId': $($_.Exception.Message)"
+              return $null
+            }
+
+            if ($null -eq $response.versions) {
+              Write-Warning "Response does not contain 'versions' property."
+              return $null
+            }
+
+            Write-Host "Total versions found: $($response.versions.Count)"
+            Write-Host "Available versions: $($response.versions -join ', ')"
+
+            # Sort all versions semantically and get the latest
+            # Returns only the base version (e.g., "1.0.8" from "1.0.8-pr.30.1")
+            try {
+              $sortedVersions = $response.versions | Sort-Object {
+                # Extract base version (e.g., "1.0.0" from "1.0.0-pr.30.1")
+                if ($_ -match '^(\d+\.\d+\.\d+)') {
+                  [Version]$matches[1]
+                }
+                else {
+                  [Version]"0.0.0"
+                }
+              } -Descending
+              
+              $latestFullVersion = $sortedVersions | Select-Object -First 1
+              Write-Host "Latest full version on NuGet: $latestFullVersion"
+              
+              # Extract only the base version part (before the hyphen if present)
+              if ($latestFullVersion -match '^(\d+\.\d+\.\d+)') {
+                $baseVersion = $matches[1]
+              }
+              else {
+                $baseVersion = $latestFullVersion
+              }
+              
+              Write-Host "Extracted base version for PR suffix: $baseVersion"
+              return $baseVersion
+            }
+            catch {
+              Write-Warning "Failed to sort versions: $($_.Exception.Message)"
+              return $null
+            }
+          }
+
+          if ("${{ github.event_name }}" -eq "pull_request") {
+            $packageId = "CW.Assistant.ExtensionDocs.Bundle"
+            $baseVersion = Get-LatestStableNuGetVersion -PackageId $packageId
+            if ([string]::IsNullOrWhiteSpace($baseVersion)) {
+              $baseVersion = "1.0.0"
+              Write-Warning "Falling back to base version $baseVersion for PR package versioning."
+            }
+
+            $prNumber = "${{ github.event.pull_request.number }}"
+            $prRevision = "${{ github.event.pull_request.commits }}"
+            $suffix = "pr.$prNumber.$prRevision"
+            $packageVersion = "$baseVersion-$suffix"
+          }
+          else {
+            $baseVersion = "1.0.${{ github.run_number }}"
+            $packageVersion = $baseVersion
+          }
+
+          "PACKAGE_VERSION=$packageVersion" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Host "Package version: $packageVersion"
+
+      - name: Restore docs package
+        run: dotnet restore src/Assistant/dotnet/CW.Assistant.ExtensionDocs.Bundle/CW.Assistant.ExtensionDocs.Bundle.csproj
+
+      - name: Pack docs package
+        run: >-
+          dotnet pack src/Assistant/dotnet/CW.Assistant.ExtensionDocs.Bundle/CW.Assistant.ExtensionDocs.Bundle.csproj
+          --configuration Release
+          --no-restore
+          -p:PackageVersion=${{ env.PACKAGE_VERSION }}
+          --output artifacts/packages
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: artifacts/packages/*.nupkg
+          if-no-files-found: error
+
+  publish_packages:
+    name: Publish Packages
+    needs: build_packages
+    runs-on: windows-2022
+
+    steps:
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: NuGet login
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: 'packages'
+          path: artifacts/packages
+          merge-multiple: true
+
+      - name: Push package to NuGet.org
+        shell: pwsh
+        run: |
+          $packageDirectory = Join-Path "${{ github.workspace }}" "artifacts/packages"
+          $packages = Get-ChildItem -Path $packageDirectory -Recurse -Filter *.nupkg -File
+
+          if ($packages.Count -eq 0) {
+            throw "No .nupkg files found in $packageDirectory"
+          }
+
+          foreach ($package in $packages) {
+            Write-Host "Pushing $($package.FullName)"
+            dotnet nuget push $package.FullName `
+              --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" `
+              --source "$env:NUGET_SOURCE" `
+              --skip-duplicate
+
+            if ($LASTEXITCODE -ne 0) {
+              throw "dotnet nuget push failed for $($package.FullName)"
+            }
+          }

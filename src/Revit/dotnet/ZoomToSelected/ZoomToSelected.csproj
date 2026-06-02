@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ExtensionId>ZoomToSelected</ExtensionId>
+    <Authors>AEC AB</Authors>
+    <Version>0.0.1</Version>
+    <Title>Zoom To Selected</Title>
+    <Description>Zoom To Selected elements in Revit</Description>
+    <PackageTags>Revit;Assistant;Extension;Automation</PackageTags>
+  </PropertyGroup>
+</Project>

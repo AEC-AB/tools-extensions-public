@@ -43,6 +43,14 @@ Each extension folder typically contains:
 
 Assistant itself is **not open source**; only the extensions are.
 
+## Developer Documentation
+
+**New to building extensions?** Start with the [Extension Development Docs](./docs/README.md):
+- [Quick Start (5-10 min)](./docs/dotnet/QUICK_START.md) — Get your first extension working
+- [Args Developer Guide](./docs/dotnet/ARGS_DEVELOPER_GUIDE.md) — Complete reference on configuration and UI binding
+- [Cookbook: Common Patterns](./docs/dotnet/COOKBOOK.md) — Copy-paste ready examples
+- [Platform-Specific Guides](./docs/dotnet/PLATFORM_GUIDES/) — Revit, AutoCAD, Tekla, Navisworks, Assistant details
+
 ## Who this repo is for
 
 - Developers building Assistant extensions.
@@ -52,6 +60,8 @@ Assistant itself is **not open source**; only the extensions are.
 ## Contributing
 
 Contributions are welcome. Please open an issue or pull request if you want to improve an existing extension or contribute a new generic extension. Keep contributions generic and reusable, avoid company- or project-specific logic, and follow the established folder and coding conventions.
+
+Before contributing code, review the relevant [Platform Guide](./docs/dotnet/PLATFORM_GUIDES/) and [development documentation](./docs/README.md).
 
 
 

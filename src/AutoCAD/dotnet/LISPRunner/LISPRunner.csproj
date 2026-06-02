@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ExtensionId>LISPRunner</ExtensionId>
+    <Authors>AEC AB</Authors>
+    <Version>0.0.1</Version>
+    <Title>LISPRunner</Title>
+    <Description>Run a LISP script in AutoCAD</Description>
+    <PackageTags>AutoCAD;Assistant;Extension</PackageTags>
+    <PackageIcon>Icon.png</PackageIcon>
+    <PackageIconUrl></PackageIconUrl>
+    <!-- 
+		Adjust MainAutoCADVersion to get IntelliSense for the correct version do a 
+		dotnet restore to restore the correct nuget packages for the selected AutoCAD version.
+		-->
+		<MainAutoCADVersion Condition="'$(Configuration)' == 'Debug'">2024</MainAutoCADVersion>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>

@@ -42,6 +42,7 @@ bld/
 
 # Visual Studio 2017 auto generated files
 Generated\ Files/
+*.csproj.lscache
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -482,5 +483,3 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-
-*.lscache

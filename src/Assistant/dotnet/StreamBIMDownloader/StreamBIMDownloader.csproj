@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ExtensionId>StreamBIMDownloader</ExtensionId>
+    <Version>1.0.1</Version>
+    <Title>StreamBIM File Downloader</Title>
+    <Description>Download files from StreamBIM to a local folder.</Description>
+    <PackageTags>StreamBIM;Download;Assistant;Extension;AssistantExtension</PackageTags>
+    <PackageIcon>Icon.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentFTP" Version="48.0.1" />
+    <PackageReference Include="Meziantou.Framework.Win32.CredentialManager" Version="1.7.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>

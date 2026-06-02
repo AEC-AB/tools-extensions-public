@@ -1,0 +1,77 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Revit 2019",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "-c",
+                "Debug 2019"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Revit 2020",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "-c",
+                "Debug 2020"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Revit 2021",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "-c",
+                "Debug 2021"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Revit 2022",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "-c",
+                "Debug 2022"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Revit 2023",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "-c",
+                "Debug 2023"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Revit 2024",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "-c",
+                "Debug 2024"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Revit 2025",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "-c",
+                "Debug 2025"
+            ],
+            "group": "build"
+        }
+    ]
+}

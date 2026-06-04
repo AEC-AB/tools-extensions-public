@@ -159,18 +159,17 @@ public class DaluxAutomationService : IDisposable
     }
 
     /// <summary>
-    /// Ensures WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS (user scope) carries the expected
-    /// --remote-debugging-port flag. Strategy:
-    ///   - Config port 0 (default): require --remote-debugging-port=0 so every WebView2
-    ///     browser process picks its own ephemeral port and writes it to
-    ///     {UDF}/DevToolsActivePort. Silently rewrites non-zero values (e.g. =9222 as
-    ///     set by the Dalux addon) to =0 in place; the Dalux WebView2 popup reads the
-    ///     registry at spawn time so no Revit restart is needed after the rewrite.
-    ///   - Config port &gt;0 (advanced): write --remote-debugging-port={port}, same as
-    ///     the legacy behavior.
-    /// The only case that still aborts with a "restart Revit" message is the truly-
-    /// first-time write (env var missing entirely) — in that case Revit launched with
-    /// no --remote-debugging-port flag at all.
+    /// Ensures WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS carries the expected
+    /// --remote-debugging-port flag both in the User scope (for future Revit
+    /// launches) AND in the currently running Revit process's environment block
+    /// (so the Dalux WebView2 popup spawned this session inherits it).
+    ///
+    /// Process-block injection uses VirtualAllocEx + a tiny x64 shellcode stub +
+    /// CreateRemoteThread to call kernel32!SetEnvironmentVariableW inside Revit.
+    /// This removes the historical "first run writes env, second run uses it"
+    /// double-launch UX. Falls back to the legacy "restart Revit" abort only when
+    /// injection itself fails (e.g., AV blocks remote-thread creation, or
+    /// Assistant is non-elevated while Revit is elevated).
     /// </summary>
     private bool EnsureRemoteDebuggingEnvVar()
     {
@@ -193,28 +192,242 @@ public class DaluxAutomationService : IDisposable
                     @"--remote-debugging-port=\d+",
                     "--remote-debugging-port=0");
                 Environment.SetEnvironmentVariable(envName, rewritten, EnvironmentVariableTarget.User);
-                LogMessage($"[*] Env var contained --remote-debugging-port={currentPort}. Rewrote to =0 for per-UDF ephemeral ports (no restart needed).");
+                LogMessage($"[*] Env var contained --remote-debugging-port={currentPort}. Rewrote to =0 for per-UDF ephemeral ports.");
                 existingValue = rewritten;
             }
         }
 
-        if (existingValue == null || !existingValue.Contains(requiredFlag))
+        string desiredValue;
+        bool userScopeChanged = false;
+        if (string.IsNullOrEmpty(existingValue) || !existingValue.Contains(requiredFlag))
         {
-            Environment.SetEnvironmentVariable(envName, requiredFlag, EnvironmentVariableTarget.User);
+            desiredValue = string.IsNullOrEmpty(existingValue) ? requiredFlag : existingValue + " " + requiredFlag;
+            Environment.SetEnvironmentVariable(envName, desiredValue, EnvironmentVariableTarget.User);
+            userScopeChanged = true;
             var mode = _config.DebuggingPort == 0 ? "per-UDF ephemeral" : $"fixed port {_config.DebuggingPort}";
             LogMessage($"[*] WebView2 remote debugging persisted to user environment ({mode})");
-            LogMessage("[!] The setting has been written to your user environment.");
+        }
+        else
+        {
+            desiredValue = existingValue;
+            var configuredMode = _config.DebuggingPort == 0 ? "port=0, per-UDF ephemeral" : $"port={_config.DebuggingPort}";
+            LogMessage($"[*] WebView2 remote debugging already in user environment ({configuredMode})");
+        }
+
+        // Patch the running Revit process so its next WebView2 spawn inherits the
+        // flag without requiring a restart. Idempotent: if Revit's env block already
+        // has the same value, SetEnvironmentVariableW is a no-op.
+        if (TryInjectEnvVarIntoRevit(_config.RevitProcessId, envName, desiredValue))
+            return true;
+
+        // Injection failed. If user-scope was already correct before we touched it,
+        // Revit *might* have inherited the flag at launch — let the run continue and
+        // fail loudly later if not. If we just wrote the user var, the current Revit
+        // session definitely won't see it, so abort with the restart message.
+        if (userScopeChanged)
+        {
+            LogMessage("[!] Could not patch the running Revit process's environment block.");
             LogMessage("[!] Close Revit COMPLETELY, relaunch it, then re-run this extension.");
-            LogMessage("[!] The current Revit session will not see the setting — aborting this run.");
+            LogMessage("[!] The current Revit session will not see the new setting — aborting this run.");
             return false;
         }
 
-        var configuredMode = _config.DebuggingPort == 0
-            ? "port=0, per-UDF ephemeral"
-            : $"port={_config.DebuggingPort}";
-        LogMessage($"[*] WebView2 remote debugging already configured ({configuredMode})");
+        LogMessage("[!] Process injection failed but user env was already correct — continuing on the");
+        LogMessage("    assumption that Revit inherited the flag at launch.");
         return true;
     }
+
+    /// <summary>
+    /// Sets an environment variable inside the running Revit process by injecting a
+    /// small x64 shellcode that calls kernel32!SetEnvironmentVariableW(name, value).
+    /// kernel32.dll is mapped at the same virtual address in every process per boot,
+    /// so the local GetProcAddress result is valid in Revit too.
+    ///
+    /// Returns false when OpenProcess is denied (elevation mismatch / SACL), when any
+    /// VirtualAllocEx / WriteProcessMemory / CreateRemoteThread call fails (typically
+    /// AV blocking), or when the remote SetEnvironmentVariableW itself returns 0.
+    /// Callers should treat false as "fall back to restart-Revit UX".
+    /// </summary>
+    private bool TryInjectEnvVarIntoRevit(int revitPid, string name, string value)
+    {
+        if (!Environment.Is64BitProcess)
+        {
+            LogMessage("[!] Env-var injection requires a 64-bit Assistant process. Skipping.");
+            return false;
+        }
+
+        const uint PROCESS_CREATE_THREAD     = 0x0002;
+        const uint PROCESS_QUERY_INFORMATION = 0x0400;
+        const uint PROCESS_VM_OPERATION      = 0x0008;
+        const uint PROCESS_VM_WRITE          = 0x0020;
+        const uint PROCESS_VM_READ           = 0x0010;
+        const uint MEM_COMMIT_RESERVE        = 0x3000;
+        const uint MEM_RELEASE               = 0x8000;
+        const uint PAGE_READWRITE            = 0x04;
+        const uint PAGE_EXECUTE_READ         = 0x20;
+        const uint PAGE_EXECUTE_READWRITE    = 0x40;
+        const uint WAIT_OBJECT_0             = 0x0;
+
+        var access = PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION
+                     | PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ;
+
+        IntPtr hProc = OpenProcess(access, false, revitPid);
+        if (hProc == IntPtr.Zero)
+        {
+            var err = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+            LogMessage($"[!] OpenProcess(Revit PID {revitPid}) failed with Win32 error {err}.");
+            if (err == 5) // ERROR_ACCESS_DENIED
+                LogMessage("    Likely cause: Revit is running elevated and Assistant is not (or vice-versa).");
+            return false;
+        }
+
+        IntPtr pData = IntPtr.Zero;
+        IntPtr pCode = IntPtr.Zero;
+        IntPtr hThread = IntPtr.Zero;
+        try
+        {
+            IntPtr hKernel32 = GetModuleHandle("kernel32.dll");
+            if (hKernel32 == IntPtr.Zero)
+            {
+                LogMessage("[!] GetModuleHandle(kernel32.dll) returned null. Cannot inject.");
+                return false;
+            }
+            IntPtr pSetEnv = GetProcAddress(hKernel32, "SetEnvironmentVariableW");
+            if (pSetEnv == IntPtr.Zero)
+            {
+                LogMessage("[!] GetProcAddress(SetEnvironmentVariableW) failed. Cannot inject.");
+                return false;
+            }
+
+            byte[] nameBytes  = System.Text.Encoding.Unicode.GetBytes(name  + "\0");
+            byte[] valueBytes = System.Text.Encoding.Unicode.GetBytes(value + "\0");
+            uint dataSize = (uint)(nameBytes.Length + valueBytes.Length);
+
+            pData = VirtualAllocEx(hProc, IntPtr.Zero, dataSize, MEM_COMMIT_RESERVE, PAGE_READWRITE);
+            if (pData == IntPtr.Zero)
+            {
+                LogMessage($"[!] VirtualAllocEx (data) failed: {System.Runtime.InteropServices.Marshal.GetLastWin32Error()}");
+                return false;
+            }
+            IntPtr pName  = pData;
+            IntPtr pValue = new IntPtr(pData.ToInt64() + nameBytes.Length);
+
+            if (!WriteProcessMemory(hProc, pName,  nameBytes,  (uint)nameBytes.Length,  out _) ||
+                !WriteProcessMemory(hProc, pValue, valueBytes, (uint)valueBytes.Length, out _))
+            {
+                LogMessage($"[!] WriteProcessMemory (data) failed: {System.Runtime.InteropServices.Marshal.GetLastWin32Error()}");
+                return false;
+            }
+
+            // x64 shellcode:
+            //   48 83 EC 28              sub  rsp, 0x28        ; shadow space + alignment
+            //   48 B9 <imm64 pName>      mov  rcx, pName
+            //   48 BA <imm64 pValue>     mov  rdx, pValue
+            //   48 B8 <imm64 pSetEnv>    mov  rax, SetEnvironmentVariableW
+            //   FF D0                    call rax
+            //   48 83 C4 28              add  rsp, 0x28
+            //   C3                       ret
+            byte[] shellcode = new byte[4 + 10 + 10 + 10 + 2 + 4 + 1];
+            int o = 0;
+            shellcode[o++] = 0x48; shellcode[o++] = 0x83; shellcode[o++] = 0xEC; shellcode[o++] = 0x28;
+            shellcode[o++] = 0x48; shellcode[o++] = 0xB9;
+            Buffer.BlockCopy(BitConverter.GetBytes(pName.ToInt64()),   0, shellcode, o, 8); o += 8;
+            shellcode[o++] = 0x48; shellcode[o++] = 0xBA;
+            Buffer.BlockCopy(BitConverter.GetBytes(pValue.ToInt64()),  0, shellcode, o, 8); o += 8;
+            shellcode[o++] = 0x48; shellcode[o++] = 0xB8;
+            Buffer.BlockCopy(BitConverter.GetBytes(pSetEnv.ToInt64()), 0, shellcode, o, 8); o += 8;
+            shellcode[o++] = 0xFF; shellcode[o++] = 0xD0;
+            shellcode[o++] = 0x48; shellcode[o++] = 0x83; shellcode[o++] = 0xC4; shellcode[o++] = 0x28;
+            shellcode[o++] = 0xC3;
+
+            pCode = VirtualAllocEx(hProc, IntPtr.Zero, (uint)shellcode.Length, MEM_COMMIT_RESERVE, PAGE_EXECUTE_READWRITE);
+            if (pCode == IntPtr.Zero)
+            {
+                LogMessage($"[!] VirtualAllocEx (code) failed: {System.Runtime.InteropServices.Marshal.GetLastWin32Error()}");
+                return false;
+            }
+            if (!WriteProcessMemory(hProc, pCode, shellcode, (uint)shellcode.Length, out _))
+            {
+                LogMessage($"[!] WriteProcessMemory (code) failed: {System.Runtime.InteropServices.Marshal.GetLastWin32Error()}");
+                return false;
+            }
+
+            // Tighten permissions on the code page before executing — some EDR products
+            // flag RWX pages but tolerate RX.
+            VirtualProtectEx(hProc, pCode, (uint)shellcode.Length, PAGE_EXECUTE_READ, out _);
+
+            hThread = CreateRemoteThread(hProc, IntPtr.Zero, 0, pCode, IntPtr.Zero, 0, out _);
+            if (hThread == IntPtr.Zero)
+            {
+                var err = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                LogMessage($"[!] CreateRemoteThread failed: {err}. Likely AV/EDR blocking remote-thread creation.");
+                return false;
+            }
+
+            var wait = WaitForSingleObject(hThread, 5000);
+            if (wait != WAIT_OBJECT_0)
+            {
+                LogMessage($"[!] Remote thread did not finish within 5s (WaitForSingleObject={wait}).");
+                return false;
+            }
+
+            if (!GetExitCodeThread(hThread, out uint exitCode))
+            {
+                LogMessage($"[!] GetExitCodeThread failed: {System.Runtime.InteropServices.Marshal.GetLastWin32Error()}");
+                return false;
+            }
+            if (exitCode == 0)
+            {
+                LogMessage("[!] SetEnvironmentVariableW returned FALSE inside Revit.");
+                return false;
+            }
+
+            LogMessage($"[+] Patched Revit (PID {revitPid}) env block — next WebView2 spawn will inherit the flag.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogMessage($"[!] Env-var injection threw: {ex.GetType().Name}: {ex.Message}");
+            return false;
+        }
+        finally
+        {
+            if (hThread != IntPtr.Zero) CloseHandle(hThread);
+            if (pCode   != IntPtr.Zero) VirtualFreeEx(hProc, pCode, 0, MEM_RELEASE);
+            if (pData   != IntPtr.Zero) VirtualFreeEx(hProc, pData, 0, MEM_RELEASE);
+            CloseHandle(hProc);
+        }
+    }
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, int dwProcessId);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool VirtualFreeEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, uint dwFreeType);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, uint flNewProtect, out uint lpflOldProtect);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize, out IntPtr lpNumberOfBytesWritten);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr CreateRemoteThread(IntPtr hProcess, IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, out IntPtr lpThreadId);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+    private static extern uint WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool GetExitCodeThread(IntPtr hThread, out uint lpExitCode);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
+    private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Ansi, SetLastError = true)]
+    private static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
 
     /// <summary>
     /// Uses Windows UI Automation to click the Dalux tab in Revit's ribbon,

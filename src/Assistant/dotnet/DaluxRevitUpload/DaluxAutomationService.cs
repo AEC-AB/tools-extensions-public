@@ -95,7 +95,7 @@ public class DaluxAutomationService : IDisposable
                     await DebugPageStructureAsync(cancellationToken);
                     break;
                 }
-                catch (InvalidOperationException ex) when (ex.Message.Contains("-32000"))
+                catch (InvalidOperationException ex) when (ex.Message.Contains("-32000") || ex.Message.Contains("CDP-EARLY-CLOSE"))
                 {
                     if (ctxRetries >= _config.RetryCount)
                     {
@@ -109,14 +109,34 @@ public class DaluxAutomationService : IDisposable
                         return false;
                     }
                     ctxRetries++;
-                    LogMessage($"[*] Page navigated after connect — waiting and reconnecting (attempt {ctxRetries}/{_config.RetryCount})...");
+                    LogMessage($"[*] Page navigated or closed before script completed — waiting and reconnecting (attempt {ctxRetries}/{_config.RetryCount})...");
                     await Task.Delay(2000, cancellationToken);
 
                     await _cdpClient.CloseAsync();
                     _cdpClient.ResetConnection();
 
-                    // Re-fetch URL — after navigation the target may have a new WebSocket URL
-                    wsUrl = await CdpClient.GetWebSocketUrlAsync(endpointPort, cancellationToken) ?? wsUrl;
+                    // The Dalux popup often re-spawns as a different WebView2 process during init,
+                    // which means the previous port may now be dead. Probe it first; if it's gone,
+                    // rediscover the endpoint from scratch (DevToolsActivePort + WebView2 port scan).
+                    var oldPortProbe = await CdpClient.ProbeVersionAsync(endpointPort, cancellationToken);
+                    if (!oldPortProbe.CdpUp)
+                    {
+                        LogMessage($"[*] Previous CDP port {endpointPort} is dead — rediscovering Dalux endpoint (up to 30s)...");
+                        var rediscovered = await FindDaluxEndpointAnywhereAsync(TimeSpan.FromSeconds(30), cancellationToken);
+                        if (rediscovered == null)
+                        {
+                            LogMessage("[!] Could not rediscover the Dalux popup CDP endpoint after it tore down.");
+                            return false;
+                        }
+                        (endpointPort, wsUrl) = rediscovered.Value;
+                        LogMessage($"[+] Rediscovered Dalux CDP endpoint on port {endpointPort}");
+                    }
+                    else
+                    {
+                        // Port is still alive — same process, just refresh the WS URL in case the
+                        // tab Id changed.
+                        wsUrl = await CdpClient.GetWebSocketUrlAsync(endpointPort, cancellationToken) ?? wsUrl;
+                    }
 
                     // Reconnect, retrying past any 500 until the new page is ready
                     int reAttempts = 0;
@@ -1329,6 +1349,7 @@ public class DaluxAutomationService : IDisposable
         LogMessage($"\n[*] Processing files, target: '{_config.TargetFilename}'");
 
         var jsScript = GenerateMainAutomationScript();
+        var evaluateStartedAt = DateTime.UtcNow;
 
         try
         {
@@ -1376,8 +1397,31 @@ public class DaluxAutomationService : IDisposable
         }
         catch (Exception ex) when (ex.Message.Contains("WebSocket") && ex.Message.Contains("closed"))
         {
-            // Expected when popup closes after upload completes
-            LogMessage("[+] Popup closed after action completion");
+            // Previously this catch silently reported success on ANY WebSocket close during
+            // Runtime.evaluate, on the assumption it always meant "popup closed after upload
+            // completed". That masked the much more common failure where the Dalux popup tears
+            // down the CDP context shortly after we connect (popup still navigating), so the JS
+            // never ran. Distinguish the two by elapsed time AND whether an action button was
+            // actually requested:
+            //   • close before the script could plausibly finish → throw EARLY-CLOSE so the
+            //     outer retry loop reconnects (same handling as CDP -32000).
+            //   • close after a long run with TriggerUpload=true → treat as the legitimate
+            //     post-upload teardown.
+            var elapsed = DateTime.UtcNow - evaluateStartedAt;
+            var actionRequested = !string.IsNullOrEmpty(_config.ActionButtonText);
+            if (actionRequested && elapsed >= TimeSpan.FromSeconds(30))
+            {
+                LogMessage($"[+] Popup closed after {elapsed.TotalSeconds:F0}s — assuming post-upload teardown.");
+            }
+            else
+            {
+                LogMessage($"[!] WebSocket closed after only {elapsed.TotalSeconds:F1}s — Dalux popup tore down the CDP context before the automation script could complete.");
+                LogMessage($"[!] Underlying error: {ex.Message}");
+                throw new InvalidOperationException(
+                    $"CDP-EARLY-CLOSE: Dalux popup closed/navigated before the automation script could complete (after {elapsed.TotalSeconds:F1}s). " +
+                    "This usually means the WebView2 popup was still initialising when we connected and the page navigation killed the CDP context.",
+                    ex);
+            }
         }
         catch (Exception ex)
         {

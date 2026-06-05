@@ -299,16 +299,32 @@ public class CdpClient : IDisposable
     }
 
     /// <summary>
-    /// Closes the WebSocket connection
+    /// Closes the WebSocket connection. Tolerates the common case where the remote
+    /// (Dalux popup) has already torn the socket down — e.g. after a successful upload
+    /// the popup window is destroyed before we get a chance to send a Close frame. In
+    /// that case CloseAsync throws WebSocketException ("remote party closed without
+    /// completing the close handshake") which is not a real failure for our purposes:
+    /// we're done with the connection either way.
     /// </summary>
     public async Task CloseAsync()
     {
-        if (_webSocket?.State == WebSocketState.Open)
+        if (_webSocket?.State != WebSocketState.Open)
+            return;
+
+        try
         {
             await _webSocket.CloseAsync(
                 WebSocketCloseStatus.NormalClosure,
                 "Closing",
                 CancellationToken.None);
+        }
+        catch (WebSocketException)
+        {
+            // Remote already gone — nothing to clean up beyond Dispose, which runs separately.
+        }
+        catch (InvalidOperationException)
+        {
+            // Socket transitioned out of Open between the check and the call.
         }
     }
 

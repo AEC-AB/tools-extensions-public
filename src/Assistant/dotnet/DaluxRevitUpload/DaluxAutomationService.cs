@@ -1,4 +1,4 @@
-//-------------------------------------------------------------------------------
+﻿//-------------------------------------------------------------------------------
 // DaluxAutomationService.cs
 //
 // Main service class that orchestrates the Dalux headless automation.
@@ -514,17 +514,50 @@ public class DaluxAutomationService : IDisposable
         LogMessage("[*] Waiting for Dalux ribbon panel to load...");
         await Task.Delay(1500, cancellationToken);
 
-        // Find and click the Upload button in the Dalux ribbon panel
+        // Find and click the Upload button in the Dalux ribbon panel.
+        // We search broadly because the Dalux plugin's exact label/control-type varies
+        // across versions and Revit locales:
+        //   - Some versions ship a Button literally named "Upload".
+        //   - Others ship a SplitButton named "Upload Model" / "Upload to Dalux".
+        //   - Localized Revit installs may translate the label.
+        // Strategy: match any element whose Name contains "upload" (case-insensitive),
+        // regardless of ControlType. Retry for several seconds while the ribbon paints.
         LogMessage("[*] Looking for Upload button in Dalux ribbon...");
         AutomationElement? uploadBtn = null;
         int attempts = 0;
-        while (uploadBtn == null && attempts < 5)
+        const int maxAttempts = 10;
+        while (uploadBtn == null && attempts < maxAttempts)
         {
+            // Pass 1: exact "Upload" Button (the original happy path — fastest match).
             uploadBtn = revitWindow.FindFirst(
                 TreeScope.Descendants,
                 new AndCondition(
                     new PropertyCondition(AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Button),
                     new PropertyCondition(AutomationElement.NameProperty, "Upload", PropertyConditionFlags.IgnoreCase)));
+
+            // Pass 2: any control whose Name contains "upload" (substring, case-insensitive),
+            // restricted to clickable types so we don't grab a static text label.
+            if (uploadBtn == null)
+            {
+                var candidates = revitWindow.FindAll(TreeScope.Descendants,
+                    new OrCondition(
+                        new PropertyCondition(AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Button),
+                        new PropertyCondition(AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.SplitButton),
+                        new PropertyCondition(AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.MenuItem),
+                        new PropertyCondition(AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.ListItem)));
+                foreach (AutomationElement c in candidates)
+                {
+                    var name = c.Current.Name ?? string.Empty;
+                    if (name.IndexOf("upload", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        uploadBtn = c;
+                        if (attempts > 0)
+                            LogMessage($"[*] Matched broader candidate: ControlType={c.Current.ControlType.ProgrammaticName}, Name=\"{name}\"");
+                        break;
+                    }
+                }
+            }
+
             if (uploadBtn == null)
             {
                 attempts++;
@@ -535,6 +568,7 @@ public class DaluxAutomationService : IDisposable
         if (uploadBtn == null)
         {
             LogMessage("[!] Upload button not found in Dalux ribbon panel");
+            DumpRibbonCandidatesForDiagnostics(revitWindow);
             return false;
         }
 
@@ -566,6 +600,58 @@ public class DaluxAutomationService : IDisposable
         PostMessage(hwnd, WM_LBUTTONUP,   IntPtr.Zero,        lParam);
     }
 
+
+    /// <summary>
+    /// Dumps a snapshot of the Dalux ribbon's clickable controls so we can diagnose
+    /// "Upload button not found" failures remotely. The exact label varies across
+    /// Dalux plugin versions and Revit locales; the dump lets a remote user paste the
+    /// log back and we can add the correct match without another round-trip.
+    /// </summary>
+    private void DumpRibbonCandidatesForDiagnostics(AutomationElement revitWindow)
+    {
+        try
+        {
+            LogMessage("[DEBUG] Dumping clickable ribbon controls so we can see what's actually labelled.");
+            LogMessage("[DEBUG] Send these lines back so the Upload-button matcher can be updated for your Revit/Dalux version.");
+
+            var clickable = revitWindow.FindAll(TreeScope.Descendants,
+                new OrCondition(
+                    new PropertyCondition(AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Button),
+                    new PropertyCondition(AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.SplitButton),
+                    new PropertyCondition(AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.MenuItem),
+                    new PropertyCondition(AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.ListItem)));
+
+            int total = clickable.Count;
+            int shown = 0;
+            const int maxShown = 60;
+            foreach (AutomationElement c in clickable)
+            {
+                var name = c.Current.Name ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(name)) continue;
+
+                var lower = name.ToLowerInvariant();
+                bool relevant =
+                    lower.Contains("upload") ||
+                    lower.Contains("dalux")  ||
+                    lower.Contains("send")   ||
+                    lower.Contains("publish");
+
+                if (!relevant) continue;
+
+                LogMessage($"[DEBUG]   ControlType={c.Current.ControlType.ProgrammaticName} Name=\"{name}\" AutomationId=\"{c.Current.AutomationId}\"");
+                if (++shown >= maxShown) break;
+            }
+
+            if (shown == 0)
+                LogMessage($"[DEBUG]   No controls matched upload/dalux/send/publish (scanned {total} clickable elements). Dalux ribbon panel may not be loaded \u2014 try opening the Dalux tab manually and rerunning.");
+            else
+                LogMessage($"[DEBUG]   (showed {shown} of {total} clickable elements; only those whose Name contains upload/dalux/send/publish)");
+        }
+        catch (Exception ex)
+        {
+            LogMessage($"[DEBUG] Failed to enumerate ribbon controls: {ex.Message}");
+        }
+    }
     /// <summary>
     /// Path to the Dalux WebView2 UserDataFolder's DevToolsActivePort file. Chromium
     /// writes this file when --remote-debugging-port is present (including =0 for an

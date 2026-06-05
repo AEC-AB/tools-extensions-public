@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ExtensionId>DaluxRevitUpload</ExtensionId>
     <Authors>AEC AB</Authors>
-    <Version>0.0.2</Version>
+    <Version>0.0.3</Version>
     <Title>DaluxRevitUpload</Title>
     <Description>DaluxRevitUpload Description</Description>
     <PackageTags>AssistantExtension;Assistant;Extension</PackageTags>

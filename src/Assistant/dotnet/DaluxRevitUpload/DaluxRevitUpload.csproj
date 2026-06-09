@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ExtensionId>DaluxRevitUpload</ExtensionId>
+    <Authors>AEC AB</Authors>
+    <Version>0.0.4</Version>
+    <Title>DaluxRevitUpload</Title>
+    <Description>DaluxRevitUpload Description</Description>
+    <PackageTags>AssistantExtension;Assistant;Extension</PackageTags>
+    <PackageIcon>Icon.png</PackageIcon>
+    <LangVersion>12</LangVersion>
+    <UseWPF>true</UseWPF>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <PackageIconUrl></PackageIconUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="Icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+</Project>

@@ -46,19 +46,62 @@ public class DaluxRevitUploadCommand : IAssistantExtension<DaluxRevitUploadArgs>
             using var service = new DaluxAutomationService(config);
             
             // Log that we're starting automation
-            var successMessage = await service.RunAutomationAsync(cancellationToken);
+            var success = await service.RunAutomationAsync(cancellationToken);
 
             // Step 5: Gather the audit log and return results
             var auditLog = service.GetAuditLogAsString();
+            var summary = BuildSummary(config, columnFields, success, errorMessage: null);
+            var message = $"{summary}\n\n## Log\n\n{auditLog}";
 
-            if (successMessage)
-                return Result.Text.Succeeded(auditLog);
+            if (success)
+                return Result.Text.Succeeded(message);
             else
-                return Result.Text.Failed($"Dalux automation failed or was cancelled.\n\n{auditLog}");
+                return Result.Text.Failed(message);
         }
         catch (Exception ex)
         {
-            return Result.Text.Failed($"Error during Dalux automation: {ex.Message}\n\nStack: {ex.StackTrace}");
+            return Result.Text.Failed(
+                $"## Dalux Upload\n\n" +
+                $"- **Status:** Error\n" +
+                $"- **Error:** {ex.Message}\n\n" +
+                $"## Log\n\n" +
+                $"{ex.StackTrace}");
         }
+    }
+
+    private static string BuildSummary(
+        DaluxAutomationConfig config,
+        IReadOnlyDictionary<string, string> columnFields,
+        bool success,
+        string? errorMessage)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("## Dalux Upload");
+        sb.AppendLine();
+        sb.AppendLine($"- **Status:** {(success ? "Succeeded" : "Failed")}");
+        sb.AppendLine($"- **Target file:** {config.TargetFilename}");
+        sb.AppendLine($"- **Revision increment:** {config.RevisionIncrement}");
+        sb.AppendLine($"- **Upload triggered:** {(string.IsNullOrEmpty(config.ActionButtonText) ? "No (dry run)" : "Yes")}");
+        sb.AppendLine($"- **Revit process id:** {config.RevitProcessId}");
+
+        sb.AppendLine();
+        if (columnFields.Count == 0)
+        {
+            sb.AppendLine("**Column fields:** _none provided_");
+        }
+        else
+        {
+            sb.AppendLine("**Column fields set:**");
+            foreach (var kvp in columnFields)
+                sb.AppendLine($"- `{kvp.Key}`: {kvp.Value}");
+        }
+
+        if (!string.IsNullOrEmpty(errorMessage))
+        {
+            sb.AppendLine();
+            sb.AppendLine($"**Error:** {errorMessage}");
+        }
+
+        return sb.ToString().TrimEnd();
     }
 }

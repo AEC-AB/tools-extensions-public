@@ -1,0 +1,29 @@
+{
+  "Custom Autofill AutoCAD": {
+    "prefix": [
+      "control-type-auto-fill-custom-autocad"
+    ],
+    "body": [
+      "[Description(\"${1:ControlName}\")]",
+      "[CustomAutoCADAutoFill(typeof(${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g}AutoFillCollector))]",
+      "public string ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g} { get; set; }",
+      "",
+      "internal class ${1/([a-zA-z]*) +([a-z]*)/${1:/capitalize}${2:/capitalize}/g}AutoFillCollector : IAutoCADAutoFillCollector<${2:Plant3DOpenAndPurge2Args}>",
+      "{",
+      "    public Dictionary<string, string> Get(${2:Plant3DOpenAndPurge2Args} args)",
+      "    {",
+      "        var result = new Dictionary<string, string>();",
+      "        try",
+      "        {",
+      "            var document = Application.DocumentManager.MdiActiveDocument;",
+      "            if (document is null) return result;",
+      "            ${3}",
+      "        }",
+      "        catch { }",
+      "        return result;",
+      "    }",
+      "}",
+    ],
+    "description": "Control for Extension UI with custom autofill with AutoCAD context"
+  }
+}

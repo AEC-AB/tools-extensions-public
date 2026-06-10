@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ExtensionId>Plant3DOpenAndPurge2</ExtensionId>
+    <Authors>AEC AB</Authors>
+    <Version>0.0.1</Version>
+    <Title>Plant3DOpenAndPurge2</Title>
+    <Description>Plant3DOpenAndPurge2 Description</Description>
+    <PackageTags>AutoCAD;Assistant;Extension</PackageTags>
+    <PackageIcon>Icon.png</PackageIcon>
+    <PackageIconUrl></PackageIconUrl>
+    <!-- 
+		Adjust MainAutoCADVersion to get IntelliSense for the correct version do a 
+		dotnet restore to restore the correct nuget packages for the selected AutoCAD version.
+		-->
+		<MainAutoCADVersion Condition="'$(Configuration)' == 'Debug'">2025</MainAutoCADVersion>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+
+  <Import Project=".\Configurations.targets" />
+
+  <ItemGroup>
+    <None Include="Icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <!-- Plant 3D Assembly References -->
+  <ItemGroup>
+    <Reference Include="PnP3dObjectsMgd">
+      <HintPath>C:\Program Files\Autodesk\AutoCAD 2025\PLNT3D\PnP3dObjectsMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PnPProjectManagerMgd">
+      <HintPath>C:\Program Files\Autodesk\AutoCAD 2025\PLNT3D\PnPProjectManagerMgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

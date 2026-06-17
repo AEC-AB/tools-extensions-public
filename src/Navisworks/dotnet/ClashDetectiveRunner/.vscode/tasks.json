@@ -1,0 +1,67 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Navisworks 2019",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "-c",
+                "Debug 2019"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Navisworks 2020",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "-c",
+                "Debug 2020"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Navisworks 2021",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "-c",
+                "Debug 2021"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Navisworks 2022",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "-c",
+                "Debug 2022"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Navisworks 2023",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "-c",
+                "Debug 2023"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Navisworks 2024",
+            "command": "dotnet",
+            "args": [
+                "publish",
+                "-c",
+                "Debug 2024"
+            ],
+            "group": "build"
+        }
+    ]
+}

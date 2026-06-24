@@ -102,7 +102,8 @@ internal static class StreamBimDownloadService
             return await DownloadFilesByWildcardAsync(args, client, projectPath, fullFilePath, cancellationToken);
         }
 
-        var item = await client.GetObjectInfo(fullFilePath, token: cancellationToken);
+        var item = await client.GetObjectInfo(fullFilePath, token: cancellationToken)
+            ?? await TryResolveItemFromParentListingAsync(client, fullFilePath, cancellationToken);
         if (item is null)
         {
             return StreamBimItemDownloadResult.Failed(displayPath, "File not found.");
@@ -119,6 +120,32 @@ internal static class StreamBimDownloadService
         }
 
         return StreamBimItemDownloadResult.Empty;
+    }
+
+    private static async Task<FtpListItem?> TryResolveItemFromParentListingAsync(
+        AsyncFtpClient client,
+        string fullFilePath,
+        CancellationToken cancellationToken)
+    {
+        var folder = Path.GetDirectoryName(fullFilePath)?.Replace('\\', '/');
+        var fileName = Path.GetFileName(fullFilePath);
+        if (string.IsNullOrWhiteSpace(folder) || string.IsNullOrWhiteSpace(fileName))
+        {
+            return null;
+        }
+
+        var listing = await client.GetListing(folder, cancellationToken);
+        foreach (var item in listing)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (string.Equals(item.Name, fileName, StringComparison.OrdinalIgnoreCase))
+            {
+                return item;
+            }
+        }
+
+        return null;
     }
 
     private static async Task<StreamBimItemDownloadResult> DownloadFilesByWildcardAsync(

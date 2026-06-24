@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Threading;
@@ -102,11 +104,13 @@ internal static class StreamBimDownloadService
             return await DownloadFilesByWildcardAsync(args, client, projectPath, fullFilePath, cancellationToken);
         }
 
+        var resolution = await ResolveFtpPathAsync(client, fullFilePath, cancellationToken);
         var item = await client.GetObjectInfo(fullFilePath, token: cancellationToken)
-            ?? await TryResolveItemFromParentListingAsync(client, fullFilePath, cancellationToken);
+            ?? await TryResolveItemFromParentListingAsync(client, fullFilePath, cancellationToken)
+            ?? resolution.Item;
         if (item is null)
         {
-            return StreamBimItemDownloadResult.Failed(displayPath, "File not found.");
+            return StreamBimItemDownloadResult.Failed(displayPath, CreatePathNotFoundMessage(resolution, false));
         }
 
         if (item.Type == FtpObjectType.File)
@@ -163,7 +167,15 @@ internal static class StreamBimDownloadService
 
         var builder = new StreamBimDownloadOutcomeBuilder();
         var pattern = Path.GetFileName(file);
-        await foreach (var itemInFolder in client.GetListingEnumerable(folder))
+        var folderResolution = await ResolveFtpPathAsync(client, folder, cancellationToken);
+        if (folderResolution.Item?.Type != FtpObjectType.Directory)
+        {
+            return StreamBimItemDownloadResult.Failed(file.TrimStart('/'), CreatePathNotFoundMessage(folderResolution, true));
+        }
+
+        var matchedAny = false;
+        var listing = await client.GetListing(GetResolvedItemPath(folderResolution.ValidParentPath, folderResolution.Item), cancellationToken);
+        foreach (var itemInFolder in listing)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -172,9 +184,178 @@ internal static class StreamBimDownloadService
                 continue;
             }
 
+            matchedAny = true;
             builder.Add(await StreamBimFileTransferService.DownloadFileAsync(args, client, projectPath, itemInFolder, cancellationToken));
+        }
+
+        if (!matchedAny)
+        {
+            var similarFiles = GetSimilarNames(pattern, listing.Where(item => item.Type == FtpObjectType.File));
+            return StreamBimItemDownloadResult.Failed(file.TrimStart('/'), CreateWildcardNotFoundMessage(pattern, folder, similarFiles));
         }
 
         return builder.BuildItemResult();
     }
+
+    private static async Task<FtpPathResolution> ResolveFtpPathAsync(
+        AsyncFtpClient client,
+        string fullFilePath,
+        CancellationToken cancellationToken)
+    {
+        var segments = fullFilePath
+            .Replace('\\', '/')
+            .Trim('/')
+            .Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+        if (segments.Length == 0)
+        {
+            return new FtpPathResolution(null, "/", null, false, []);
+        }
+
+        var currentFolder = "/";
+        FtpListItem? matchedItem = null;
+        for (var index = 0; index < segments.Length; index++)
+        {
+            var listing = await client.GetListing(currentFolder, cancellationToken);
+            matchedItem = null;
+            foreach (var item in listing)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (string.Equals(item.Name, segments[index], StringComparison.OrdinalIgnoreCase))
+                {
+                    matchedItem = item;
+                    break;
+                }
+            }
+
+            if (matchedItem is null)
+            {
+                var missingSegmentShouldBeFolder = index < segments.Length - 1;
+                return new FtpPathResolution(
+                    null,
+                    currentFolder,
+                    segments[index],
+                    missingSegmentShouldBeFolder,
+                    GetSimilarNames(segments[index], listing, missingSegmentShouldBeFolder ? FtpObjectType.Directory : null));
+            }
+
+            if (index == segments.Length - 1)
+            {
+                return new FtpPathResolution(matchedItem, currentFolder, null, false, []);
+            }
+
+            if (matchedItem.Type != FtpObjectType.Directory)
+            {
+                return new FtpPathResolution(null, currentFolder, segments[index], true, []);
+            }
+
+            currentFolder = GetResolvedItemPath(currentFolder, matchedItem);
+        }
+
+        return new FtpPathResolution(matchedItem, currentFolder, null, false, []);
+    }
+
+    private static string GetResolvedItemPath(string parentFolder, FtpListItem item)
+    {
+        if (!string.IsNullOrWhiteSpace(item.FullName))
+        {
+            return item.FullName.Replace('\\', '/');
+        }
+
+        return StreamBimPathHelper.CombineFtpPath(parentFolder, item.Name);
+    }
+
+    private static string CreatePathNotFoundMessage(FtpPathResolution resolution, bool expectedFolder)
+    {
+        if (resolution.MissingSegment is null)
+        {
+            return expectedFolder ? "Folder not found." : "File not found.";
+        }
+
+        var itemKind = expectedFolder || resolution.MissingSegmentShouldBeFolder ? "folder" : "file or folder";
+        var validPath = string.IsNullOrWhiteSpace(resolution.ValidParentPath.TrimStart('/')) ? "/" : resolution.ValidParentPath.TrimStart('/');
+        var message = $"Missing {itemKind} '{resolution.MissingSegment}'. Path is valid through '{validPath}'.";
+        if (resolution.SimilarNames.Count > 0)
+        {
+            message += $" Similar names: {string.Join(", ", resolution.SimilarNames)}.";
+        }
+
+        return message;
+    }
+
+    private static string CreateWildcardNotFoundMessage(string pattern, string folder, IReadOnlyList<string> similarFiles)
+    {
+        var message = $"No files matched wildcard '{pattern}'. Folder exists: '{folder.TrimStart('/')}'.";
+        if (similarFiles.Count > 0)
+        {
+            message += $" Similar files: {string.Join(", ", similarFiles)}.";
+        }
+
+        return message;
+    }
+
+    private static IReadOnlyList<string> GetSimilarNames(string expectedName, IEnumerable<FtpListItem> items, FtpObjectType? itemType = null)
+    {
+        return items
+            .Where(item => itemType is null || item.Type == itemType)
+            .Where(item => !string.IsNullOrWhiteSpace(item.Name))
+            .Select(item => item.Name)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name => GetSimilarityScore(expectedName, name))
+            .ThenBy(name => name, StringComparer.OrdinalIgnoreCase)
+            .Take(5)
+            .ToArray();
+    }
+
+    private static int GetSimilarityScore(string expectedName, string candidateName)
+    {
+        if (candidateName.StartsWith(expectedName, StringComparison.OrdinalIgnoreCase) ||
+            expectedName.StartsWith(candidateName, StringComparison.OrdinalIgnoreCase))
+        {
+            return 0;
+        }
+
+        if (candidateName.Contains(expectedName, StringComparison.OrdinalIgnoreCase) ||
+            expectedName.Contains(candidateName, StringComparison.OrdinalIgnoreCase))
+        {
+            return 1;
+        }
+
+        return GetLevenshteinDistance(expectedName, candidateName);
+    }
+
+    private static int GetLevenshteinDistance(string left, string right)
+    {
+        var distances = new int[left.Length + 1, right.Length + 1];
+        for (var leftIndex = 0; leftIndex <= left.Length; leftIndex++)
+        {
+            distances[leftIndex, 0] = leftIndex;
+        }
+
+        for (var rightIndex = 0; rightIndex <= right.Length; rightIndex++)
+        {
+            distances[0, rightIndex] = rightIndex;
+        }
+
+        for (var leftIndex = 1; leftIndex <= left.Length; leftIndex++)
+        {
+            for (var rightIndex = 1; rightIndex <= right.Length; rightIndex++)
+            {
+                var cost = char.ToUpperInvariant(left[leftIndex - 1]) == char.ToUpperInvariant(right[rightIndex - 1]) ? 0 : 1;
+                distances[leftIndex, rightIndex] = Math.Min(
+                    Math.Min(distances[leftIndex - 1, rightIndex] + 1, distances[leftIndex, rightIndex - 1] + 1),
+                    distances[leftIndex - 1, rightIndex - 1] + cost);
+            }
+        }
+
+        return distances[left.Length, right.Length];
+    }
+
+    private sealed record FtpPathResolution(
+        FtpListItem? Item,
+        string ValidParentPath,
+        string? MissingSegment,
+        bool MissingSegmentShouldBeFolder,
+        IReadOnlyList<string> SimilarNames);
 }

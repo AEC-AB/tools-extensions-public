@@ -28,7 +28,7 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
         }
 
         var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.Project);
-        var lookupContexts = CreateLookupContexts(args.Files);
+        var lookupContexts = CreateLookupContexts(projectPath, args.Files);
 
         try
         {
@@ -196,17 +196,20 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
         return StreamBimPathHelper.GetLeafName(path);
     }
 
-    private static IReadOnlyList<LookupContext> CreateLookupContexts(IReadOnlyList<string> configuredFiles)
+    private static IReadOnlyList<LookupContext> CreateLookupContexts(string projectPath, IReadOnlyList<string> configuredFiles)
     {
         var contexts = new List<LookupContext>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var normalizedConfiguredFiles = configuredFiles
+            .Select(configuredFile => StreamBimPathHelper.NormalizeConfiguredFile(projectPath, configuredFile))
+            .ToArray();
 
-        var currentInput = configuredFiles
+        var currentInput = normalizedConfiguredFiles
             .LastOrDefault(value => !string.IsNullOrWhiteSpace(value));
         var currentContext = CreateLookupContext(currentInput);
         AddLookupContext(contexts, seen, currentContext);
 
-        foreach (var folderPath in configuredFiles.Select(GetFolderPath))
+        foreach (var folderPath in normalizedConfiguredFiles.Select(GetFolderPath))
         {
             AddLookupContext(contexts, seen, new LookupContext(folderPath, string.Empty));
         }

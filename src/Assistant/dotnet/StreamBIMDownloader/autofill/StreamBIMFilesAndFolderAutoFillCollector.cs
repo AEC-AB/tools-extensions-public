@@ -14,7 +14,7 @@ namespace StreamBIMDownloader;
 [SupportedOSPlatform("windows")]
 internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollector<StreamBIMDownloaderArgs>
 {
-    private const int MaxSuggestionDepth = 2;
+    private const int MaxSuggestionDepth = 3;
     private const string NoResultsMessage = "No results found. The folder may be empty or not exist. Try changing the folder and clicking reload.";
     private const string SelectProjectMessage = "Select a project and click reload";
     private static readonly TimeSpan CacheLifetime = TimeSpan.FromMinutes(2);

@@ -163,7 +163,7 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
             foreach (var item in folderListing.Items)
             {
                 var itemLeafName = GetLeafName(item.Name);
-                if (!itemLeafName.StartsWith(folderListing.NamePrefix, StringComparison.OrdinalIgnoreCase))
+                if (!StreamBimPathHelper.StartsWithNormalized(itemLeafName, folderListing.NamePrefix))
                 {
                     continue;
                 }
@@ -257,7 +257,7 @@ internal class StreamBIMFilesAndFolderAutoFillCollector : IAsyncAutoFillCollecto
 
     private static void AddLookupContext(List<LookupContext> contexts, HashSet<string> seen, LookupContext context)
     {
-        var key = $"{context.RelativeFolderPath}|{context.NamePrefix}";
+        var key = StreamBimPathHelper.NormalizeForComparison($"{context.RelativeFolderPath}|{context.NamePrefix}");
         if (!seen.Add(key))
         {
             return;

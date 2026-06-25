@@ -222,7 +222,7 @@ internal static class StreamBimDownloadService
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (string.Equals(item.Name, segments[index], StringComparison.OrdinalIgnoreCase))
+                if (StreamBimPathHelper.EqualsNormalized(item.Name, segments[index]))
                 {
                     matchedItem = item;
                     break;
@@ -296,7 +296,8 @@ internal static class StreamBimDownloadService
             .Where(item => itemType is null || item.Type == itemType)
             .Where(item => !string.IsNullOrWhiteSpace(item.Name))
             .Select(item => item.Name)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .GroupBy(StreamBimPathHelper.NormalizeForComparison, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
             .OrderBy(name => GetSimilarityScore(expectedName, name))
             .ThenBy(name => name, StringComparer.OrdinalIgnoreCase)
             .Take(5)
@@ -305,14 +306,17 @@ internal static class StreamBimDownloadService
 
     private static int GetSimilarityScore(string expectedName, string candidateName)
     {
-        if (candidateName.StartsWith(expectedName, StringComparison.OrdinalIgnoreCase) ||
-            expectedName.StartsWith(candidateName, StringComparison.OrdinalIgnoreCase))
+        expectedName = StreamBimPathHelper.NormalizeForComparison(expectedName);
+        candidateName = StreamBimPathHelper.NormalizeForComparison(candidateName);
+
+        if (StreamBimPathHelper.StartsWithNormalized(candidateName, expectedName) ||
+            StreamBimPathHelper.StartsWithNormalized(expectedName, candidateName))
         {
             return 0;
         }
 
-        if (candidateName.Contains(expectedName, StringComparison.OrdinalIgnoreCase) ||
-            expectedName.Contains(candidateName, StringComparison.OrdinalIgnoreCase))
+        if (StreamBimPathHelper.ContainsNormalized(candidateName, expectedName) ||
+            StreamBimPathHelper.ContainsNormalized(expectedName, candidateName))
         {
             return 1;
         }

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace StreamBIMDownloader;
@@ -28,8 +29,9 @@ internal static class StreamBimPathHelper
             return false;
         }
 
-        return name.EndsWith("-revs", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(name, "_backup", StringComparison.OrdinalIgnoreCase);
+        var normalizedName = NormalizeForComparison(name);
+        return normalizedName.EndsWith("-revs", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(normalizedName, "_backup", StringComparison.OrdinalIgnoreCase);
     }
 
     internal static bool AreEquivalentTimestamps(DateTime remoteTimestamp, DateTime localTimestamp)
@@ -83,11 +85,11 @@ internal static class StreamBimPathHelper
     internal static string CreateLocalPath(string downloadFolder, string projectPath, string remotePath)
     {
         var projectPrefix = NormalizeProjectPath(projectPath).TrimEnd('/');
-        var normalizedRemotePath = remotePath.Replace('\\', '/');
+        var normalizedRemotePath = NormalizeForComparison(remotePath.Replace('\\', '/'));
 
         var relativeRemotePath = projectPrefix.Length == 0 || projectPrefix == "/"
             ? normalizedRemotePath.TrimStart('/')
-            : normalizedRemotePath.StartsWith(projectPrefix + "/", StringComparison.OrdinalIgnoreCase)
+            : StartsWithNormalized(normalizedRemotePath, projectPrefix + "/")
                 ? normalizedRemotePath[(projectPrefix.Length + 1)..]
                 : normalizedRemotePath.TrimStart('/');
 
@@ -133,8 +135,8 @@ internal static class StreamBimPathHelper
 
     internal static bool MatchesWildcard(string fileName, string fileNameWithWildcard)
     {
-        var regex = "^" + Regex.Escape(fileNameWithWildcard).Replace("\\?", ".").Replace("\\*", ".*") + "$";
-        return Regex.IsMatch(fileName, regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        var regex = "^" + Regex.Escape(NormalizeForComparison(fileNameWithWildcard)).Replace("\\?", ".").Replace("\\*", ".*") + "$";
+        return Regex.IsMatch(NormalizeForComparison(fileName), regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     }
 
     internal static string NormalizeConfiguredFile(string projectPath, string? configuredFile)
@@ -145,13 +147,13 @@ internal static class StreamBimPathHelper
         }
 
         var normalized = NormalizeRelativePath(configuredFile.Trim().TrimStart('/').TrimEnd('/'));
-        var trimmedProjectPath = projectPath.Trim('/');
+        var trimmedProjectPath = NormalizeForComparison(projectPath.Trim('/'));
         if (!string.IsNullOrEmpty(trimmedProjectPath) &&
-            normalized.StartsWith(trimmedProjectPath + "/", StringComparison.OrdinalIgnoreCase))
+            StartsWithNormalized(normalized, trimmedProjectPath + "/"))
         {
             normalized = normalized[(trimmedProjectPath.Length + 1)..];
         }
-        else if (string.Equals(normalized, trimmedProjectPath, StringComparison.OrdinalIgnoreCase))
+        else if (EqualsNormalized(normalized, trimmedProjectPath))
         {
             normalized = string.Empty;
         }
@@ -166,7 +168,7 @@ internal static class StreamBimPathHelper
             return "/";
         }
 
-        var normalized = project.Trim();
+        var normalized = NormalizeForComparison(project.Trim());
         if (!normalized.StartsWith('/'))
         {
             normalized = "/" + normalized;
@@ -192,9 +194,29 @@ internal static class StreamBimPathHelper
                     throw new ArgumentException("Path segments cannot contain '.' or '..'.");
                 }
 
-                return segment;
+                return NormalizeForComparison(segment);
             });
 
         return string.Join("/", segments);
+    }
+
+    internal static bool ContainsNormalized(string value, string expected)
+    {
+        return NormalizeForComparison(value).Contains(NormalizeForComparison(expected), StringComparison.OrdinalIgnoreCase);
+    }
+
+    internal static bool EqualsNormalized(string? left, string? right)
+    {
+        return string.Equals(NormalizeForComparison(left), NormalizeForComparison(right), StringComparison.OrdinalIgnoreCase);
+    }
+
+    internal static string NormalizeForComparison(string? value)
+    {
+        return (value ?? string.Empty).Normalize(NormalizationForm.FormC);
+    }
+
+    internal static bool StartsWithNormalized(string value, string expected)
+    {
+        return NormalizeForComparison(value).StartsWith(NormalizeForComparison(expected), StringComparison.OrdinalIgnoreCase);
     }
 }

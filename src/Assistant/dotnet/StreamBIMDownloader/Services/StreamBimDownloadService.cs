@@ -258,14 +258,6 @@ internal static class StreamBimDownloadService
 
     private static string GetResolvedItemPath(string parentFolder, FtpListItem item)
     {
-        var normalizedFullName = item.FullName?.Replace('\\', '/');
-        if (!string.IsNullOrWhiteSpace(normalizedFullName) &&
-            normalizedFullName != "/" &&
-            string.Equals(StreamBimPathHelper.GetLeafName(normalizedFullName), item.Name, StringComparison.OrdinalIgnoreCase))
-        {
-            return normalizedFullName;
-        }
-
         return StreamBimPathHelper.CombineFtpPath(parentFolder, item.Name);
     }
 

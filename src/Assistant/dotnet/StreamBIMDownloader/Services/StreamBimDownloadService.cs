@@ -118,7 +118,9 @@ internal static class StreamBimDownloadService
             var resolvedRemotePath = resolution.Item is not null
                 ? GetResolvedItemPath(resolution.ValidParentPath, item)
                 : fullFilePath;
-            return StreamBimItemDownloadResult.FromSingle(await StreamBimFileTransferService.DownloadFileAsync(args, client, projectPath, item, resolvedRemotePath, cancellationToken));
+            return StreamBimItemDownloadResult.FromSingle(
+                await StreamBimFileTransferService.DownloadFileAsync(args, client, projectPath, item, resolvedRemotePath, cancellationToken),
+                resolution.LogEntries);
         }
 
         if (item.Type == FtpObjectType.Directory)
@@ -171,6 +173,7 @@ internal static class StreamBimDownloadService
         var builder = new StreamBimDownloadOutcomeBuilder();
         var pattern = Path.GetFileName(file);
         var folderResolution = await ResolveFtpPathAsync(client, folder, cancellationToken);
+        builder.AddLogEntries(folderResolution.LogEntries);
         if (folderResolution.Item?.Type != FtpObjectType.Directory)
         {
             return StreamBimItemDownloadResult.Failed(file.TrimStart('/'), CreatePathNotFoundMessage(folderResolution, true), folderResolution.LogEntries);
@@ -219,9 +222,14 @@ internal static class StreamBimDownloadService
 
         var currentFolder = "/";
         var logEntries = new List<StreamBimLogEntry>();
+        logEntries.Add(StreamBimLogEntry.Trace($"Resolving FTP path '{fullFilePath}' using {segments.Length} path segments."));
         FtpListItem? matchedItem = null;
         for (var index = 0; index < segments.Length; index++)
         {
+            var expectedSegmentKind = index < segments.Length - 1 ? "folder" : "file or folder";
+            logEntries.Add(StreamBimLogEntry.Trace(
+                $"Looking for {expectedSegmentKind} segment '{segments[index]}' in folder '{currentFolder}'."));
+
             var listing = await client.GetListing(currentFolder, cancellationToken);
             logEntries.Add(StreamBimLogEntry.Trace(
                 $"Listed '{currentFolder}' while resolving segment '{segments[index]}'. Returned {listing.Length} entries: {CreateListingPreview(listing)}"));
@@ -240,29 +248,35 @@ internal static class StreamBimDownloadService
             if (matchedItem is null)
             {
                 var missingSegmentShouldBeFolder = index < segments.Length - 1;
+                var similarNames = GetSimilarNames(segments[index], listing, missingSegmentShouldBeFolder ? FtpObjectType.Directory : null);
+                logEntries.Add(StreamBimLogEntry.Warning(
+                    $"Did not find {(missingSegmentShouldBeFolder ? "folder" : "file or folder")} segment '{segments[index]}' in '{currentFolder}'. Similar names: {CreateNameList(similarNames)}"));
                 return new FtpPathResolution(
                     null,
                     currentFolder,
                     segments[index],
                     missingSegmentShouldBeFolder,
-                    GetSimilarNames(segments[index], listing, missingSegmentShouldBeFolder ? FtpObjectType.Directory : null),
+                    similarNames,
                     logEntries.ToArray());
             }
 
+            logEntries.Add(StreamBimLogEntry.Trace(
+                $"Found segment '{segments[index]}' in '{currentFolder}' as {matchedItem.Type}. item.Name='{matchedItem.Name}', item.FullName='{matchedItem.FullName}'."));
+
             if (index == segments.Length - 1)
             {
-                logEntries.Add(StreamBimLogEntry.Trace($"Resolved '{fullFilePath}' through parent '{currentFolder}'."));
+                logEntries.Add(StreamBimLogEntry.Trace($"Resolved '{fullFilePath}' through parent '{currentFolder}' to item '{matchedItem.Name}'."));
                 return new FtpPathResolution(matchedItem, currentFolder, null, false, [], logEntries.ToArray());
             }
 
             if (matchedItem.Type != FtpObjectType.Directory)
             {
-                logEntries.Add(StreamBimLogEntry.Error($"Path segment '{segments[index]}' resolved to a non-folder item while resolving '{fullFilePath}'."));
+                logEntries.Add(StreamBimLogEntry.Warning($"Segment '{segments[index]}' was expected to be a folder while resolving '{fullFilePath}', but FTP returned {matchedItem.Type}."));
                 return new FtpPathResolution(null, currentFolder, segments[index], true, [], logEntries.ToArray());
             }
 
             currentFolder = GetResolvedItemPath(currentFolder, matchedItem);
-            logEntries.Add(StreamBimLogEntry.Trace($"Matched folder segment '{segments[index]}'. Next listing path is '{currentFolder}'."));
+            logEntries.Add(StreamBimLogEntry.Trace($"Using resolved path '{currentFolder}' for the next segment after matching folder '{segments[index]}'."));
         }
 
         return new FtpPathResolution(matchedItem, currentFolder, null, false, [], logEntries.ToArray());
@@ -272,11 +286,16 @@ internal static class StreamBimDownloadService
     {
         var names = listing
             .Where(item => !string.IsNullOrWhiteSpace(item.Name))
-            .Select(item => item.Type == FtpObjectType.Directory ? item.Name + "/" : item.Name)
-            .Take(8)
+            .Select(item => $"{item.Type}:{item.Name}{(string.IsNullOrWhiteSpace(item.FullName) ? string.Empty : $" (FullName='{item.FullName}')")}")
+            .Take(25)
             .ToArray();
 
         return names.Length == 0 ? "<empty>" : string.Join(", ", names);
+    }
+
+    private static string CreateNameList(IReadOnlyList<string> names)
+    {
+        return names.Count == 0 ? "<none>" : string.Join(", ", names);
     }
 
     private static string GetResolvedItemPath(string parentFolder, FtpListItem item)

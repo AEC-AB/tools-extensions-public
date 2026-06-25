@@ -91,7 +91,13 @@ internal sealed record StreamBimItemDownloadResult(
 
     internal static StreamBimItemDownloadResult FromSingle(StreamBimSingleFileDownloadResult result)
     {
+        return FromSingle(result, []);
+    }
+
+    internal static StreamBimItemDownloadResult FromSingle(StreamBimSingleFileDownloadResult result, IReadOnlyList<StreamBimLogEntry> logEntries)
+    {
         var builder = new StreamBimDownloadOutcomeBuilder();
+        builder.AddLogEntries(logEntries);
         builder.Add(result);
         return builder.BuildItemResult();
     }
@@ -141,6 +147,11 @@ internal sealed class StreamBimDownloadOutcomeBuilder
         }
 
         logEntries.AddRange(result.LogEntries);
+    }
+
+    internal void AddLogEntries(IReadOnlyList<StreamBimLogEntry> entries)
+    {
+        logEntries.AddRange(entries);
     }
 
     internal StreamBimDownloadResult BuildBatchResult()

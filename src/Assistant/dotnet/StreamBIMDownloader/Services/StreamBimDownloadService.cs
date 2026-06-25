@@ -115,7 +115,10 @@ internal static class StreamBimDownloadService
 
         if (item.Type == FtpObjectType.File)
         {
-            return StreamBimItemDownloadResult.FromSingle(await StreamBimFileTransferService.DownloadFileAsync(args, client, projectPath, item, cancellationToken));
+            var resolvedRemotePath = resolution.Item is not null
+                ? GetResolvedItemPath(resolution.ValidParentPath, item)
+                : fullFilePath;
+            return StreamBimItemDownloadResult.FromSingle(await StreamBimFileTransferService.DownloadFileAsync(args, client, projectPath, item, resolvedRemotePath, cancellationToken));
         }
 
         if (item.Type == FtpObjectType.Directory)
@@ -174,7 +177,8 @@ internal static class StreamBimDownloadService
         }
 
         var matchedAny = false;
-        var listing = await client.GetListing(GetResolvedItemPath(folderResolution.ValidParentPath, folderResolution.Item), cancellationToken);
+        var resolvedFolderPath = GetResolvedItemPath(folderResolution.ValidParentPath, folderResolution.Item);
+        var listing = await client.GetListing(resolvedFolderPath, cancellationToken);
         foreach (var itemInFolder in listing)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -185,7 +189,8 @@ internal static class StreamBimDownloadService
             }
 
             matchedAny = true;
-            builder.Add(await StreamBimFileTransferService.DownloadFileAsync(args, client, projectPath, itemInFolder, cancellationToken));
+            var resolvedRemotePath = StreamBimPathHelper.CombineFtpPath(resolvedFolderPath, itemInFolder.Name);
+            builder.Add(await StreamBimFileTransferService.DownloadFileAsync(args, client, projectPath, itemInFolder, resolvedRemotePath, cancellationToken));
         }
 
         if (!matchedAny)

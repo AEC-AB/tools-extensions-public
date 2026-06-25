@@ -17,28 +17,51 @@ internal static class StreamBimFileTransferService
         AsyncFtpClient client,
         string projectPath,
         FtpListItem file,
+        string resolvedRemotePath,
         CancellationToken cancellationToken)
     {
         try
         {
-            if (StreamBimPathHelper.ContainsIgnoredFolder(file.FullName))
+            var displayPath = resolvedRemotePath.TrimStart('/');
+            if (StreamBimPathHelper.ContainsIgnoredFolder(resolvedRemotePath))
             {
-                return StreamBimSingleFileDownloadResult.Skipped(file.FullName);
+                return StreamBimSingleFileDownloadResult.Skipped(displayPath);
             }
 
-            var localPath = StreamBimPathHelper.CreateLocalPath(args.DownloadFolder, projectPath, file.FullName);
+            var localPath = StreamBimPathHelper.CreateLocalPath(args.DownloadFolder, projectPath, resolvedRemotePath);
 
             if (args.SkipUnchangedFiles &&
                 File.Exists(localPath) &&
                 StreamBimPathHelper.AreEquivalentTimestamps(file.Modified, File.GetLastWriteTimeUtc(localPath)))
             {
-                return StreamBimSingleFileDownloadResult.Skipped(file.FullName);
+                return StreamBimSingleFileDownloadResult.Skipped(displayPath);
             }
 
-            var downloadStatus = await DownloadFileWithRetriesAsync(client, file, localPath, cancellationToken);
-            return downloadStatus == FtpStatus.Failed
-                ? StreamBimSingleFileDownloadResult.Failed(file.FullName, "Failed to download.")
-                : StreamBimSingleFileDownloadResult.Downloaded(file.FullName);
+            var primaryRemotePath = string.IsNullOrWhiteSpace(file.FullName)
+                ? resolvedRemotePath
+                : file.FullName.Replace('\\', '/');
+            var primaryStatus = await DownloadFileWithRetriesAsync(client, file, localPath, primaryRemotePath, cancellationToken);
+            if (primaryStatus != FtpStatus.Failed)
+            {
+                return StreamBimSingleFileDownloadResult.Downloaded(displayPath);
+            }
+
+            if (StreamBimPathHelper.EqualsNormalized(primaryRemotePath, resolvedRemotePath))
+            {
+                return StreamBimSingleFileDownloadResult.Failed(displayPath, "Failed to download.");
+            }
+
+            var fallbackStatus = await DownloadFileWithRetriesAsync(client, file, localPath, resolvedRemotePath, cancellationToken);
+            if (fallbackStatus == FtpStatus.Failed)
+            {
+                return StreamBimSingleFileDownloadResult.Failed(
+                    displayPath,
+                    $"Failed to download using item.FullName '{primaryRemotePath}' and resolved path '{resolvedRemotePath}'.");
+            }
+
+            return StreamBimSingleFileDownloadResult.Downloaded(
+                displayPath,
+                $"Downloaded '{displayPath}' using resolved path fallback after item.FullName failed. item.FullName='{primaryRemotePath}', resolvedPath='{resolvedRemotePath}'.");
         }
         catch (OperationCanceledException)
         {
@@ -46,35 +69,35 @@ internal static class StreamBimFileTransferService
         }
         catch (ArgumentException exception)
         {
-            return StreamBimSingleFileDownloadResult.Failed(file.FullName, StreamBimExceptionHelper.GetInnermostMessage(exception));
+            return StreamBimSingleFileDownloadResult.Failed(resolvedRemotePath.TrimStart('/'), StreamBimExceptionHelper.GetInnermostMessage(exception));
         }
         catch (InvalidOperationException exception)
         {
-            return StreamBimSingleFileDownloadResult.Failed(file.FullName, StreamBimExceptionHelper.GetInnermostMessage(exception));
+            return StreamBimSingleFileDownloadResult.Failed(resolvedRemotePath.TrimStart('/'), StreamBimExceptionHelper.GetInnermostMessage(exception));
         }
         catch (FtpException exception)
         {
-            return StreamBimSingleFileDownloadResult.Failed(file.FullName, StreamBimExceptionHelper.GetInnermostMessage(exception));
+            return StreamBimSingleFileDownloadResult.Failed(resolvedRemotePath.TrimStart('/'), StreamBimExceptionHelper.GetInnermostMessage(exception));
         }
         catch (IOException exception)
         {
-            return StreamBimSingleFileDownloadResult.Failed(file.FullName, StreamBimExceptionHelper.GetInnermostMessage(exception));
+            return StreamBimSingleFileDownloadResult.Failed(resolvedRemotePath.TrimStart('/'), StreamBimExceptionHelper.GetInnermostMessage(exception));
         }
         catch (UnauthorizedAccessException exception)
         {
-            return StreamBimSingleFileDownloadResult.Failed(file.FullName, StreamBimExceptionHelper.GetInnermostMessage(exception));
+            return StreamBimSingleFileDownloadResult.Failed(resolvedRemotePath.TrimStart('/'), StreamBimExceptionHelper.GetInnermostMessage(exception));
         }
         catch (SocketException exception)
         {
-            return StreamBimSingleFileDownloadResult.Failed(file.FullName, StreamBimExceptionHelper.GetInnermostMessage(exception));
+            return StreamBimSingleFileDownloadResult.Failed(resolvedRemotePath.TrimStart('/'), StreamBimExceptionHelper.GetInnermostMessage(exception));
         }
         catch (TimeoutException exception)
         {
-            return StreamBimSingleFileDownloadResult.Failed(file.FullName, StreamBimExceptionHelper.GetInnermostMessage(exception));
+            return StreamBimSingleFileDownloadResult.Failed(resolvedRemotePath.TrimStart('/'), StreamBimExceptionHelper.GetInnermostMessage(exception));
         }
         catch (AuthenticationException exception)
         {
-            return StreamBimSingleFileDownloadResult.Failed(file.FullName, StreamBimExceptionHelper.GetInnermostMessage(exception));
+            return StreamBimSingleFileDownloadResult.Failed(resolvedRemotePath.TrimStart('/'), StreamBimExceptionHelper.GetInnermostMessage(exception));
         }
     }
 
@@ -82,6 +105,7 @@ internal static class StreamBimFileTransferService
         AsyncFtpClient client,
         FtpListItem item,
         string localPath,
+        string remotePath,
         CancellationToken cancellationToken)
     {
         for (var attempt = 0; attempt < 3; attempt++)
@@ -94,7 +118,7 @@ internal static class StreamBimFileTransferService
                 tempPath = Path.GetTempFileName();
                 File.Delete(tempPath);
 
-                var downloadStatus = await client.DownloadFile(tempPath, item.FullName, token: cancellationToken);
+                var downloadStatus = await client.DownloadFile(tempPath, remotePath, token: cancellationToken);
                 if (downloadStatus == FtpStatus.Failed)
                 {
                     continue;
@@ -121,15 +145,19 @@ internal static class StreamBimFileTransferService
 
                 return downloadStatus;
             }
-            catch (Exception exception) when (attempt < 2 &&
-                (exception is UnauthorizedAccessException || StreamBimExceptionHelper.IsTransientFtpFailure(exception)))
+            catch (Exception exception) when (exception is UnauthorizedAccessException || StreamBimExceptionHelper.IsTransientFtpFailure(exception))
             {
                 Trace.TraceWarning(
-                    "Retrying download for '{0}' after attempt {1} failed with {2}: {3}",
-                    item.FullName,
+                    "Download for '{0}' failed on attempt {1} with {2}: {3}",
+                    remotePath,
                     attempt + 1,
                     exception.GetType().Name,
                     StreamBimExceptionHelper.GetInnermostMessage(exception));
+
+                if (attempt == 2)
+                {
+                    return FtpStatus.Failed;
+                }
             }
             finally
             {

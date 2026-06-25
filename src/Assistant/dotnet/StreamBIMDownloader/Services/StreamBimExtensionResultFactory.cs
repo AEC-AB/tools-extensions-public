@@ -41,6 +41,12 @@ internal static class StreamBimExtensionResultFactory
             message += $"\n\n{string.Join("\n", result.SkippedFiles)}";
         }
 
+        if (result.Warnings.Count > 0)
+        {
+            message += $"\n\nWarnings";
+            message += $"\n\n{string.Join("\n", result.Warnings)}";
+        }
+
         if (result.FailedFiles.Count > 0)
         {
             message += $"\n\nFailed to download {result.FailedFiles.Count} files";

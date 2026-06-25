@@ -77,11 +77,16 @@ internal sealed record StreamBimItemDownloadResult(
 
     internal static StreamBimItemDownloadResult Failed(string fileName, string errorMessage)
     {
+        return Failed(fileName, errorMessage, []);
+    }
+
+    internal static StreamBimItemDownloadResult Failed(string fileName, string errorMessage, IReadOnlyList<StreamBimLogEntry> logEntries)
+    {
         return new StreamBimItemDownloadResult(
             [],
             [],
             [new FailedFile(fileName, errorMessage)],
-            [StreamBimLogEntry.Error($"Failed to download '{fileName}': {errorMessage}")]);
+            logEntries.Concat([StreamBimLogEntry.Error($"Failed to download '{fileName}': {errorMessage}")]).ToArray());
     }
 
     internal static StreamBimItemDownloadResult FromSingle(StreamBimSingleFileDownloadResult result)

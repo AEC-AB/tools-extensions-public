@@ -110,7 +110,7 @@ internal static class StreamBimDownloadService
             ?? resolution.Item;
         if (item is null)
         {
-            return StreamBimItemDownloadResult.Failed(displayPath, CreatePathNotFoundMessage(resolution, false));
+            return StreamBimItemDownloadResult.Failed(displayPath, CreatePathNotFoundMessage(resolution, false), resolution.LogEntries);
         }
 
         if (item.Type == FtpObjectType.File)
@@ -146,7 +146,7 @@ internal static class StreamBimDownloadService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (string.Equals(item.Name, fileName, StringComparison.OrdinalIgnoreCase))
+            if (StreamBimPathHelper.EqualsNormalized(item.Name, fileName))
             {
                 return item;
             }
@@ -173,7 +173,7 @@ internal static class StreamBimDownloadService
         var folderResolution = await ResolveFtpPathAsync(client, folder, cancellationToken);
         if (folderResolution.Item?.Type != FtpObjectType.Directory)
         {
-            return StreamBimItemDownloadResult.Failed(file.TrimStart('/'), CreatePathNotFoundMessage(folderResolution, true));
+            return StreamBimItemDownloadResult.Failed(file.TrimStart('/'), CreatePathNotFoundMessage(folderResolution, true), folderResolution.LogEntries);
         }
 
         var matchedAny = false;
@@ -196,7 +196,7 @@ internal static class StreamBimDownloadService
         if (!matchedAny)
         {
             var similarFiles = GetSimilarNames(pattern, listing.Where(item => item.Type == FtpObjectType.File));
-            return StreamBimItemDownloadResult.Failed(file.TrimStart('/'), CreateWildcardNotFoundMessage(pattern, folder, similarFiles));
+            return StreamBimItemDownloadResult.Failed(file.TrimStart('/'), CreateWildcardNotFoundMessage(pattern, folder, similarFiles), folderResolution.LogEntries);
         }
 
         return builder.BuildItemResult();
@@ -214,14 +214,17 @@ internal static class StreamBimDownloadService
 
         if (segments.Length == 0)
         {
-            return new FtpPathResolution(null, "/", null, false, []);
+            return new FtpPathResolution(null, "/", null, false, [], []);
         }
 
         var currentFolder = "/";
+        var logEntries = new List<StreamBimLogEntry>();
         FtpListItem? matchedItem = null;
         for (var index = 0; index < segments.Length; index++)
         {
             var listing = await client.GetListing(currentFolder, cancellationToken);
+            logEntries.Add(StreamBimLogEntry.Trace(
+                $"Listed '{currentFolder}' while resolving segment '{segments[index]}'. Returned {listing.Length} entries: {CreateListingPreview(listing)}"));
             matchedItem = null;
             foreach (var item in listing)
             {
@@ -242,23 +245,38 @@ internal static class StreamBimDownloadService
                     currentFolder,
                     segments[index],
                     missingSegmentShouldBeFolder,
-                    GetSimilarNames(segments[index], listing, missingSegmentShouldBeFolder ? FtpObjectType.Directory : null));
+                    GetSimilarNames(segments[index], listing, missingSegmentShouldBeFolder ? FtpObjectType.Directory : null),
+                    logEntries.ToArray());
             }
 
             if (index == segments.Length - 1)
             {
-                return new FtpPathResolution(matchedItem, currentFolder, null, false, []);
+                logEntries.Add(StreamBimLogEntry.Trace($"Resolved '{fullFilePath}' through parent '{currentFolder}'."));
+                return new FtpPathResolution(matchedItem, currentFolder, null, false, [], logEntries.ToArray());
             }
 
             if (matchedItem.Type != FtpObjectType.Directory)
             {
-                return new FtpPathResolution(null, currentFolder, segments[index], true, []);
+                logEntries.Add(StreamBimLogEntry.Error($"Path segment '{segments[index]}' resolved to a non-folder item while resolving '{fullFilePath}'."));
+                return new FtpPathResolution(null, currentFolder, segments[index], true, [], logEntries.ToArray());
             }
 
             currentFolder = GetResolvedItemPath(currentFolder, matchedItem);
+            logEntries.Add(StreamBimLogEntry.Trace($"Matched folder segment '{segments[index]}'. Next listing path is '{currentFolder}'."));
         }
 
-        return new FtpPathResolution(matchedItem, currentFolder, null, false, []);
+        return new FtpPathResolution(matchedItem, currentFolder, null, false, [], logEntries.ToArray());
+    }
+
+    private static string CreateListingPreview(IEnumerable<FtpListItem> listing)
+    {
+        var names = listing
+            .Where(item => !string.IsNullOrWhiteSpace(item.Name))
+            .Select(item => item.Type == FtpObjectType.Directory ? item.Name + "/" : item.Name)
+            .Take(8)
+            .ToArray();
+
+        return names.Length == 0 ? "<empty>" : string.Join(", ", names);
     }
 
     private static string GetResolvedItemPath(string parentFolder, FtpListItem item)
@@ -361,5 +379,6 @@ internal static class StreamBimDownloadService
         string ValidParentPath,
         string? MissingSegment,
         bool MissingSegmentShouldBeFolder,
-        IReadOnlyList<string> SimilarNames);
+        IReadOnlyList<string> SimilarNames,
+        IReadOnlyList<StreamBimLogEntry> LogEntries);
 }

@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text;
 using CW.Assistant.Extensions.Assistant;
 using CW.Assistant.Extensions.Contracts;
 
@@ -10,49 +11,97 @@ internal static class StreamBimExtensionResultFactory
     {
         if (result.TotalCount == 0)
         {
-            return Result.Text.Failed("No files found.");
+            return Result.Markdown.Failed("No files found.");
         }
 
         var message = ComposeMessage(result);
         if (result.SuccessfulCount > 0 && result.FailedFiles.Count == 0)
         {
-            return Result.Text.Succeeded(message);
+            return Result.Markdown.Succeeded(message);
         }
 
         if (result.SuccessfulCount > 0)
         {
-            return Result.Text.PartiallySucceeded(message);
+            return Result.Markdown.PartiallySucceeded(message);
         }
 
-        return Result.Text.Failed(message);
+        return Result.Markdown.Failed(message);
     }
 
     private static string ComposeMessage(StreamBimDownloadResult result)
     {
-        var message = $"Downloaded {result.DownloadedFiles.Count} files";
+        var builder = new StringBuilder();
+        builder.AppendLine("## StreamBIM Download Result");
+        builder.AppendLine();
+        builder.AppendLine("| Result | Count |");
+        builder.AppendLine("| --- | ---: |");
+        builder.AppendLine($"| Downloaded | {result.DownloadedFiles.Count} |");
+        builder.AppendLine($"| Skipped | {result.SkippedFiles.Count} |");
+        builder.AppendLine($"| Failed | {result.FailedFiles.Count} |");
+        builder.AppendLine();
+
         if (result.DownloadedFiles.Count > 0)
         {
-            message += $"\n\n{string.Join("\n", result.DownloadedFiles)}";
+            AppendPathList(builder, "Downloaded Files", result.DownloadedFiles);
         }
 
         if (result.SkippedFiles.Count > 0)
         {
-            message += $"\n\nSkipped {result.SkippedFiles.Count} files";
-            message += $"\n\n{string.Join("\n", result.SkippedFiles)}";
-        }
-
-        if (result.Warnings.Count > 0)
-        {
-            message += $"\n\nWarnings";
-            message += $"\n\n{string.Join("\n", result.Warnings)}";
+            AppendPathList(builder, "Skipped Files", result.SkippedFiles);
         }
 
         if (result.FailedFiles.Count > 0)
         {
-            message += $"\n\nFailed to download {result.FailedFiles.Count} files";
-            message += $"\n\n{string.Join("\n", result.FailedFiles.Select(x => x.FileName + ": " + x.ErrorMessage))}";
+            builder.AppendLine("## Failed Files");
+            builder.AppendLine();
+            builder.AppendLine("| File | Error |");
+            builder.AppendLine("| --- | --- |");
+            foreach (var failedFile in result.FailedFiles)
+            {
+                builder.AppendLine($"| {EscapeTableCell(failedFile.FileName)} | {EscapeTableCell(failedFile.ErrorMessage)} |");
+            }
+
+            builder.AppendLine();
         }
 
-        return message;
+        if (result.LogEntries.Count > 0)
+        {
+            builder.AppendLine("## Execution Log");
+            builder.AppendLine();
+            builder.AppendLine("| Time (UTC) | Type | Message |");
+            builder.AppendLine("| --- | --- | --- |");
+            foreach (var entry in result.LogEntries.OrderBy(entry => entry.Timestamp))
+            {
+                builder.AppendLine($"| {entry.Timestamp:yyyy-MM-dd HH:mm:ss.fff} | {EscapeTableCell(entry.EventType)} | {EscapeTableCell(entry.Message)} |");
+            }
+        }
+
+        return builder.ToString().TrimEnd();
+    }
+
+    private static void AppendPathList(StringBuilder builder, string title, System.Collections.Generic.IReadOnlyList<string> paths)
+    {
+        builder.AppendLine($"## {title}");
+        builder.AppendLine();
+        foreach (var path in paths)
+        {
+            builder.AppendLine($"- `{EscapeCodeSpan(path)}`");
+        }
+
+        builder.AppendLine();
+    }
+
+    private static string EscapeCodeSpan(string value)
+    {
+        return value.Replace("`", "'");
+    }
+
+    private static string EscapeTableCell(string value)
+    {
+        return value
+            .Replace("\\", "\\\\")
+            .Replace("|", "\\|")
+            .Replace("\r", " ")
+            .Replace("\n", " ");
     }
 }

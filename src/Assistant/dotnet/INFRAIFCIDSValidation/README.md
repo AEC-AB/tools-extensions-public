@@ -117,4 +117,4 @@ Collector diagnostics are written to:
 ## Version History
 - Version 0.0.1 - 2026-06-17
 	- Initial public README with complete user guidance for configuration, execution, and troubleshooting.
-	- IFC files now supports raw exact paths, wildcard paths, Assistant variables, and regex-scoped entries through one field.
+- IFC files now support raw exact paths, wildcard paths, Assistant variables, and regex-scoped entries through one field.

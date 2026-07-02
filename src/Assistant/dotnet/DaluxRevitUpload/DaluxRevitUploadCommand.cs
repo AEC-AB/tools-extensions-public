@@ -36,7 +36,7 @@ public class DaluxRevitUploadCommand : IAssistantExtension<DaluxRevitUploadArgs>
                     return Result.Text.Failed("Column Fields contains empty keys or values. Please review your input.");
 
                 var value = DateTime.TryParse(kvp.Value, out var parsedDate)
-                    ? parsedDate.ToString("dd MMM yyyy")
+                    ? parsedDate.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture)
                     : kvp.Value;
                 columnFields[kvp.Key] = value;
             }

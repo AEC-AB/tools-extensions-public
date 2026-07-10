@@ -1,0 +1,9 @@
+{
+    "python.defaultInterpreterPath": "C:\\Program Files (x86)\\IronPython 2.7\\ipy.exe",
+    "python.linting.pycodestyleEnabled": true,
+    "python.analysis.extraPaths": [
+        "O:\\Networks\\Group_Tools\\ironpython-stubs-master\\release\\stubs",
+        "C:\\Users\\ktu\\AppData\\Local\\Tools\\apps\\Assistant\\Resources\\PythonModules\\Assistant",
+        "C:\\Users\\ktu\\AppData\\Local\\Tools\\apps\\Assistant\\Resources\\PythonModules\\Rpw",
+    ]
+}

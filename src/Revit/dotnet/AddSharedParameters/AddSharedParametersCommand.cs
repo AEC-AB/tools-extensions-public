@@ -262,8 +262,6 @@ public class AddSharedParametersCommand : IRevitExtension<AddSharedParametersArg
 
     private bool BindingTypeHasChanged(UpdateSharedParameterContext context, AddSharedParametersArgs args)
     {
-        var typeBinding = args.BindingType.Equals(BindingType.Type);
-
         return args.BindingType switch
         {
             BindingType.Type => context.ElementBinding is not TypeBinding,

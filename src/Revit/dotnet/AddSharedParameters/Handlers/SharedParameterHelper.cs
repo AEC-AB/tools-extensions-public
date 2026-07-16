@@ -30,11 +30,10 @@ public class SharedParameterHelper
 
     public IEnumerable<SharedParameterElement> GetSharedParameterElements(Document document)
     {
-        var collector = new FilteredElementCollector(document)
-            .OfClass(typeof(SharedParameterElement))
-            .OfType<SharedParameterElement>();
+        using var collector = new FilteredElementCollector(document)
+            .OfClass(typeof(SharedParameterElement));
 
-        return collector;
+        return collector.OfType<SharedParameterElement>().ToList();
     }
 
     internal RemovedParameterBackup DeleteAndInsertParameter(Document document, UpdateSharedParameterContext context, AddSharedParametersArgs args)

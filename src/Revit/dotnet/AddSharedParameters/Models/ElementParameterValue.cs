@@ -2,6 +2,6 @@ namespace AddSharedParameters.Models;
 
 public class ElementParameterValue
 {
-    public string ElementUniqueId { get; set; }
-    public string Value { get; set; }
+    public required string ElementUniqueId { get; set; }
+    public required string Value { get; set; }
 }

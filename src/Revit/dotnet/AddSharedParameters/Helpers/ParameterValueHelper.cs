@@ -9,7 +9,14 @@ public class ParameterValueHelper
 {
     private string GetMostCommonValue(List<string> value)
     {
-        return value.GroupBy(v => v).OrderByDescending(g => g.Count()).First(x => !string.IsNullOrEmpty(x.Key)).Key;
+        var mostCommon = value
+            .Where(v => !string.IsNullOrEmpty(v))
+            .GroupBy(v => v)
+            .OrderByDescending(g => g.Count())
+            .FirstOrDefault()
+            ?.Key;
+
+        return mostCommon ?? string.Empty;
     }
 
     public string GetParameterValue(Parameter parameter)
@@ -178,7 +185,6 @@ public class ParameterValueHelper
 
     private void ApplyValuesToInstances(Document document, InternalDefinition targetParameterDefinition, RestoreValuesResult result, KeyValuePair<ElementId, string> value, ElementType elementType)
     {
-        var instancesOfType = new Dictionary<ElementId, string>();
         using var collector = new FilteredElementCollector(document)
                                     .WhereElementIsNotElementType()
                                     .OfCategoryId(elementType.Category.Id);

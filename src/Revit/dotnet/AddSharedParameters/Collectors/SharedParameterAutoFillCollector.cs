@@ -10,7 +10,6 @@ public class SharedParameterAutoFillCollector : IRevitAutoFillCollector<AddShare
 
     public Dictionary<string, string> Get(UIApplication uiApplication, AddSharedParametersArgs args)
     {
-        var logMessages = new List<string>();
         var result = new Dictionary<string, string>();
 
         if (args.SharedParameterPath is null)
@@ -30,7 +29,7 @@ public class SharedParameterAutoFillCollector : IRevitAutoFillCollector<AddShare
             }
 
             using var sharedParameterFileHandler = new SharedParameterFileHandler(uiApplication.Application);
-            var definitionFile = sharedParameterFileHandler.OpenSharedParameterFile(args.SharedParameterPath);
+            var definitionFile = sharedParameterFileHandler.OpenSharedParameterFile(sharedParameterPath);
             
             var parameters = _sharedParameterHelper.GetAllParametersInSharedParameterFile(definitionFile);
 

@@ -87,7 +87,7 @@ public class UpdateSharedParameterContext : SharedParameterContextBase
             if (RestoreValuesResult is not null)
             {
                 sb.AppendLine($" - Parameter values was restored");
-                RestoreValuesResult?.AppendDetails(sb);
+                RestoreValuesResult.AppendDetails(sb);
             }
         }
         else if (ParameterWasUpdated)

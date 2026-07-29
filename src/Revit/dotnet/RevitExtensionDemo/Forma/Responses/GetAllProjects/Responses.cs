@@ -1,4 +1,4 @@
-namespace RevitExtensionDemo.ACC.Responses.GetAllProjects;
+namespace RevitExtensionDemo.Forma.Responses.GetAllProjects;
 // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
     public class Attributes
     {
@@ -146,5 +146,4 @@ namespace RevitExtensionDemo.ACC.Responses.GetAllProjects;
     {
         public string Href { get; set; }
     }
-
 

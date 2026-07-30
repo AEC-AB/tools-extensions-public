@@ -1,4 +1,4 @@
-namespace RevitExtensionDemo.ACC.Responses.GetAllHubs;
+namespace RevitExtensionDemo.Forma.Responses.GetAllHubs;
 // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
 public class Attributes
 {

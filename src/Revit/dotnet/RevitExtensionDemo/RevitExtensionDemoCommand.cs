@@ -1,4 +1,4 @@
-﻿using RevitExtensionDemo.ACC;
+﻿using RevitExtensionDemo.Forma;
 
 namespace RevitExtensionDemo;
 
@@ -25,7 +25,7 @@ public class RevitExtensionDemoCommand : IRevitExtension<RevitExtensionDemoArgs>
             return Result.Text.Failed("No ValueCopy configuration provided.");
         }
 
-        var client = new AccClient(args.AutodeskClient);
+        var client = new FormaClient(args.AutodeskClient);
         var hubs = client.GetHubs();
         message += $"Found {hubs.Data.Count} hubs.\n";
         var hub = hubs.Data.First(x => x.Attributes.Extension.Type == "hubs:autodesk.bim360:Account");

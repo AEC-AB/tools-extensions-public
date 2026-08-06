@@ -165,6 +165,7 @@ public class PrintPDFSelector
                     if (viewSheet is ViewSheet sheet)
                         sheets.Add(sheet);
                 }
+                _telemetry?.MarkViewSetProcessed();
             }
 #else
             foreach (var viewSheet in viewSet.Views)
@@ -172,6 +173,7 @@ public class PrintPDFSelector
                 if (viewSheet is ViewSheet sheet)
                     sheets.Add(sheet);
             }
+            _telemetry?.MarkViewSetProcessed();
 #endif
         }
         _logger?.Info($"Collected {sheets.Count} sheets from view set '{viewSetName}'");

@@ -63,27 +63,13 @@ public class PrintPDFSelector
 #if R2023_OR_GREATER
             try
             {
-                var pm = _document.PrintManager;
-                var vss = pm.ViewSheetSetting.CurrentViewSheetSet;
-                if (vss != null && !vss.IsAutomatic)
+                foreach (var v in viewSet.OrderedViewList)
                 {
-                    foreach (var v in vss.OrderedViewList)
-                    {
-                        if (v is ViewSheet sheet)
-                            sheetsForSet.Add(sheet);
-                    }
-                    _telemetry?.MarkOrderedViewListUsed();
-                    _telemetry?.MarkViewSetProcessed();
+                    if (v is ViewSheet sheet)
+                        sheetsForSet.Add(sheet);
                 }
-                else
-                {
-                    foreach (var viewSheet in viewSet.Views)
-                    {
-                        if (viewSheet is ViewSheet sheet)
-                            sheetsForSet.Add(sheet);
-                    }
-                    _telemetry?.MarkViewSetProcessed();
-                }
+                _telemetry?.MarkOrderedViewListUsed();
+                _telemetry?.MarkViewSetProcessed();
             }
             catch
             {
@@ -159,31 +145,18 @@ public class PrintPDFSelector
         if (viewSet != null)
         {
             _logger?.Info($"Collecting view set named: '{viewSetName}'");
-            // Try to use explicit ordered list when available (R2025+)
-#if R2025_OR_GREATER
+            // Try to use explicit ordered list when available (R2023+)
+#if R2023_OR_GREATER
             try
             {
-                var pm = _document.PrintManager;
-                var vss = pm.ViewSheetSetting.CurrentViewSheetSet;
-                if (vss != null && !vss.IsAutomatic)
+                _logger?.Info($"Using ordered view list for view set '{viewSetName}'");
+                foreach (var v in viewSet.OrderedViewList)
                 {
-                    _logger?.Info($"Using ordered view list for view set '{viewSetName}'");
-                    _telemetry?.MarkOrderedViewListUsed();
-                    _telemetry?.MarkViewSetProcessed();
-                    foreach (var v in vss.OrderedViewList)
-                    {
-                        if (v is ViewSheet sheet)
-                            sheets.Add(sheet);
-                    }
+                    if (v is ViewSheet sheet)
+                        sheets.Add(sheet);
                 }
-                else
-                {
-                    foreach (var viewSheet in viewSet.Views)
-                    {
-                        if (viewSheet is ViewSheet sheet)
-                            sheets.Add(sheet);
-                    }
-                }
+                _telemetry?.MarkOrderedViewListUsed();
+                _telemetry?.MarkViewSetProcessed();
             }
             catch
             {

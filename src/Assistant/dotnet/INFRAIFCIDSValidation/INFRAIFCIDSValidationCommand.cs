@@ -61,17 +61,27 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
 
         string projectName;
         string projectPath;
-        Dictionary<string, string> projects = [];
+        Dictionary<string, string> projects;
 
         try
         {
             projects = Invoke<Dictionary<string, string>>(apiInstance, "ScanAllProjects") ?? [];
+        }
+        catch (Exception ex) when (ex is TargetInvocationException or MissingMethodException or AmbiguousMatchException)
+        {
+            diagnostics.Add($"ScanAllProjectsFallback={InfraApiCollectorHelpers.FormatException(ex)}");
+            projects = InfraApiCollectorHelpers.ScanProjectsFallback();
         }
         catch (Exception ex)
         {
             return Result.Text.Failed($"Failed to scan projects: {ex.Message}");
         }
 
+        if (projects.Count == 0)
+        {
+            diagnostics.Add("ScanAllProjects returned no projects; using fallback scan.");
+            projects = InfraApiCollectorHelpers.ScanProjectsFallback();
+        }
         diagnostics.Add($"ScanAllProjectsCount={projects.Count}");
         if (projects.Count > 0)
         {
@@ -123,10 +133,14 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
 
         if (explicitIdsSelection.Count > 0)
         {
+            string idsRoot = Path.GetFullPath(Path.Combine(projectPath, "IDS"));
+
             idsFilesToSave = explicitIdsSelection
                 .Where(path => !string.IsNullOrWhiteSpace(path))
-                .Select(path => Path.Combine(projectPath, "IDS", path.Trim()))
-                .Where(File.Exists)
+                .Select(path => Path.GetFullPath(Path.Combine(idsRoot, path.Trim())))
+                .Where(fullPath =>
+                    fullPath.StartsWith(idsRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+                    && File.Exists(fullPath))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
@@ -246,6 +260,10 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
             try
             {
                 await Task.Delay(TimeSpan.FromSeconds(1), linked.Token);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
             }
             catch (OperationCanceledException)
             {

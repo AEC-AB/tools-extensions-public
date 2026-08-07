@@ -326,7 +326,7 @@ internal static class IfcFileResolver
         {
             yield break;
         }
-        catch (SecurityException)
+        catch (System.Security.SecurityException)
         {
             yield break;
         }

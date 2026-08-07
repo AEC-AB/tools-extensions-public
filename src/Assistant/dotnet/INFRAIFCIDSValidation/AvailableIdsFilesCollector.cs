@@ -64,7 +64,8 @@ public class AvailableIdsFilesCollector : IAsyncAutoFillCollector<INFRAIFCIDSVal
                 });
             }
 
-            string idsPath = Path.Combine(projectPath, "IDS");
+            string normalizedProjectPath = Path.GetFullPath(projectPath);
+            string idsPath = Path.Join(normalizedProjectPath, "IDS");
             List<string> idsFiles;
             if (idsLoadedFromApi && InfraApiCollectorHelpers.TryCreateApiInstance(out object? idsApi, out _))
             {

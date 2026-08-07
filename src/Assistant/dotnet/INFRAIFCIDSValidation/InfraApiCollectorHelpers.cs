@@ -7,12 +7,20 @@ internal static class InfraApiCollectorHelpers
 {
     private const string ApiDllName = "AEC.Infra_Assistant_API.dll";
     private const string ApiTypeName = "INFRA_Assistant_API.InfraAssistantApi";
-    private static readonly string DiagnosticsPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "AEC AB",
-        "Assistant",
-        "Logs",
-        "INFRAIFCIDSValidation.collector.log");
+    private static readonly string DiagnosticsPath = BuildDiagnosticsPath();
+
+    private static string BuildDiagnosticsPath()
+    {
+        string basePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        string[] relativeParts = { "AEC AB", "Assistant", "Logs", "INFRAIFCIDSValidation.collector.log" };
+
+        if (relativeParts.Any(Path.IsPathRooted))
+        {
+            throw new InvalidOperationException("Diagnostics path segments must be relative.");
+        }
+
+        return Path.Combine(basePath, Path.Combine(relativeParts));
+    }
 
     [SupportedOSPlatform("windows")]
     public static bool TryCreateApiInstance([NotNullWhen(true)] out object? api, out string error)
@@ -239,7 +247,15 @@ internal static class InfraApiCollectorHelpers
 
             File.AppendAllText(DiagnosticsPath, $"[{DateTime.Now:O}] {message}{Environment.NewLine}");
         }
-        catch
+        catch (UnauthorizedAccessException)
+        {
+            // Best-effort logging only.
+        }
+        catch (IOException)
+        {
+            // Best-effort logging only.
+        }
+        catch (System.Security.SecurityException)
         {
             // Best-effort logging only.
         }
@@ -260,7 +276,19 @@ internal static class InfraApiCollectorHelpers
 
             return GetInstallLocationFromView(RegistryView.Registry32, baseRegistryPath);
         }
-        catch
+        catch (SecurityException)
+        {
+            return null;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return null;
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+        catch (ObjectDisposedException)
         {
             return null;
         }
@@ -393,9 +421,17 @@ internal static class InfraApiCollectorHelpers
             {
                 files = Directory.EnumerateFiles(current, pattern, SearchOption.TopDirectoryOnly);
             }
-            catch
+            catch (UnauthorizedAccessException)
             {
                 // Ignore inaccessible folders.
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // Ignore folders that disappear during traversal.
+            }
+            catch (IOException)
+            {
+                // Ignore transient IO errors during traversal.
             }
 
             foreach (string file in files)
@@ -408,9 +444,17 @@ internal static class InfraApiCollectorHelpers
             {
                 directories = Directory.EnumerateDirectories(current, "*", SearchOption.TopDirectoryOnly);
             }
-            catch
+            catch (UnauthorizedAccessException)
             {
                 // Ignore inaccessible folders.
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // Ignore folders that disappear during traversal.
+            }
+            catch (IOException)
+            {
+                // Ignore transient IO errors during traversal.
             }
 
             foreach (string directory in directories)

@@ -109,10 +109,6 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
         {
             return Result.Text.Failed($"Failed to write INFRA registry settings (invalid operation): {ex.Message}");
         }
-        catch (Exception ex)
-        {
-            return Result.Text.Failed($"Failed to write INFRA registry settings (unexpected error): {ex.Message}");
-        }
 
         string commandString = string.Join("|", selectedCommands.Select(c => c.ToString()));
         string arguments = $"--command {commandString}";
@@ -237,7 +233,10 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
 
             idsFilesToSave = explicitIdsSelection
                 .Where(path => !string.IsNullOrWhiteSpace(path))
-                .Select(path => Path.GetFullPath(Path.Combine(idsRoot, path.Trim())))
+                .Select(path => path.Trim())
+                .Select(path => path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar))
+                .Where(path => !Path.IsPathRooted(path))
+                .Select(path => Path.GetFullPath(Path.Combine(idsRoot, path)))
                 .Where(fullPath =>
                     fullPath.StartsWith(idsRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
                     && File.Exists(fullPath))
@@ -246,7 +245,7 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
         }
         else
         {
-            string idsPath = Path.Combine(projectPath, "IDS");
+            string idsPath = Path.GetFullPath(Path.Join(projectPath, "IDS"));
 
             List<string> scannedIdsFiles;
             try

@@ -83,7 +83,25 @@ public class AvailableProjectsCollector : IAsyncAutoFillCollector<INFRAIFCIDSVal
         {
             throw;
         }
-        catch (Exception ex)
+        catch (IOException ex)
+        {
+            string message = InfraApiCollectorHelpers.FormatException(ex);
+            InfraApiCollectorHelpers.Log($"AvailableProjectsCollector failed: {message}");
+            return Task.FromResult(Error($"Failed loading projects: {message}"));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            string message = InfraApiCollectorHelpers.FormatException(ex);
+            InfraApiCollectorHelpers.Log($"AvailableProjectsCollector failed: {message}");
+            return Task.FromResult(Error($"Failed loading projects: {message}"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            string message = InfraApiCollectorHelpers.FormatException(ex);
+            InfraApiCollectorHelpers.Log($"AvailableProjectsCollector failed: {message}");
+            return Task.FromResult(Error($"Failed loading projects: {message}"));
+        }
+        catch (System.Reflection.TargetInvocationException ex)
         {
             string message = InfraApiCollectorHelpers.FormatException(ex);
             InfraApiCollectorHelpers.Log($"AvailableProjectsCollector failed: {message}");

@@ -60,7 +60,19 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
         {
             api.CreateMetadataFile(projectName, selectedIfcFiles.ToArray());
         }
-        catch (Exception ex)
+        catch (IOException ex)
+        {
+            return Result.Text.Failed($"Failed to create metadata file: {ex.Message}");
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Result.Text.Failed($"Failed to create metadata file: {ex.Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            return Result.Text.Failed($"Failed to create metadata file: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
         {
             return Result.Text.Failed($"Failed to create metadata file: {ex.Message}");
         }
@@ -77,9 +89,29 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
             api.SaveSelectedIdsFilesToRegistry(projectName, idsFilesToSave);
             api.WriteOutputDirectoryToRegistry(projectName, args.OutputFolder!);
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Result.Text.Failed($"Failed to write INFRA registry settings (access denied): {ex.Message}");
+        }
+        catch (System.Security.SecurityException ex)
+        {
+            return Result.Text.Failed($"Failed to write INFRA registry settings (security error): {ex.Message}");
+        }
+        catch (IOException ex)
+        {
+            return Result.Text.Failed($"Failed to write INFRA registry settings (I/O error): {ex.Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            return Result.Text.Failed($"Failed to write INFRA registry settings (invalid argument): {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Result.Text.Failed($"Failed to write INFRA registry settings (invalid operation): {ex.Message}");
+        }
         catch (Exception ex)
         {
-            return Result.Text.Failed($"Failed to write INFRA registry settings: {ex.Message}");
+            return Result.Text.Failed($"Failed to write INFRA registry settings (unexpected error): {ex.Message}");
         }
 
         string commandString = string.Join("|", selectedCommands.Select(c => c.ToString()));
@@ -95,7 +127,7 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
         {
             api.LaunchInfraAutomation(arguments, projectName);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is InvalidOperationException || ex is ArgumentException || ex is IOException || ex is UnauthorizedAccessException)
         {
             return Result.Text.Failed($"Failed to launch INFRA automation: {ex.Message}");
         }
@@ -121,7 +153,7 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
         {
             projectsLocation = api.GetCommonProjectsLocation();
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is InvalidOperationException or MissingMethodException)
         {
             return Result.Text.Failed($"Failed to get common projects location: {ex.Message}");
         }
@@ -143,7 +175,15 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
             diagnostics.Add($"ScanAllProjectsFallback={ex.Message}");
             projects = InfraApiCollectorHelpers.ScanProjectsFallback();
         }
-        catch (Exception ex)
+        catch (IOException ex)
+        {
+            return Result.Text.Failed($"Failed to scan projects: {ex.Message}");
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Result.Text.Failed($"Failed to scan projects: {ex.Message}");
+        }
+        catch (System.Security.SecurityException ex)
         {
             return Result.Text.Failed($"Failed to scan projects: {ex.Message}");
         }
@@ -213,7 +253,15 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
             {
                 scannedIdsFiles = api.ScanIdsFiles(idsPath);
             }
-            catch
+            catch (IOException)
+            {
+                scannedIdsFiles = InfraApiCollectorHelpers.ScanIdsFilesFallback(idsPath);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                scannedIdsFiles = InfraApiCollectorHelpers.ScanIdsFilesFallback(idsPath);
+            }
+            catch (SystemException)
             {
                 scannedIdsFiles = InfraApiCollectorHelpers.ScanIdsFilesFallback(idsPath);
             }
@@ -270,7 +318,23 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
                 .Select(Path.GetFullPath)
                 .ToList();
         }
-        catch
+        catch (UnauthorizedAccessException)
+        {
+            return [];
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return [];
+        }
+        catch (IOException)
+        {
+            return [];
+        }
+        catch (ArgumentException)
+        {
+            return [];
+        }
+        catch (NotSupportedException)
         {
             return [];
         }

@@ -466,10 +466,14 @@ internal static class InfraApiCollectorHelpers
             Path.Combine(installLocation, "net8.0-windows", ApiDllName),
         };
 
-        return candidates.FirstOrDefault(File.Exists);
-
         try
         {
+            var found = candidates.FirstOrDefault(File.Exists);
+            if (found != null)
+            {
+                return found;
+            }
+
             return Directory
                 .EnumerateFiles(installLocation, ApiDllName, SearchOption.AllDirectories)
                 .FirstOrDefault();

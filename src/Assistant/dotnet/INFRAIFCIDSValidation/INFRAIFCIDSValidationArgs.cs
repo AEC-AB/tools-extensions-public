@@ -103,7 +103,7 @@ public class AvailableProjectsCollector : IAsyncAutoFillCollector<INFRAIFCIDSVal
                 }
             }
 
-            if (options.Count == 0)
+            if (projects.Count == 0)
             {
                 string reason = projectsLoadedFromApi
                     ? "No INFRA projects found."
@@ -114,6 +114,10 @@ public class AvailableProjectsCollector : IAsyncAutoFillCollector<INFRAIFCIDSVal
             }
 
             return Task.FromResult(options);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -229,7 +233,29 @@ public class AvailableIdsFilesCollector : IAsyncAutoFillCollector<INFRAIFCIDSVal
 
             return Task.FromResult(options);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (IOException ex)
+        {
+            string message = InfraApiCollectorHelpers.FormatException(ex);
+            InfraApiCollectorHelpers.Log($"AvailableIdsFilesCollector failed: {message}");
+            return Task.FromResult(Error($"Failed loading IDS files: {message}"));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            string message = InfraApiCollectorHelpers.FormatException(ex);
+            InfraApiCollectorHelpers.Log($"AvailableIdsFilesCollector failed: {message}");
+            return Task.FromResult(Error($"Failed loading IDS files: {message}"));
+        }
+        catch (InvalidOperationException ex)
+        {
+            string message = InfraApiCollectorHelpers.FormatException(ex);
+            InfraApiCollectorHelpers.Log($"AvailableIdsFilesCollector failed: {message}");
+            return Task.FromResult(Error($"Failed loading IDS files: {message}"));
+        }
+        catch (ArgumentException ex)
         {
             string message = InfraApiCollectorHelpers.FormatException(ex);
             InfraApiCollectorHelpers.Log($"AvailableIdsFilesCollector failed: {message}");
@@ -338,7 +364,91 @@ internal static class InfraApiCollectorHelpers
                 AppDomain.CurrentDomain.AssemblyResolve -= resolver;
             }
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (PathTooLongException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (NotSupportedException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (System.Security.SecurityException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (IOException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (FileNotFoundException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (FileLoadException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (BadImageFormatException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (TypeLoadException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (MissingMethodException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (TargetInvocationException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (MemberAccessException ex)
+        {
+            error = FormatException(ex);
+            Log($"TryCreateApiInstance failed: {error}");
+            return false;
+        }
+        catch (InvalidOperationException ex)
         {
             error = FormatException(ex);
             Log($"TryCreateApiInstance failed: {error}");
@@ -356,13 +466,7 @@ internal static class InfraApiCollectorHelpers
             Path.Combine(installLocation, "net8.0-windows", ApiDllName),
         };
 
-        foreach (string candidate in candidates)
-        {
-            if (File.Exists(candidate))
-            {
-                return candidate;
-            }
-        }
+        return candidates.FirstOrDefault(File.Exists);
 
         try
         {
@@ -370,7 +474,15 @@ internal static class InfraApiCollectorHelpers
                 .EnumerateFiles(installLocation, ApiDllName, SearchOption.AllDirectories)
                 .FirstOrDefault();
         }
-        catch
+        catch (UnauthorizedAccessException)
+        {
+            return null;
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+        catch (System.Security.SecurityException)
         {
             return null;
         }
@@ -480,9 +592,8 @@ internal static class InfraApiCollectorHelpers
 
         foreach (string root in GetFallbackRoots())
         {
-            foreach (string setupFile in EnumerateFilesSafe(root, "setup.xml"))
+            foreach (string? projectPath in EnumerateFilesSafe(root, "setup.xml").Select(Path.GetDirectoryName))
             {
-                string? projectPath = Path.GetDirectoryName(setupFile);
                 if (string.IsNullOrWhiteSpace(projectPath))
                 {
                     continue;
@@ -515,14 +626,13 @@ internal static class InfraApiCollectorHelpers
     {
         var roots = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (Environment.SpecialFolder folder in new[]
+        foreach (string basePath in new[]
         {
             Environment.SpecialFolder.ApplicationData,
             Environment.SpecialFolder.LocalApplicationData,
             Environment.SpecialFolder.CommonApplicationData,
-        })
+        }.Select(Environment.GetFolderPath))
         {
-            string basePath = Environment.GetFolderPath(folder);
             if (string.IsNullOrWhiteSpace(basePath) || !Directory.Exists(basePath))
             {
                 continue;

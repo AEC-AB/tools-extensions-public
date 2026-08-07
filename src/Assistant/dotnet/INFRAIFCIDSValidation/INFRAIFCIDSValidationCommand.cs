@@ -201,20 +201,12 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
 
         string? firstNewFile = await WaitForFirstNewOutputFileAsync(args.OutputFolder!, outputFilesBefore, cancellationToken, 120);
 
-        string summary;
-        if (firstNewFile is not null)
-        {
-            summary =
-                $"INFRA validation for project '{projectName}' with {selectedIfcFiles.Count} IFC file(s), {idsFilesToSave.Count} IDS file(s), and {selectedCommands.Count} command(s): {string.Join(", ", selectedCommands)}."
+        string summary = firstNewFile is not null
+            ? $"INFRA validation for project '{projectName}' with {selectedIfcFiles.Count} IFC file(s), {idsFilesToSave.Count} IDS file(s), and {selectedCommands.Count} command(s): {string.Join(", ", selectedCommands)}."
                 + $"\nFirst output file: {firstNewFile}"
-                + $"\nOutput folder: {args.OutputFolder}";
-        }
-        else
-        {
-            summary =
-                $"INFRA validation for project '{projectName}' launched with {selectedIfcFiles.Count} IFC file(s), {idsFilesToSave.Count} IDS file(s), and {selectedCommands.Count} command(s): {string.Join(", ", selectedCommands)}."
+                + $"\nOutput folder: {args.OutputFolder}"
+            : $"INFRA validation for project '{projectName}' launched with {selectedIfcFiles.Count} IFC file(s), {idsFilesToSave.Count} IDS file(s), and {selectedCommands.Count} command(s): {string.Join(", ", selectedCommands)}."
                 + $"\nNo output file created yet. Check result in INFRA or in output folder: {args.OutputFolder}";
-        }
 
         if (args.EnableDiagnostics)
         {
@@ -289,12 +281,9 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
 
         foreach (string entry in args.IfcFiles)
         {
-            foreach (string filePath in ExpandIfcEntry(context, entry, variableStack))
+            foreach (string filePath in ExpandIfcEntry(context, entry, variableStack).Where(filePath => seenFiles.Add(filePath)))
             {
-                if (seenFiles.Add(filePath))
-                {
-                    resolvedFiles.Add(filePath);
-                }
+                resolvedFiles.Add(filePath);
             }
         }
 
@@ -564,7 +553,7 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
         Regex regex;
         try
         {
-            regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, TimeSpan.FromSeconds(2));
         }
         catch (ArgumentException)
         {
@@ -581,12 +570,9 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
             yield break;
         }
 
-        foreach (string filePath in files)
+        foreach (string filePath in files.Where(filePath => regex.IsMatch(Path.GetFileName(filePath))))
         {
-            if (regex.IsMatch(Path.GetFileName(filePath)))
-            {
-                yield return Path.GetFullPath(filePath);
-            }
+            yield return Path.GetFullPath(filePath);
         }
     }
 
@@ -598,12 +584,19 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
             throw new MissingMethodException($"Method not found: {methodName}");
         }
 
-        object? result = method.Invoke(target, parameters);
-        if (result is T typed)
+        try
         {
-            return typed;
-        }
+            object? result = method.Invoke(target, parameters);
+            if (result is T typed)
+            {
+                return typed;
+            }
 
-        return default;
+            return default;
+        }
+        catch (TargetInvocationException tie) when (tie.InnerException is not null)
+        {
+            throw new InvalidOperationException(InfraApiCollectorHelpers.FormatException(tie), tie.InnerException);
+        }
     }
 }

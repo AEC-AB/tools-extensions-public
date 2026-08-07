@@ -237,7 +237,23 @@ internal static class IfcFileResolver
         {
             matches = Directory.EnumerateFiles(directory, pattern, SearchOption.TopDirectoryOnly);
         }
-        catch
+        catch (IOException)
+        {
+            yield break;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            yield break;
+        }
+        catch (ArgumentException)
+        {
+            yield break;
+        }
+        catch (NotSupportedException)
+        {
+            yield break;
+        }
+        catch (System.Security.SecurityException)
         {
             yield break;
         }
@@ -294,7 +310,27 @@ internal static class IfcFileResolver
         {
             files = Directory.EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly);
         }
-        catch
+        catch (UnauthorizedAccessException)
+        {
+            yield break;
+        }
+        catch (DirectoryNotFoundException)
+        {
+            yield break;
+        }
+        catch (PathTooLongException)
+        {
+            yield break;
+        }
+        catch (NotSupportedException)
+        {
+            yield break;
+        }
+        catch (SecurityException)
+        {
+            yield break;
+        }
+        catch (IOException)
         {
             yield break;
         }

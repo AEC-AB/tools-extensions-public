@@ -60,7 +60,19 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
         {
             api.CreateMetadataFile(projectName, selectedIfcFiles.ToArray());
         }
-        catch (Exception ex)
+        catch (IOException ex)
+        {
+            return Result.Text.Failed($"Failed to create metadata file: {ex.Message}");
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Result.Text.Failed($"Failed to create metadata file: {ex.Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            return Result.Text.Failed($"Failed to create metadata file: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
         {
             return Result.Text.Failed($"Failed to create metadata file: {ex.Message}");
         }
@@ -115,7 +127,7 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
         {
             api.LaunchInfraAutomation(arguments, projectName);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is InvalidOperationException || ex is ArgumentException || ex is IOException || ex is UnauthorizedAccessException)
         {
             return Result.Text.Failed($"Failed to launch INFRA automation: {ex.Message}");
         }
@@ -306,7 +318,23 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
                 .Select(Path.GetFullPath)
                 .ToList();
         }
-        catch
+        catch (UnauthorizedAccessException)
+        {
+            return [];
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return [];
+        }
+        catch (IOException)
+        {
+            return [];
+        }
+        catch (ArgumentException)
+        {
+            return [];
+        }
+        catch (NotSupportedException)
         {
             return [];
         }

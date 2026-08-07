@@ -1,4 +1,3 @@
-
 namespace INFRAIFCIDSValidation;
 
 [SupportedOSPlatform("windows")]
@@ -28,24 +27,99 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
             .Select(command => command!.Value)
             .Distinct()
             .ToList();
-
         if (selectedCommands.Count == 0)
         {
             return Result.Text.Failed("Select at least one validation command.");
         }
 
-        if (!InfraApiCollectorHelpers.TryCreateApiInstance(out object? api, out string loadError))
+        InfraApiWrapper? api = InfraApiWrapper.TryCreate(out string loadError);
+        if (api is null)
         {
             return Result.Text.Failed($"Failed to load INFRA API: {loadError}");
         }
 
-        object apiInstance = api!;
         var diagnostics = new List<string>();
+
+        IExtensionResult? projectError = ResolveProject(api, args.AutoProjectName, diagnostics, out string projectName, out string projectPath);
+        if (projectError is not null)
+        {
+            return projectError;
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        List<string> selectedIfcFiles = IfcFileResolver.ResolveIfcFiles(context, args);
+        if (selectedIfcFiles.Count == 0)
+        {
+            return Result.Text.Failed("No IFC files were selected.");
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        try
+        {
+            api.CreateMetadataFile(projectName, selectedIfcFiles.ToArray());
+        }
+        catch (Exception ex)
+        {
+            return Result.Text.Failed($"Failed to create metadata file: {ex.Message}");
+        }
+
+        IExtensionResult? idsError = ResolveIdsFiles(api, projectPath, args.AutoSelectedIdsFiles, out List<string> idsFilesToSave);
+        if (idsError is not null)
+        {
+            return idsError;
+        }
+
+        try
+        {
+            api.WriteProjectPathToRegistry(projectName, projectPath);
+            api.SaveSelectedIdsFilesToRegistry(projectName, idsFilesToSave);
+            api.WriteOutputDirectoryToRegistry(projectName, args.OutputFolder!);
+        }
+        catch (Exception ex)
+        {
+            return Result.Text.Failed($"Failed to write INFRA registry settings: {ex.Message}");
+        }
+
+        string commandString = string.Join("|", selectedCommands.Select(c => c.ToString()));
+        string arguments = $"--command {commandString}";
+        if (args.CloseOnCompletion)
+        {
+            arguments += " --close-on-completion true";
+        }
+
+        IReadOnlyList<string> outputFilesBefore = GetOutputFiles(args.OutputFolder!);
+
+        try
+        {
+            api.LaunchInfraAutomation(arguments, projectName);
+        }
+        catch (Exception ex)
+        {
+            return Result.Text.Failed($"Failed to launch INFRA automation: {ex.Message}");
+        }
+
+        string? firstNewFile = await WaitForFirstNewOutputFileAsync(args.OutputFolder!, outputFilesBefore, cancellationToken, 120);
+
+        string summary = BuildSummary(projectName, selectedIfcFiles.Count, idsFilesToSave.Count, selectedCommands, args.OutputFolder!, firstNewFile, diagnostics, arguments, args.EnableDiagnostics);
+        return Result.Text.Succeeded(summary);
+    }
+
+    private static IExtensionResult? ResolveProject(
+        InfraApiWrapper api,
+        string rawProjectName,
+        List<string> diagnostics,
+        out string projectName,
+        out string projectPath)
+    {
+        projectName = string.Empty;
+        projectPath = string.Empty;
 
         string? projectsLocation;
         try
         {
-            projectsLocation = Invoke<string?>(apiInstance, "GetCommonProjectsLocation");
+            projectsLocation = api.GetCommonProjectsLocation();
         }
         catch (Exception ex)
         {
@@ -59,17 +133,14 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
 
         diagnostics.Add($"GetCommonProjectsLocation='{projectsLocation}'");
 
-        string projectName;
-        string projectPath;
         Dictionary<string, string> projects;
-
         try
         {
-            projects = Invoke<Dictionary<string, string>>(apiInstance, "ScanAllProjects") ?? [];
+            projects = api.ScanAllProjects();
         }
-        catch (Exception ex) when (ex is TargetInvocationException or MissingMethodException or AmbiguousMatchException)
+        catch (Exception ex) when (ex is InvalidOperationException or MissingMethodException)
         {
-            diagnostics.Add($"ScanAllProjectsFallback={InfraApiCollectorHelpers.FormatException(ex)}");
+            diagnostics.Add($"ScanAllProjectsFallback={ex.Message}");
             projects = InfraApiCollectorHelpers.ScanProjectsFallback();
         }
         catch (Exception ex)
@@ -82,6 +153,7 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
             diagnostics.Add("ScanAllProjects returned no projects; using fallback scan.");
             projects = InfraApiCollectorHelpers.ScanProjectsFallback();
         }
+
         diagnostics.Add($"ScanAllProjectsCount={projects.Count}");
         if (projects.Count > 0)
         {
@@ -89,17 +161,18 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
             diagnostics.Add($"ScanAllProjectsSample={sample}");
         }
 
-        if (string.IsNullOrWhiteSpace(args.AutoProjectName)
-            || string.Equals(args.AutoProjectName, "INFO", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(args.AutoProjectName, "ERROR", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(args.AutoProjectName, "__collector_probe__", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(rawProjectName)
+            || string.Equals(rawProjectName, "INFO", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(rawProjectName, "ERROR", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(rawProjectName, "__collector_probe__", StringComparison.OrdinalIgnoreCase))
         {
             return Result.Text.Failed("Select a valid project from Project name.");
         }
 
-        projectName = args.AutoProjectName.Trim();
+        projectName = rawProjectName.Trim();
+        string resolvedProjectName = projectName;
         projectPath = projects
-            .Where(pair => string.Equals(pair.Value, projectName, StringComparison.OrdinalIgnoreCase))
+            .Where(pair => string.Equals(pair.Value, resolvedProjectName, StringComparison.OrdinalIgnoreCase))
             .Select(pair => pair.Key)
             .FirstOrDefault()
             ?? string.Empty;
@@ -109,28 +182,15 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
             return Result.Text.Failed($"Selected project path is missing: {projectName}");
         }
 
-        cancellationToken.ThrowIfCancellationRequested();
+        return null;
+    }
 
-        List<string> selectedIfcFiles = ResolveIfcFiles(context, args);
-        if (selectedIfcFiles.Count == 0)
-        {
-            return Result.Text.Failed("No IFC files were selected.");
-        }
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        try
-        {
-            Invoke<object?>(apiInstance, "CreateMetadataFile", projectName, selectedIfcFiles.ToArray());
-        }
-        catch (Exception ex)
-        {
-            return Result.Text.Failed($"Failed to create metadata file: {ex.Message}");
-        }
-
-        List<string> idsFilesToSave;
-        List<string> explicitIdsSelection = args.AutoSelectedIdsFiles;
-
+    private static IExtensionResult? ResolveIdsFiles(
+        InfraApiWrapper api,
+        string projectPath,
+        List<string> explicitIdsSelection,
+        out List<string> idsFilesToSave)
+    {
         if (explicitIdsSelection.Count > 0)
         {
             string idsRoot = Path.GetFullPath(Path.Combine(projectPath, "IDS"));
@@ -151,7 +211,7 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
             List<string> scannedIdsFiles;
             try
             {
-                scannedIdsFiles = Invoke<List<string>>(apiInstance, "ScanIdsFiles", idsPath) ?? [];
+                scannedIdsFiles = api.ScanIdsFiles(idsPath);
             }
             catch
             {
@@ -169,53 +229,37 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
             return Result.Text.Failed("No IDS files were found or selected.");
         }
 
-        try
-        {
-            Invoke<object?>(apiInstance, "WriteProjectPathToRegistry", projectName, projectPath);
-            Invoke<object?>(apiInstance, "SaveSelectedIdsFilesToRegistry", projectName, idsFilesToSave);
+        return null;
+    }
 
-            Invoke<object?>(apiInstance, "WriteOutputDirectoryToRegistry", projectName, args.OutputFolder!);
-        }
-        catch (Exception ex)
-        {
-            return Result.Text.Failed($"Failed to write INFRA registry settings: {ex.Message}");
-        }
-
-        string commandString = string.Join("|", selectedCommands.Select(c => c.ToString()));
-        string arguments = $"--command {commandString}";
-        if (args.CloseOnCompletion)
-        {
-            arguments += " --close-on-completion true";
-        }
-
-        IReadOnlyList<string> outputFilesBefore = GetOutputFiles(args.OutputFolder!);
-
-        try
-        {
-            Invoke<object?>(apiInstance, "LaunchInfraAutomation", arguments, projectName);
-        }
-        catch (Exception ex)
-        {
-            return Result.Text.Failed($"Failed to launch INFRA automation: {ex.Message}");
-        }
-
-        string? firstNewFile = await WaitForFirstNewOutputFileAsync(args.OutputFolder!, outputFilesBefore, cancellationToken, 120);
+    private static string BuildSummary(
+        string projectName,
+        int ifcCount,
+        int idsCount,
+        List<InfraCommand> commands,
+        string outputFolder,
+        string? firstNewFile,
+        List<string> diagnostics,
+        string launchArguments,
+        bool includeDiagnostics)
+    {
+        string commandList = string.Join(", ", commands);
 
         string summary = firstNewFile is not null
-            ? $"INFRA validation for project '{projectName}' with {selectedIfcFiles.Count} IFC file(s), {idsFilesToSave.Count} IDS file(s), and {selectedCommands.Count} command(s): {string.Join(", ", selectedCommands)}."
+            ? $"INFRA validation for project '{projectName}' with {ifcCount} IFC file(s), {idsCount} IDS file(s), and {commands.Count} command(s): {commandList}."
                 + $"\nFirst output file: {firstNewFile}"
-                + $"\nOutput folder: {args.OutputFolder}"
-            : $"INFRA validation for project '{projectName}' launched with {selectedIfcFiles.Count} IFC file(s), {idsFilesToSave.Count} IDS file(s), and {selectedCommands.Count} command(s): {string.Join(", ", selectedCommands)}."
-                + $"\nNo output file created yet. Check result in INFRA or in output folder: {args.OutputFolder}";
+                + $"\nOutput folder: {outputFolder}"
+            : $"INFRA validation for project '{projectName}' launched with {ifcCount} IFC file(s), {idsCount} IDS file(s), and {commands.Count} command(s): {commandList}."
+                + $"\nNo output file created yet. Check result in INFRA or in output folder: {outputFolder}";
 
-        if (args.EnableDiagnostics)
+        if (includeDiagnostics)
         {
             summary += "\nDiagnostics:";
             summary += string.Concat(diagnostics.Select(entry => $"\n- {entry}"));
-            summary += $"\n- LaunchArguments='{arguments}'";
+            summary += $"\n- LaunchArguments='{launchArguments}'";
         }
 
-        return Result.Text.Succeeded(summary);
+        return summary;
     }
 
     private static IReadOnlyList<string> GetOutputFiles(string outputFolder)
@@ -271,332 +315,5 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
         }
 
         return null;
-    }
-
-    private static List<string> ResolveIfcFiles(IAssistantExtensionContext context, INFRAIFCIDSValidationArgs args)
-    {
-        var resolvedFiles = new List<string>();
-        var seenFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var variableStack = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (string entry in args.IfcFiles)
-        {
-            foreach (string filePath in ExpandIfcEntry(context, entry, variableStack).Where(filePath => seenFiles.Add(filePath)))
-            {
-                resolvedFiles.Add(filePath);
-            }
-        }
-
-        return resolvedFiles;
-    }
-
-    private static IEnumerable<string> ExpandIfcEntry(IAssistantExtensionContext context, string? rawEntry, HashSet<string> variableStack)
-    {
-        string entry = NormalizeIfcEntry(rawEntry);
-        if (string.IsNullOrWhiteSpace(entry))
-        {
-            yield break;
-        }
-
-        if (TryResolveInterpolatedEntry(context, entry, variableStack, out string interpolatedEntry)
-            && !string.Equals(interpolatedEntry, entry, StringComparison.Ordinal))
-        {
-            foreach (string filePath in ExpandIfcEntry(context, interpolatedEntry, variableStack))
-            {
-                yield return filePath;
-            }
-
-            yield break;
-        }
-
-        if (File.Exists(entry))
-        {
-            yield return Path.GetFullPath(entry);
-            yield break;
-        }
-
-        if (TryParseRegexEntry(entry, out string regexDirectory, out string regexPattern))
-        {
-            foreach (string filePath in ExpandRegexEntry(regexDirectory, regexPattern))
-            {
-                yield return filePath;
-            }
-
-            yield break;
-        }
-
-        if (ContainsWildcard(entry))
-        {
-            foreach (string filePath in ExpandWildcardEntry(entry))
-            {
-                yield return filePath;
-            }
-
-            yield break;
-        }
-
-        if (TryResolveVariableEntries(context, entry, out string variableName, out List<string> variableEntries))
-        {
-            if (!variableStack.Add(variableName))
-            {
-                yield break;
-            }
-
-            try
-            {
-                foreach (string variableEntry in variableEntries)
-                {
-                    foreach (string filePath in ExpandIfcEntry(context, variableEntry, variableStack))
-                    {
-                        yield return filePath;
-                    }
-                }
-            }
-            finally
-            {
-                variableStack.Remove(variableName);
-            }
-        }
-    }
-
-    private static string NormalizeIfcEntry(string? rawEntry)
-    {
-        if (string.IsNullOrWhiteSpace(rawEntry))
-        {
-            return string.Empty;
-        }
-
-        return rawEntry.Trim().Trim('"');
-    }
-
-    private static bool TryResolveVariableEntries(IAssistantExtensionContext context, string entry, out string variableName, out List<string> variableEntries)
-    {
-        variableName = ExtractVariableName(entry);
-        variableEntries = [];
-
-        if (string.IsNullOrWhiteSpace(variableName))
-        {
-            return false;
-        }
-
-        string? rawValue = context.GetVariableValue(variableName);
-        if (string.IsNullOrWhiteSpace(rawValue))
-        {
-            return false;
-        }
-
-        variableEntries = SplitMultiValue(rawValue);
-        return variableEntries.Count > 0;
-    }
-
-    private static bool TryResolveInterpolatedEntry(IAssistantExtensionContext context, string entry, HashSet<string> variableStack, out string resolvedEntry)
-    {
-        resolvedEntry = entry;
-
-        if (!entry.Contains("${", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        bool replacedAny = false;
-
-        string resolvedDoubleBrace = Regex.Replace(resolvedEntry, @"\$\{\{\s*(?<name>[^{}]+?)\s*\}\}", match =>
-        {
-            string variableName = match.Groups["name"].Value.Trim();
-            string? variableValue = ResolveVariableValue(context, variableName, variableStack);
-            if (string.IsNullOrWhiteSpace(variableValue))
-            {
-                return match.Value;
-            }
-
-            replacedAny = true;
-            return variableValue;
-        });
-
-        resolvedEntry = Regex.Replace(resolvedDoubleBrace, @"\$\{\s*(?<name>[^{}]+?)\s*\}", match =>
-        {
-            string variableName = match.Groups["name"].Value.Trim();
-            string? variableValue = ResolveVariableValue(context, variableName, variableStack);
-            if (string.IsNullOrWhiteSpace(variableValue))
-            {
-                return match.Value;
-            }
-
-            replacedAny = true;
-            return variableValue;
-        });
-
-        return replacedAny;
-    }
-
-    private static string? ResolveVariableValue(IAssistantExtensionContext context, string variableName, HashSet<string> variableStack)
-    {
-        if (string.IsNullOrWhiteSpace(variableName) || !variableStack.Add(variableName))
-        {
-            return null;
-        }
-
-        try
-        {
-            string? rawValue = context.GetVariableValue(variableName);
-            if (string.IsNullOrWhiteSpace(rawValue))
-            {
-                return null;
-            }
-
-            string normalizedValue = NormalizeIfcEntry(rawValue);
-            if (TryResolveInterpolatedEntry(context, normalizedValue, variableStack, out string interpolatedValue))
-            {
-                return interpolatedValue;
-            }
-
-            return normalizedValue;
-        }
-        finally
-        {
-            variableStack.Remove(variableName);
-        }
-    }
-
-    private static string ExtractVariableName(string entry)
-    {
-        if (entry.StartsWith("var:", StringComparison.OrdinalIgnoreCase))
-        {
-            return entry[4..].Trim();
-        }
-
-        // ${{ Variable.Name }} resolves inside raw IFC entries as an extension-side placeholder.
-        if (entry.StartsWith("${{", StringComparison.Ordinal) && entry.EndsWith("}}"))
-        {
-            return entry[3..^2].Trim();
-        }
-
-        // ${ VariableName } — single-brace shorthand
-        if (entry.StartsWith("${", StringComparison.Ordinal) && entry.EndsWith('}'))
-        {
-            return entry[2..^1].Trim();
-        }
-
-        return entry;
-    }
-
-    private static List<string> SplitMultiValue(string rawValue)
-    {
-        return rawValue
-            .Split(['\r', '\n', ';', ',', '|'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .ToList();
-    }
-
-    private static bool ContainsWildcard(string entry)
-    {
-        return entry.IndexOfAny(['*', '?']) >= 0;
-    }
-
-    private static IEnumerable<string> ExpandWildcardEntry(string entry)
-    {
-        string directory = Path.GetDirectoryName(entry) ?? string.Empty;
-        string pattern = Path.GetFileName(entry);
-
-        if (string.IsNullOrWhiteSpace(directory) || string.IsNullOrWhiteSpace(pattern) || !Directory.Exists(directory))
-        {
-            yield break;
-        }
-
-        IEnumerable<string> matches;
-        try
-        {
-            matches = Directory.EnumerateFiles(directory, pattern, SearchOption.TopDirectoryOnly);
-        }
-        catch
-        {
-            yield break;
-        }
-
-        foreach (string filePath in matches)
-        {
-            yield return Path.GetFullPath(filePath);
-        }
-    }
-
-    private static bool TryParseRegexEntry(string entry, out string directory, out string pattern)
-    {
-        const string prefix = "regex:";
-
-        directory = string.Empty;
-        pattern = string.Empty;
-
-        if (!entry.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        string payload = entry[prefix.Length..].Trim();
-        int separatorIndex = payload.IndexOf('|');
-        if (separatorIndex <= 0 || separatorIndex == payload.Length - 1)
-        {
-            return false;
-        }
-
-        directory = payload[..separatorIndex].Trim().Trim('"');
-        pattern = payload[(separatorIndex + 1)..].Trim();
-        return !string.IsNullOrWhiteSpace(directory) && !string.IsNullOrWhiteSpace(pattern);
-    }
-
-    private static IEnumerable<string> ExpandRegexEntry(string directory, string pattern)
-    {
-        if (!Directory.Exists(directory))
-        {
-            yield break;
-        }
-
-        Regex regex;
-        try
-        {
-            regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, TimeSpan.FromSeconds(2));
-        }
-        catch (ArgumentException)
-        {
-            yield break;
-        }
-
-        IEnumerable<string> files;
-        try
-        {
-            files = Directory.EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly);
-        }
-        catch
-        {
-            yield break;
-        }
-
-        foreach (string filePath in files.Where(filePath => regex.IsMatch(Path.GetFileName(filePath))))
-        {
-            yield return Path.GetFullPath(filePath);
-        }
-    }
-
-    private static T? Invoke<T>(object target, string methodName, params object?[] parameters)
-    {
-        MethodInfo? method = target.GetType().GetMethod(methodName);
-        if (method == null)
-        {
-            throw new MissingMethodException($"Method not found: {methodName}");
-        }
-
-        try
-        {
-            object? result = method.Invoke(target, parameters);
-            if (result is T typed)
-            {
-                return typed;
-            }
-
-            return default;
-        }
-        catch (TargetInvocationException tie) when (tie.InnerException is not null)
-        {
-            throw new InvalidOperationException(InfraApiCollectorHelpers.FormatException(tie), tie.InnerException);
-        }
     }
 }

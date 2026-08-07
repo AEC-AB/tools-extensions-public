@@ -115,6 +115,9 @@ Collector diagnostics are written to:
 - [Assistant platform guide](../../../../docs/dotnet/PLATFORM_GUIDES/ASSISTANT.md)
 
 ## Version History
+- Version 1.0.0 - 2026-08-07
+	- Improved stability and reliability of INFRA API integration.
+	- Internal code quality improvements.
 - Version 0.0.1 - 2026-06-17
 	- Initial public README with complete user guidance for configuration, execution, and troubleshooting.
     - IFC files now support raw exact paths, wildcard paths, Assistant variables, and regex-scoped entries through one field.

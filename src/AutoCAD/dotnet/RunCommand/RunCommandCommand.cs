@@ -25,46 +25,34 @@ public class RunCommandCommand : IAutoCADExtension<RunCommandArgs>
 
         try
         {
-            var commandResults = new List<CommandResult>();
-            var commands = args.Commands?.Split('\n') ?? new string[] { };
-            
-            foreach (var command in commands)
+            var normalizedCommands = NormalizeCommands(args.Commands);
+            var commandResults = normalizedCommands
+                .Split('\n')
+                .Where(command => !string.IsNullOrWhiteSpace(command))
+                .Select(command => new CommandResult
+                {
+                    Succeeded = true,
+                    CommandResults = command
+                })
+                .ToList();
+
+            if (!commandResults.Any())
             {
-                if (string.IsNullOrWhiteSpace(command))
-                    continue;
-                    
-                try
+                return new RunCommandCommandResult
                 {
-                    RunCommand(command);
-                    commandResults.Add(new CommandResult
-                    {
-                        Succeeded = true,
-                        CommandResults = command
-                    });
-                }
-                catch (System.Exception e)
-                {
-                    commandResults.Add(new CommandResult
-                    {
-                        Succeeded = false,
-                        CommandResults = command,
-                        ErrorMessage = e.Message
-                    });
-                }
+                    Result = ExecutionResult.Failed,
+                    CommandResults = [new CommandResult { Succeeded = false, ErrorMessage = "Commands cannot be empty" }]
+                };
             }
+
+            QueueCommands(doc, normalizedCommands);
 
             var result = new RunCommandCommandResult
             {
                 CommandResults = commandResults
             };
-            
-            // Determine overall result
-            if (commandResults.All(x => x.Succeeded))
-                result.Result = ExecutionResult.Succeeded;
-            else if (commandResults.All(x => !x.Succeeded))
-                result.Result = ExecutionResult.Failed;
-            else
-                result.Result = ExecutionResult.PartiallySucceeded;
+
+            result.Result = ExecutionResult.Succeeded;
 
             return result;
         }
@@ -78,11 +66,17 @@ public class RunCommandCommand : IAutoCADExtension<RunCommandArgs>
         }
     }
 
-    private static void RunCommand(string command)
+    private static string NormalizeCommands(string? commands)
     {
-        dynamic acadApp = Autodesk.AutoCAD.ApplicationServices.Application.AcadApplication;
-        var thisDrawing = acadApp.ActiveDocument;
-        thisDrawing.SendCommand(command);
+        return commands?
+            .Replace("\r\n", "\n")
+            .Replace('\r', '\n')
+            .Trim() ?? string.Empty;
+    }
+
+    private static void QueueCommands(Autodesk.AutoCAD.ApplicationServices.Document doc, string commands)
+    {
+        doc.SendStringToExecute(commands + "\n", activate: true, wrapUpInactiveDoc: false, echoCommand: false);
     }
 }
 

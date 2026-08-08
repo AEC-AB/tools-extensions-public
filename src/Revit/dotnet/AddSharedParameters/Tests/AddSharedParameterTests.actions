@@ -1,0 +1,153 @@
+{
+  "Version": 4,
+  "ActionConfigs": [
+    {
+      "Id": "0ff8b55f-8b93-4bb6-acdb-0590e0b0c4c2",
+      "IsChecked": true,
+      "Name": "Create test file",
+      "Tasks": [
+        {
+          "TaskTypeId": "b91645fa-d714-4ec2-a404-b5a41f690fbe",
+          "ScriptPath": "C:\\Users\\ktu\\source\\repos\\Macros\\AddSharedParameters\\Tests\\DuplicateParameterTest\\CreateTestFile\\CreateTestFile\\CreateTestFile.py",
+          "FormData": {
+            "control": "Default value",
+            "comboBox": null
+          },
+          "Id": "582066c9-0403-4290-825b-84a2fe6be550",
+          "Disabled": false,
+          "GeneratedName": "Run CreateTestFile.py",
+          "UserDefinedName": null,
+          "Condition": 0,
+          "TreatErrorsAsWarnings": false,
+          "Timeout": null,
+          "Logins": []
+        },
+        {
+          "TaskTypeId": "21160144-4eb3-43dd-8200-1ce7ae58e221",
+          "AssemblyPath": "C:\\Users\\ktu\\source\\repos\\Macros\\AddSharedParameters\\bin\\Debug\\netstandard2.0\\publish\\AddSharedParameters.dll",
+          "FormData": {
+            "SharedParameterPath": "C:\\Users\\ktu\\source\\repos\\Macros\\AddSharedParameters\\Tests\\TestFiles\\CW NO Common Parameters_SUS.txt",
+            "ParameterNames": "[\"df2c656f-285a-4e3e-873f-5fba2f930c1d\",\"c7bdd5fa-ee58-4290-a9f6-29e7cbefc175\"]",
+            "ParameterGroup": "PG_IDENTITY_DATA",
+            "ChangeParameterGroupOnExistingBindings": "True",
+            "BindingType": "Instance",
+            "CangeBindingTypeOnExistingBindings": "False",
+            "VariesAcrossGroups": "Vary",
+            "CategoryNames": "[\"OST_Walls\"]",
+            "ResetCategories": "False",
+            "CategoryNamesToRemove": "[]",
+            "ReplaceParameter": "[]",
+            "MergeParameters": "False",
+            "ReInsertParameter": "False"
+          },
+          "Output": null,
+          "UseNugetBrowser": false,
+          "Nuget": null,
+          "Id": "ea391615-d65d-43eb-8e25-b530f06e762d",
+          "Disabled": false,
+          "GeneratedName": "Run AddSharedParameters.dll",
+          "UserDefinedName": null,
+          "Condition": 0,
+          "TreatErrorsAsWarnings": false,
+          "Timeout": null,
+          "Logins": []
+        }
+      ],
+      "GroupId": "a81c1cf3-67c3-49c3-a5e1-d998b05be04f",
+      "Variables": [],
+      "Retires": 0
+    },
+    {
+      "Id": "6bafbe7e-0183-4ce5-8481-b33bba552f80",
+      "IsChecked": true,
+      "Name": "Merge parameters",
+      "Tasks": [
+        {
+          "TaskTypeId": "b91645fa-d714-4ec2-a404-b5a41f690fbe",
+          "ScriptPath": "C:\\Users\\ktu\\source\\repos\\Macros\\AddSharedParameters\\Tests\\SetWallParameter\\SetWallParameter\\SetWallParameter.py",
+          "FormData": {
+            "set_parameter": "True",
+            "check_parameter": "False"
+          },
+          "Id": "af2fbc1e-f335-42c8-b2c4-0288abbd5240",
+          "Disabled": false,
+          "GeneratedName": "Run SetWallParameter.py",
+          "UserDefinedName": null,
+          "Condition": 0,
+          "TreatErrorsAsWarnings": false,
+          "Timeout": null,
+          "Logins": []
+        },
+        {
+          "TaskTypeId": "21160144-4eb3-43dd-8200-1ce7ae58e221",
+          "AssemblyPath": "C:\\Users\\ktu\\source\\repos\\Macros\\AddSharedParameters\\bin\\Debug\\netstandard2.0\\publish\\AddSharedParameters.dll",
+          "FormData": {
+            "SharedParameterPath": "C:\\Users\\ktu\\source\\repos\\Macros\\AddSharedParameters\\Tests\\TestFiles\\CW NO Common Parameters_SUS.txt",
+            "ParameterNames": "[\"df2c656f-285a-4e3e-873f-5fba2f930c1d\"]",
+            "ParameterGroup": "PG_IDENTITY_DATA",
+            "ChangeParameterGroupOnExistingBindings": "True",
+            "BindingType": "Instance",
+            "CangeBindingTypeOnExistingBindings": "False",
+            "VariesAcrossGroups": "Vary",
+            "CategoryNames": "[\"OST_Walls\"]",
+            "ResetCategories": "False",
+            "CategoryNamesToRemove": "[]",
+            "ReplaceParameter": "[]",
+            "MergeParameters": "True",
+            "ReInsertParameter": "False"
+          },
+          "Output": null,
+          "UseNugetBrowser": false,
+          "Nuget": null,
+          "Id": "ea391615-d65d-43eb-8e25-b530f06e762d",
+          "Disabled": false,
+          "GeneratedName": "Run AddSharedParameters.dll",
+          "UserDefinedName": null,
+          "Condition": 0,
+          "TreatErrorsAsWarnings": false,
+          "Timeout": null,
+          "Logins": []
+        },
+        {
+          "TaskTypeId": "b91645fa-d714-4ec2-a404-b5a41f690fbe",
+          "ScriptPath": "C:\\Users\\ktu\\source\\repos\\Macros\\AddSharedParameters\\Tests\\SetWallParameter\\SetWallParameter\\SetWallParameter.py",
+          "FormData": {
+            "set_parameter": "False",
+            "check_parameter": "True"
+          },
+          "Id": "2e6c5b36-414e-4caf-a317-271b59c14ff3",
+          "Disabled": false,
+          "GeneratedName": "Run SetWallParameter.py",
+          "UserDefinedName": null,
+          "Condition": 0,
+          "TreatErrorsAsWarnings": false,
+          "Timeout": null,
+          "Logins": []
+        }
+      ],
+      "GroupId": "a81c1cf3-67c3-49c3-a5e1-d998b05be04f",
+      "Variables": [],
+      "Retires": 0
+    }
+  ],
+  "SchedulingConfig": {
+    "Schedules": []
+  },
+  "ActionGroups": [
+    {
+      "Id": "a81c1cf3-67c3-49c3-a5e1-d998b05be04f",
+      "Name": "Action group",
+      "Variables": []
+    }
+  ],
+  "Variables": [
+    {
+      "Key": "Assistant:DisablePopupCloser",
+      "Value": "True"
+    }
+  ],
+  "Settings": {
+    "LogActionRuns": false
+  },
+  "RequiredLogins": []
+}

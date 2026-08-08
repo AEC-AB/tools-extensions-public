@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<ExtensionId>AddSharedParameters</ExtensionId>		
+		<Version>0.1.5</Version>
+		<Title>Add Shared Parameters</Title>
+		<Description>Add shared parameters to Revit document.</Description>
+		<PackageTags>Revit;Assistant;Extension</PackageTags>
+		<PackageIcon>Icon.png</PackageIcon>		
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="Icon.png" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+</Project>

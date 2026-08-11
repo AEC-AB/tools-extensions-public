@@ -19,7 +19,7 @@ internal static class InfraApiCollectorHelpers
             throw new InvalidOperationException("Diagnostics path segments must be relative.");
         }
 
-        return Path.Combine(basePath, Path.Combine(relativeParts));
+        return Path.Combine(new[] { basePath }.Concat(relativeParts).ToArray());
     }
 
     [SupportedOSPlatform("windows")]
@@ -174,12 +174,22 @@ internal static class InfraApiCollectorHelpers
 
     private static string? ResolveApiDllPath(string installLocation)
     {
+        static string CombineUnderInstall(string basePath, params string[] parts)
+        {
+            if (parts.Any(Path.IsPathRooted))
+            {
+                throw new InvalidOperationException("DLL path segments must be relative.");
+            }
+
+            return Path.Combine(basePath, Path.Combine(parts));
+        }
+
         var candidates = new[]
         {
-            Path.Combine(installLocation, ApiDllName),
-            Path.Combine(installLocation, "net10.0-windows", ApiDllName),
-            Path.Combine(installLocation, "net9.0-windows", ApiDllName),
-            Path.Combine(installLocation, "net8.0-windows", ApiDllName),
+            CombineUnderInstall(installLocation, ApiDllName),
+            CombineUnderInstall(installLocation, "net10.0-windows", ApiDllName),
+            CombineUnderInstall(installLocation, "net9.0-windows", ApiDllName),
+            CombineUnderInstall(installLocation, "net8.0-windows", ApiDllName),
         };
 
         try
@@ -378,7 +388,7 @@ internal static class InfraApiCollectorHelpers
                 continue;
             }
 
-            string infraRoot = Path.Combine(basePath, "AEC AB", "AEC PLUS Infra");
+            string infraRoot = Path.Join(basePath, "AEC AB", "AEC PLUS Infra");
             if (!Directory.Exists(infraRoot))
             {
                 continue;

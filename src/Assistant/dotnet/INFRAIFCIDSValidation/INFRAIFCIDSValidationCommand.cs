@@ -236,7 +236,7 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
                 .Select(path => path.Trim())
                 .Select(path => path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar))
                 .Where(path => !Path.IsPathRooted(path))
-                .Select(path => Path.GetFullPath(Path.Combine(idsRoot, path)))
+                .Select(path => Path.GetFullPath(Path.Join(idsRoot, path)))
                 .Where(fullPath =>
                     fullPath.StartsWith(idsRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
                     && File.Exists(fullPath))

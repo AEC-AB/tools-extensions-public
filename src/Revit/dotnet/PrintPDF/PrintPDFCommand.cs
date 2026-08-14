@@ -10,8 +10,12 @@ public class PrintPDFCommand : IRevitExtension<PrintPDFArgs>
         if (document == null)
             return Result.Text.Failed("No active document found");
 
-        if (string.IsNullOrEmpty(Args.DestinationDirectory))
+        if (string.IsNullOrWhiteSpace(Args.DestinationDirectory))
             return Result.Text.Failed("Please select a destination directory");
+
+        if (Args.NamingOptions == NamingOptions.CustomNamingConvention &&
+            string.IsNullOrWhiteSpace(Args.CustomNamingConvention))
+            return Result.Text.Failed("Please define a custom naming convention");
 
         if (cancellationToken.IsCancellationRequested)
             return Result.Text.PartiallySucceeded("Operation cancelled");
@@ -66,10 +70,11 @@ public class PrintPDFCommand : IRevitExtension<PrintPDFArgs>
                         break;
                     }
                 case ExportOptions.SheetSet:
-                    if (Args.ViewSet == null)
+                    var viewSet = Args.ViewSet;
+                    if (string.IsNullOrWhiteSpace(viewSet))
                         return Result.Text.Failed("Please Select a View/Sheet set");
                     {
-                        var (sheetsToPrint, name) = selector.CollectByViewSet(Args.ViewSet ?? string.Empty);
+                        var (sheetsToPrint, name) = selector.CollectByViewSet(viewSet!);
                         if (sheetsToPrint == null || !sheetsToPrint.Any())
                             return Result.Text.PartiallySucceeded($"No sheets found in view set '{name}'");
                         worker.PrintPDF(sheetsToPrint, name ?? string.Empty, OrderingTechnique.PreserveSourceOrder);
@@ -97,10 +102,11 @@ public class PrintPDFCommand : IRevitExtension<PrintPDFArgs>
                     break;
 #if R2025_OR_GREATER
                 case ExportOptions.SheetCollection:
-                    if (Args.ViewCollection == null)
+                    var viewCollection = Args.ViewCollection;
+                    if (string.IsNullOrWhiteSpace(viewCollection))
                         return Result.Text.Failed("Please Select a Sheet collection");
                     {
-                        var (sheetsToPrint, name) = selector.CollectByViewCollection(Args.ViewCollection ?? string.Empty);
+                        var (sheetsToPrint, name) = selector.CollectByViewCollection(viewCollection!);
                         if (sheetsToPrint == null || !sheetsToPrint.Any())
                             return Result.Text.PartiallySucceeded($"No sheets found in view collection '{name}'");
                         worker.PrintPDF(sheetsToPrint, name ?? string.Empty, OrderingTechnique.PreserveSourceOrder);

@@ -10,5 +10,15 @@
   <ItemGroup>
     <PackageReference Include="Nuke.Common" Version="10.1.0" />
     <PackageReference Include="LibGit2Sharp" Version="0.31.0" />
+    <PackageReference Include="Microsoft.Build.Locator" Version="1.7.8" />
+    <!-- ExcludeAssets="runtime" so these are only used as compile-time references; MSBuildLocator loads the matching real assemblies from the installed SDK at runtime, avoiding assembly version mismatches (e.g. NuGet.Frameworks) between the restored packages and the SDK's own MSBuild. -->
+    <PackageReference Include="Microsoft.Build" Version="18.0.2" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="18.0.2" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="18.0.2" ExcludeAssets="runtime" />
+    <PackageReference Include="NuGet.Frameworks" Version="6.12.1" ExcludeAssets="runtime" />
+    <PackageReference Include="NuGet.Packaging" Version="6.12.1" ExcludeAssets="runtime" />
+    <PackageReference Include="NuGet.Common" Version="6.12.1" ExcludeAssets="runtime" />
+    <PackageReference Include="NuGet.Configuration" Version="6.12.1" ExcludeAssets="runtime" />
+    <PackageReference Include="NuGet.Versioning" Version="6.12.1" ExcludeAssets="runtime" />
   </ItemGroup>
 </Project>

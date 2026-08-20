@@ -409,7 +409,7 @@ internal static class InfraApiCollectorHelpers
 
             roots.Add(infraRoot);
 
-            string projects = Path.Combine(infraRoot, "Projects");
+            string projects = Path.Join(infraRoot, "Projects");
             if (Directory.Exists(projects))
             {
                 roots.Add(projects);

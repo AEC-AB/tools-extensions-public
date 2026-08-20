@@ -15,12 +15,18 @@ internal static class InfraApiCollectorHelpers
         string basePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         string[] relativeParts = { "AEC AB", "Assistant", "Logs", "INFRAIFCIDSValidation.collector.log" };
 
-        if (relativeParts.Any(Path.IsPathRooted))
+        string diagnosticsPath = basePath;
+        foreach (string part in relativeParts)
         {
-            throw new InvalidOperationException("Diagnostics path segments must be relative.");
+            if (Path.IsPathRooted(part))
+            {
+                throw new InvalidOperationException("Diagnostics path segments must be relative.");
+            }
+
+            diagnosticsPath = Path.Combine(diagnosticsPath, part);
         }
 
-        return Path.Combine(new[] { basePath }.Concat(relativeParts).ToArray());
+        return diagnosticsPath;
     }
 
     [SupportedOSPlatform("windows")]
@@ -182,7 +188,13 @@ internal static class InfraApiCollectorHelpers
                 throw new InvalidOperationException("DLL path segments must be relative.");
             }
 
-            return Path.Combine(basePath, Path.Combine(parts));
+            var combinedPath = basePath;
+            foreach (var part in parts)
+            {
+                combinedPath = Path.Combine(combinedPath, part);
+            }
+
+            return combinedPath;
         }
 
         var candidates = new[]
@@ -403,7 +415,7 @@ internal static class InfraApiCollectorHelpers
                 roots.Add(projects);
             }
 
-            string cloudProjects = Path.Combine(infraRoot, "CloudProjects");
+            string cloudProjects = Path.Join(infraRoot, "CloudProjects");
             if (Directory.Exists(cloudProjects))
             {
                 roots.Add(cloudProjects);
@@ -491,7 +503,8 @@ internal static class InfraApiCollectorHelpers
                 return null;
             }
 
-            string candidatePath = Path.Combine(_assemblyFolder, assemblyName.Name + ".dll");
+            string safeAssemblyFileName = Path.GetFileName(assemblyName.Name) + ".dll";
+            string candidatePath = Path.Combine(_assemblyFolder, safeAssemblyFileName);
             return File.Exists(candidatePath) ? LoadFromAssemblyPath(candidatePath) : null;
         }
 

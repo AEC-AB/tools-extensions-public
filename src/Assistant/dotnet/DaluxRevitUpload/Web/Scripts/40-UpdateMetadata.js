@@ -165,10 +165,11 @@
                             return false;
                         }
                     } else {
-                        day = parseInt(parts[0]);
+                        const isYearFirst = /^\d{4}$/.test(parts[0].trim());
+                        day = parseInt(isYearFirst ? parts[2] : parts[0]);
                         let monthPart = parts[1].toLowerCase();
                         month = monthNames[monthPart.substring(0,3)] || parseInt(monthPart);
-                        year = parseInt(parts[2]);
+                        year = parseInt(isYearFirst ? parts[0] : parts[2]);
                     }
                     if (year < 100) year += 2000;
                     const targetTotalMonths = (year * 12) + month;

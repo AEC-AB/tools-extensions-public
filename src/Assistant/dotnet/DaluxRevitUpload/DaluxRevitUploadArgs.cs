@@ -9,7 +9,7 @@ public class DaluxRevitUploadArgs
 {
     [TextField(Label = "Revit Process ID", ToolTip = "Process ID of the target Revit instance.")]
     [Required(ErrorMessage = "Revit Process ID is required.")]
-    public string RevitProcessId { get; set; }
+    public string RevitProcessId { get; set; } = string.Empty;
 
     [TextField(Label = "Target Filename", ToolTip = "The exact filename to process (e.g., I90_BBH_A6_B72_K07_M00_F2_N001)")]
     [Required(ErrorMessage = "Target Filename is required.")]

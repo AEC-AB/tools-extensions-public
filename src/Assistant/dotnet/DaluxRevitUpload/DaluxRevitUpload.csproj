@@ -15,5 +15,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="Icon.png" Pack="true" PackagePath="" />
+    <None Remove="Web\Scripts\*.js" />
+    <EmbeddedResource Include="Web\Scripts\*.js" />
   </ItemGroup>
 </Project>

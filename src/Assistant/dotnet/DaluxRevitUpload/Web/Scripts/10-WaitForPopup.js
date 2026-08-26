@@ -55,6 +55,7 @@
                 }
             } catch(e) {
                 results.push('[!] Error waiting for popup load: ' + e.message);
+                return false;
             }
     
     return true;

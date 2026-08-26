@@ -32,20 +32,20 @@ public class PrintPDFArgs
         Hint = "Click to add filter rules")]
     public FilteredElementCollector? CustomFilter { get; set; }
 
-    [OptionsField(
+    [TextField(
         Label = "ViewSet",
         ToolTip = "Select a saved sheet set",
+        CollectorType = typeof(ViewSetCollector),
         Visibility = $"{nameof(ExportOption)} == '{nameof(ExportOptions.SheetSet)}'")]
-    [CustomRevitAutoFill(typeof(ViewSetCollector))]
     [Required(ErrorMessage = "Value can not be empty")]
     public string? ViewSet { get; set; }
 
 #if R2025_OR_GREATER
-    [OptionsField(
+    [TextField(
         Label = "ViewCollection",
         ToolTip = "Select a saved sheet collection",
+        CollectorType = typeof(ViewCollectionCollector),
         Visibility = $"{nameof(ExportOption)} == '{nameof(ExportOptions.SheetCollection)}'")]
-    [CustomRevitAutoFill(typeof(ViewCollectionCollector))]
     [Required(ErrorMessage = "Value can not be empty")]
     public string? ViewCollection { get; set; }
 #endif
@@ -108,7 +108,7 @@ public class PrintPDFArgs
     [BooleanField(
         Label = "Use sheet set name as PDF Name",
         ToolTip ="Use the selected sheet set name for the combined PDF",
-         Visibility = $"{nameof(Combine)} && {nameof(ExportOption)} == 'SheetSet'")]
+         Visibility = nameof(Combine))]
     public bool UseSheetSetNameAsPdfName { get; set; }
 
     [TextField(

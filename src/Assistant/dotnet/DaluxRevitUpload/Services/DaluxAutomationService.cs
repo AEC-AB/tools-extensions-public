@@ -71,7 +71,7 @@ public class DaluxAutomationService : IDisposable
                     LogMessage("[+] WebSocket connected!");
                     break;
                 }
-                catch (Exception ex) when (wsAttempts < 10 && (ex.Message.Contains("500") || ex.Message.Contains("status code")))
+                catch (Exception ex) when (wsAttempts < 10 && IsTransientWebSocketConnectFailure(ex))
                 {
                     wsAttempts++;
                     LogMessage($"[*] WebView not ready yet, retrying ({wsAttempts}/10)...");
@@ -144,7 +144,7 @@ public class DaluxAutomationService : IDisposable
                             LogMessage("[+] Reconnected after page navigation.");
                             break;
                         }
-                        catch (Exception re) when (reAttempts < 10 && (re.Message.Contains("500") || re.Message.Contains("status code")))
+                        catch (Exception re) when (reAttempts < 10 && IsTransientWebSocketConnectFailure(re))
                         {
                             reAttempts++;
                             await Task.Delay(500, cancellationToken);
@@ -282,6 +282,13 @@ public class DaluxAutomationService : IDisposable
     {
         _auditLog.Add(message);
         System.Diagnostics.Debug.WriteLine(message);
+    }
+
+    private static bool IsTransientWebSocketConnectFailure(Exception ex)
+    {
+        return ex is TimeoutException ||
+               ex.Message.Contains("500") ||
+               ex.Message.Contains("status code");
     }
 
     public string GetAuditLogAsString()

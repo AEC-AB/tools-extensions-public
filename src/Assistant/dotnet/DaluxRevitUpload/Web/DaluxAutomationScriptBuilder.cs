@@ -21,7 +21,7 @@ internal static class DaluxAutomationScriptBuilder
 
         return ScriptTemplate.Value
             .Replace("__TARGET_JSON__", JsonSerializer.Serialize(config.TargetFilename))
-            .Replace("__REVISION_INCREMENT__", config.RevisionIncrement.ToString())
+            .Replace("__REVISION_INCREMENT__", config.RevisionIncrement.ToString(System.Globalization.CultureInfo.InvariantCulture))
             .Replace("__COLUMN_CONFIG_JSON__", JsonSerializer.Serialize(config.ColumnFields))
             .Replace("__ACTION_BUTTON_JSON__", JsonSerializer.Serialize(config.ActionButtonText));
     }

@@ -150,9 +150,16 @@ internal sealed class CdpPreflightDiagnostics
         try { ownerStart = ownerProc?.StartTime; } catch { }
 
         _log($"[*] Port {_config.DebuggingPort} is held by foreign process {ownerName} (PID {ownerPid}). Terminating...");
+        if (ownerProc == null)
+        {
+            _log($"[!] Could not access process {ownerName} (PID {ownerPid}) to terminate it.");
+            _log("[!] Close it manually, or change the CDP port in Advanced and retry.");
+            return false;
+        }
+
         try
         {
-            ownerProc!.Kill();
+            ownerProc.Kill();
             ownerProc.WaitForExit(2000);
         }
         catch (Exception ex)

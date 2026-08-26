@@ -34,8 +34,7 @@ public class PrintPDFArgs
 
     [TextField(
         Label = "ViewSet",
-        ToolTip = "Select a saved sheet set",
-        CollectorType = typeof(ViewSetCollector),
+        ToolTip = "Enter the saved sheet set name",
         Visibility = $"{nameof(ExportOption)} == '{nameof(ExportOptions.SheetSet)}'")]
     [Required(ErrorMessage = "Value can not be empty")]
     public string? ViewSet { get; set; }
@@ -43,8 +42,7 @@ public class PrintPDFArgs
 #if R2025_OR_GREATER
     [TextField(
         Label = "ViewCollection",
-        ToolTip = "Select a saved sheet collection",
-        CollectorType = typeof(ViewCollectionCollector),
+        ToolTip = "Enter the saved sheet collection name",
         Visibility = $"{nameof(ExportOption)} == '{nameof(ExportOptions.SheetCollection)}'")]
     [Required(ErrorMessage = "Value can not be empty")]
     public string? ViewCollection { get; set; }

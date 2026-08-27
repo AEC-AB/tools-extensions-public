@@ -1,0 +1,4 @@
+{
+    "dotnet.projects.enableAutomaticRestore": false,
+	"dotnet.automaticallyCreateSolutionInWorkspace": false
+}

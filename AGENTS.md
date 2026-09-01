@@ -21,6 +21,29 @@ This repo contains Assistant extensions for multiple integrations (Assistant des
 - Do not catch `Exception` or `OperationCanceledException`. Catch only expected platform exceptions you can convert into actionable failures.
 - Start implementation tasks with `skills/docs-routing/SKILL.md`. It resolves the offline extension docs bundled with the project's resolved dependency version.
 
+## Integration API inspection
+
+Use `dotnet-inspect` when an extension needs Revit, AutoCAD, Navisworks, Tekla, or Assistant host-integration API signatures or members that the bundled extension docs do not cover. Install it once when it is unavailable:
+
+```powershell
+dotnet tool install -g dotnet-inspect
+```
+
+Run `dotnet-inspect skill` before the first inspection in a task. It provides the tool's current agent guidance. Target the resolved local assembly or NuGet package for the integration, then use:
+
+```powershell
+# Find relevant API names before guessing.
+dotnet-inspect search "[PathToDll]" "FilteredElementCollector"
+
+# Inspect a type's constructors, interfaces, methods, and properties.
+dotnet-inspect type "[PathToDll]" "Autodesk.Revit.DB.Wall"
+
+# Compare two package or assembly versions when behavior may have changed.
+dotnet-inspect diff [SourceTarget] [DestinationTarget]
+```
+
+Use the default Markdown output for focused investigation. Add `--json`, `--tsv`, or `--table` when structured output helps; use `-v:d` only when decompiled implementation context is required.
+
 ## Skills
 
 - `skills/docs-routing/SKILL.md` - resolve the offline NuGet documentation root and load the relevant guidance.

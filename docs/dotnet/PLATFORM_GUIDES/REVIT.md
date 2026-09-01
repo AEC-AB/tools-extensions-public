@@ -15,8 +15,9 @@ This guide covers Revit-specific patterns for writing extensions that integrate 
 See [Quick Start](../QUICK_START.md) for Args/Command basics. This guide covers Revit-specific patterns.
 
 Scope: these guides provide extension and integration patterns and hints, not a
-complete API reference. Consult the [official Autodesk Revit API documentation](https://help.autodesk.com/view/RVT/2025/ENU/)
-for full host API semantics.
+complete API reference. Human developers should consult [RevitApiDocs](https://www.revitapidocs.com/)
+for full host API semantics. Agents should use `dotnet-inspect` against the
+resolved Revit API assembly.
 
 ## Choose Revit Template
 
@@ -94,9 +95,6 @@ var walls = new FilteredElementCollector(document)
     .WhereElementIsNotElementType()
     .ToElements();
 ```
-
-For a focused, file-based link insertion example, see the [Insert a Revit link
-recipe](../COOKBOOK.md#insert-a-revit-link) in the cookbook.
 
 ## Workset Handling
 

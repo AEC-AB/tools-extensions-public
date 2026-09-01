@@ -6,21 +6,16 @@ description: Use this skill when you need extension framework guidance before ch
 
 Use this skill when you need extension framework guidance before changing code in this repository.
 
-If the `extension-docs` assistant docs MCP tool is unavailable, use `../mcp-setup/SKILL.md` first to restore the assistant MCP server in the active agent framework.
+## Resolve the documentation root
 
-## MCP entry points
+1. Open the active project's `obj/project.assets.json`. Restore the project first if this file has not been generated.
+2. In `libraries`, find `CW.Assistant.ExtensionDocs.Bundle/<version>`. This transitive dependency comes through `CW.Assistant.Extensions.Contracts`; use the exact resolved version recorded here.
+3. For each local NuGet root in `packageFolders`, append `cw.assistant.extensiondocs.bundle/<version>/contentFiles/any/any/Resources/ExtensionDocs`.
+4. Use the first existing directory as `ExtensionDocsRoot`. If none exists, package restore is incomplete; do not substitute docs from another version.
 
-Use the `extension-docs` MCP tool:
+Read and search Markdown beneath `ExtensionDocsRoot` directly. This route is offline and does not check for newer documentation.
 
-- `operation=index` to list available docs
-- `operation=search` with focused queries such as `args versioning`, `autofill`, `transaction`, `document lock`, `current selection`, or `model connection`
-- `operation=content` with document ids such as `quick-start`, `args-developer-guide`, `cookbook`, `reference`, `assistant`, `autocad`, `revit`, `navisworks`, or `tekla`
+When maintaining the documentation package itself, edit `docs/dotnet/`; it is the source copied into the bundle.
 
-## Suggested reading order
-
-1. `quick-start` for extension shape and execution model
-2. Platform doc (`assistant`, `autocad`, `revit`, `navisworks`, or `tekla`) for runtime behavior
-3. `args-developer-guide` when changing configuration classes
-4. `cookbook` for reusable implementation patterns
-5. `reference` for exact field syntax and validation rules
+After resolving `ExtensionDocsRoot`, read `ExtensionDocsRoot/AGENT.md` for the canonical reading order and platform guide selection.
 

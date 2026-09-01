@@ -8,13 +8,7 @@ Use this skill when editing `*Args.cs` in any integration under this repository.
 
 ## Load these docs first
 
-Use the `extension-docs` MCP tool:
-
-1. `operation=content` with document id `args-developer-guide`
-2. `operation=search` with query `args versioning upgrades`
-3. `operation=content` using the returned document id
-
-If the `extension-docs` MCP tool is unavailable or returns no results, proceed using only the rules in this document and inform the user that docs could not be loaded.
+Use `../docs-routing/SKILL.md` to resolve `ExtensionDocsRoot`, then read `ARGS_DEVELOPER_GUIDE.md`. Search that file for `version` and `upgrade` when changing a persisted shape.
 
 ## Upgrade rules
 

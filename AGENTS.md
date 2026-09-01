@@ -19,13 +19,11 @@ This repo contains Assistant extensions for multiple integrations (Assistant des
 - Use `Result.*` helpers for outcomes. Prefer `Result.Markdown.*` for execution summaries and diagnostics.
 - Failure results should state what happened, why it happened when relevant, and exactly what the user should check next.
 - Do not catch `Exception` or `OperationCanceledException`. Catch only expected platform exceptions you can convert into actionable failures.
-- Start docs and implementation tasks by using the `extension-docs` assistant docs MCP tool for current guidance.
-- If the tool is unavailable, use `skills/mcp-setup/SKILL.md` to restore the assistant MCP server before continuing.
+- Start implementation tasks with `skills/docs-routing/SKILL.md`. It resolves the offline extension docs bundled with the project's resolved dependency version.
 
 ## Skills
 
-- `skills/docs-routing/SKILL.md` - start here to load the right `extension-docs` content and reading order.
-- `skills/mcp-setup/SKILL.md` - restore the assistant MCP server when `extension-docs` is unavailable.
+- `skills/docs-routing/SKILL.md` - resolve the offline NuGet documentation root and load the relevant guidance.
 - `skills/args-evolution/SKILL.md` - apply when editing `*Args.cs`, upgrades, collectors, or field metadata.
 - `skills/readme-help/SKILL.md` - apply before shipping `README.md` updates.
 - `skills/platform-assistant/SKILL.md` - apply when changing Assistant command logic or Assistant collectors.

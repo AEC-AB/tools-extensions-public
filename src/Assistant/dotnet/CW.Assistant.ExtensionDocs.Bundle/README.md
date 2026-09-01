@@ -1,6 +1,6 @@
 # CW.Assistant.ExtensionDocs.Bundle
 
-This package ships the raw extension implementation Markdown docs for Assistant MCP consumers.
+This package ships the raw extension implementation Markdown docs for coding agents and other local consumers.
 
 ## What it provides
 
@@ -21,9 +21,11 @@ The package source of truth is the markdown docs in:
 
 The package is a thin wrapper around the repo docs and does not require a parsed JSON bundle.
 
-## Consumption (CLI project)
+## Consumption
 
-Add a package reference in the consumer project:
+Extension projects receive this package transitively through `CW.Assistant.Extensions.Contracts`. Read the version selected by the resolved dependency graph rather than selecting or checking for a newer documentation version independently.
+
+The package can also be referenced directly when a standalone consumer needs the docs:
 
 ```xml
 <ItemGroup>
@@ -31,4 +33,4 @@ Add a package reference in the consumer project:
 </ItemGroup>
 ```
 
-Then ensure your loader reads the copied markdown files from `Resources/ExtensionDocs/`.
+Read the package content at `contentFiles/any/any/Resources/ExtensionDocs/`. The transitive build target also copies the Markdown files to `Resources/ExtensionDocs/` in consumer output.

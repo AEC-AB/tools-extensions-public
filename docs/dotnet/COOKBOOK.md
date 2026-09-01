@@ -745,6 +745,72 @@ public enum CompressionLevel { None, Fast, Normal, Maximum }
 
 ---
 
+## 19. Insert a Revit link
+
+**Use case:** Insert a file-based Revit model link into the active document.
+
+This example uses `context.IsDryRun` for preview runs and checks cancellation
+before host operations. It rolls back when the link cannot be loaded. An
+expected Revit `ApplicationException` is rethrown after rollback so Assistant
+can handle it as an unhandled host exception.
+
+```csharp
+public IExtensionResult Run(
+    IRevitExtensionContext context,
+    InsertRevitLinkArgs args,
+    CancellationToken cancellationToken)
+{
+    var document = context.UIApplication.ActiveUIDocument?.Document;
+    if (document is null)
+        return Result.Text.Failed("Revit has no active document.");
+
+    if (string.IsNullOrWhiteSpace(args.LinkPath))
+        return Result.Text.Failed("A Revit model path is required.");
+
+    cancellationToken.ThrowIfCancellationRequested();
+
+    var modelPath = ModelPathUtils.ConvertUserVisiblePathToModelPath(args.LinkPath);
+    if (context.IsDryRun)
+        return Result.Text.Succeeded($"Dry run: would insert the Revit link from '{args.LinkPath}'.");
+
+    using var transaction = new Transaction(document, "Insert Revit link");
+    transaction.Start();
+
+    try
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var linkResult = RevitLinkType.Create(
+            document,
+            modelPath,
+            new RevitLinkOptions(false));
+
+        if (linkResult.LoadResult != LinkLoadResultType.LinkLoaded)
+        {
+            transaction.RollBack();
+            return Result.Text.Failed("The Revit link could not be loaded.");
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        RevitLinkInstance.Create(document, linkResult.ElementId);
+        transaction.Commit();
+        return Result.Text.Succeeded("The Revit link was inserted.");
+    }
+    catch (Autodesk.Revit.Exceptions.ApplicationException)
+    {
+        transaction.RollBack();
+        throw;
+    }
+}
+```
+
+This recipe accepts a file-based model path. Consult the [official Autodesk
+Revit API documentation](https://help.autodesk.com/view/RVT/2025/ENU/) for
+cloud/ACC links, attachment versus overlay choices, existing-link behavior,
+and worksharing or editability requirements.
+
+---
+
 ## Next Steps
 
 - **Deep reference?** → [Reference](./REFERENCE.md)

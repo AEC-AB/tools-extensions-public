@@ -8,8 +8,8 @@ Use this skill when you need extension framework guidance before changing code i
 
 ## Resolve the documentation root
 
-1. Open the active project's `obj/project.assets.json`. Restore the project first if this file has not been generated.
-2. In `libraries`, find `CW.Assistant.ExtensionDocs.Bundle/<version>`. This transitive dependency comes through `CW.Assistant.Extensions.Contracts`; use the exact resolved version recorded here.
+1. If the active project's `obj/project.assets.json` is missing, restore the project first. Then search the file for the `libraries` entry `CW.Assistant.ExtensionDocs.Bundle/<version>` (for example, `rg -n '"CW\.Assistant\.ExtensionDocs\.Bundle/' obj/project.assets.json`) and capture the exact resolved version without reading the whole file.
+2. This transitive dependency comes through `CW.Assistant.Extensions.Contracts`; use the exact resolved version recorded in that entry.
 3. For each local NuGet root in `packageFolders`, append `cw.assistant.extensiondocs.bundle/<version>/contentFiles/any/any/Resources/ExtensionDocs`.
 4. Use the first existing directory as `ExtensionDocsRoot`. If none exists, package restore is incomplete; do not substitute docs from another version.
 

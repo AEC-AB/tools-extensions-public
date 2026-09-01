@@ -75,6 +75,8 @@ public class HelloWorldCommand : IAssistantExtension<HelloWorldArgs>
 }
 ```
 
+> **Host template note:** The `RunAsync` example above is Assistant-specific. Host templates use a synchronous method such as `IExtensionResult Run(I{Platform}ExtensionContext context, TArgs args, CancellationToken cancellationToken)`; replace `{Platform}` with the host integration (`Revit`, `AutoCAD`, `Navisworks`, or `Tekla`).
+
 **What's happening here?**
 - `RunAsync()` → Called when the extension runs
 - `context` → Provides access to Assistant APIs (logging, messaging, etc.)

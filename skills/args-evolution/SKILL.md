@@ -12,7 +12,12 @@ Use `../docs-routing/SKILL.md` to resolve `ExtensionDocsRoot`, then read `ARGS_D
 
 ## Upgrade rules
 
-Before changing the `*Args.cs` structure, ask the user whether the Args class is already used in production workflows before proceeding.
+Newly generated, unshipped Args classes are exempt from the production-use
+question and upgrade ceremony: make structural changes directly without a
+version bump or upgrade mapping.
+
+For an existing or production Args class, ask the user whether the Args class
+is already used in production workflows before proceeding.
 
 If the answer is yes:
 

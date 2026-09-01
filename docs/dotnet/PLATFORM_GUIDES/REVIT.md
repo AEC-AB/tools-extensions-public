@@ -14,6 +14,11 @@ This guide covers Revit-specific patterns for writing extensions that integrate 
 
 See [Quick Start](../QUICK_START.md) for Args/Command basics. This guide covers Revit-specific patterns.
 
+Scope: these guides provide extension and integration patterns and hints, not a
+complete API reference. Human developers should consult [RevitApiDocs](https://www.revitapidocs.com/)
+for full host API semantics. Agents should use `dotnet-inspect` against the
+resolved Revit API assembly.
+
 ## Choose Revit Template
 
 When creating a Revit extension for Assistant, choose between:
@@ -46,6 +51,10 @@ Assistant Shortcuts enable distributing model-based extension apps: you can assi
 
 All Revit document modifications must occur within a transaction.
 
+Check `context.IsDryRun` before mutating the document. In dry-run mode, return a
+summary of the intended change without starting a transaction. This setting
+comes from the extension context; do not add another `Args` boolean for it.
+
 ### Transaction Pattern
 
 ```csharp
@@ -72,11 +81,45 @@ public IExtensionResult Run(
 
 ## Document & Element Access
 
-*(Content to be added based on Revit SDK patterns)*
+Get the active document from the extension context and query it with a
+`FilteredElementCollector`. Check that `ActiveUIDocument` and `Document` are
+available before accessing elements:
+
+```csharp
+var document = context.UIApplication.ActiveUIDocument?.Document;
+if (document is null)
+    return Result.Text.Failed("Revit has no active document.");
+
+var walls = new FilteredElementCollector(document)
+    .OfCategory(BuiltInCategory.OST_Walls)
+    .WhereElementIsNotElementType()
+    .ToElements();
+```
 
 ## Workset Handling
 
-*(Content to be added based on Revit workset patterns)*
+Enumerate user worksets with `FilteredWorksetCollector` and use the workset
+identifier when filtering or reporting elements. Workset visibility and
+editable ownership are document state, so check them before making changes:
+
+```csharp
+var userWorksets = new FilteredWorksetCollector(document)
+    .OfKind(WorksetKind.UserWorkset)
+    .ToWorksets();
+
+foreach (var workset in userWorksets)
+{
+    var elementCount = new FilteredElementCollector(document)
+        .WherePasses(new ElementWorksetFilter(workset.Id))
+        .GetElementCount();
+
+    // Use workset.Name, workset.Id, and elementCount in the result or log.
+}
+```
+
+Do not assume a workset is editable in a central model. Handle ownership and
+worksharing exceptions at the command boundary, and keep any transaction
+that changes workset-related state short.
 
 ## CollectorType in Revit Extensions
 
@@ -100,27 +143,20 @@ internal class CustomRevitAutoFillCollector : IRevitAutoFillCollector<RevitExten
     {
         var result = new Dictionary<string, string>();
 
-        try
+        var document = uiApplication.ActiveUIDocument?.Document;
+        if (document is null)
+            return result;
+
+        using var element = new FilteredElementCollector(document)
+            .OfCategory(BuiltInCategory.OST_GenericModel)
+            .FirstElement();
+
+        if (element is null)
+            return result;
+
+        foreach (var parameter in element.GetOrderedParameters())
         {
-            var document = uiApplication.ActiveUIDocument?.Document;
-            if (document is null)
-                return result;
-
-            using var element = new FilteredElementCollector(document)
-                .OfCategory(BuiltInCategory.OST_GenericModel)
-                .FirstElement();
-
-            if (element is null)
-                return result;
-
-            foreach (var parameter in element.GetOrderedParameters())
-            {
-                result[parameter.Definition.Name] = parameter.Definition.Name;
-            }
-        }
-        catch
-        {
-            // ignore
+            result[parameter.Definition.Name] = parameter.Definition.Name;
         }
 
         return result;

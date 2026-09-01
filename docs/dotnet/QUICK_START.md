@@ -1,5 +1,7 @@
 # Quick Start: Build Your First Extension (5-10 minutes)
 
+> **Assistant MCP:** Configure the Assistant MCP server to create, inspect, test, register, publish, and run extensions. See [Assistant MCP for extension development](./ASSISTANT_MCP.md) for the configuration and tool guide.
+
 This guide gets you building your first Assistant extension in minutes. We'll walk through a working example, then explain each piece.
 
 ## The Simplest Extension: Hello World
@@ -74,6 +76,8 @@ public class HelloWorldCommand : IAssistantExtension<HelloWorldArgs>
     }
 }
 ```
+
+> **Host template note:** The `RunAsync` example above is Assistant-specific. Host templates use a synchronous method such as `IExtensionResult Run(I{Platform}ExtensionContext context, TArgs args, CancellationToken cancellationToken)`; replace `{Platform}` with the host integration (`Revit`, `AutoCAD`, `Navisworks`, or `Tekla`).
 
 **What's happening here?**
 - `RunAsync()` → Called when the extension runs

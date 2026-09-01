@@ -8,10 +8,7 @@ Use this skill when editing `*Command.cs`, collector code, or AutoCAD-specific r
 
 ## Load these docs first
 
-Use the `extension-docs` MCP tool:
-
-1. `operation=content` with document id `autocad`
-2. `operation=search` with focused topics such as `document lock` or `transaction` when you need examples
+Use `../docs-routing/SKILL.md` to resolve `ExtensionDocsRoot`, then read `PLATFORM_GUIDES/AUTOCAD.md`. Search that file for topics such as `document lock` or `transaction` when you need examples.
 
 ## API context
 

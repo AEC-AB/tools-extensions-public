@@ -632,17 +632,17 @@ public ValueCopy? ValueCopy { get; set; }
 
 ## Returning Results
 
-Your `RunAsync()` method must return `Task<IExtensionResult>`. Use the built-in `Result` factory for the common cases.
+Extension execution methods return `IExtensionResult`; Assistant commands wrap it in `Task<IExtensionResult>`. Use the built-in `Result` factory for the common cases.
 
 ### Result.Text — result with a message
 
 Use when you want to show a message to the user after execution.
 
-| Factory | Status | Use when |
-|---------|--------|----------|
-| `Result.Text.Succeeded(message)` | ✅ Succeeded | Work completed successfully |
-| `Result.Text.PartiallySucceeded(message)` | ⚠️ Partially succeeded | Work completed but with warnings or partial failures |
-| `Result.Text.Failed(message)` | ❌ Failed | Work could not complete |
+| Factory signature | Return type | Payload | Status |
+|-------------------|-------------|---------|--------|
+| `Result.Text.Succeeded(string message)` | `TextExtensionResult` | `Message` | ✅ Succeeded |
+| `Result.Text.PartiallySucceeded(string message)` | `TextExtensionResult` | `Message` | ⚠️ Partially succeeded |
+| `Result.Text.Failed(string message)` | `TextExtensionResult` | `Message` | ❌ Failed |
 
 ```csharp
 // Full success
@@ -659,11 +659,11 @@ return Result.Text.Failed($"Export failed: output folder does not exist.");
 
 Use when you want rich, structured output (headings, lists, tables, links, code blocks) in the execution result.
 
-| Factory | Status | Use when |
-|---------|--------|----------|
-| `Result.Markdown.Succeeded(markdown)` | ✅ Succeeded | Work completed and you want formatted output |
-| `Result.Markdown.PartiallySucceeded(markdown)` | ⚠️ Partially succeeded | Work completed with warnings and you want structured details |
-| `Result.Markdown.Failed(markdown)` | ❌ Failed | Work failed and you want a clear formatted error summary |
+| Factory signature | Return type | Payload | Status |
+|-------------------|-------------|---------|--------|
+| `Result.Markdown.Succeeded(string markdown)` | `MarkdownExtensionResult` | `Markdown` | ✅ Succeeded |
+| `Result.Markdown.PartiallySucceeded(string markdown)` | `MarkdownExtensionResult` | `Markdown` | ⚠️ Partially succeeded |
+| `Result.Markdown.Failed(string markdown)` | `MarkdownExtensionResult` | `Markdown` | ❌ Failed |
 
 ```csharp
 var markdown = """
@@ -685,11 +685,11 @@ return Result.Markdown.Succeeded(markdown);
 
 Use when execution status is enough and there is no meaningful message to display.
 
-| Factory | Status |
-|---------|--------|
-| `Result.Empty.Succeeded()` | ✅ Succeeded |
-| `Result.Empty.PartiallySucceeded()` | ⚠️ Partially succeeded |
-| `Result.Empty.Failed()` | ❌ Failed |
+| Factory signature | Return type | Status |
+|-------------------|-------------|--------|
+| `Result.Empty.Succeeded()` | `ExtensionResult` | ✅ Succeeded |
+| `Result.Empty.PartiallySucceeded()` | `ExtensionResult` | ⚠️ Partially succeeded |
+| `Result.Empty.Failed()` | `ExtensionResult` | ❌ Failed |
 
 ```csharp
 return Result.Empty.Succeeded();

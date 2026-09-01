@@ -8,10 +8,7 @@ Use this skill when editing `*Command.cs`, collector code, or Revit-specific run
 
 ## Load these docs first
 
-Use the `extension-docs` MCP tool:
-
-1. `operation=content` with document id `revit`
-2. `operation=search` with focused topics such as `transaction` or `valuecopy` when you need examples
+Use `../docs-routing/SKILL.md` to resolve `ExtensionDocsRoot`, then read `PLATFORM_GUIDES/REVIT.md`. Search that file for topics such as `transaction` or `ValueCopy` when you need examples.
 
 ## API context
 

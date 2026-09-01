@@ -1,5 +1,7 @@
 # Quick Start: Build Your First Extension (5-10 minutes)
 
+> **Assistant MCP:** Configure the Assistant MCP server to create, inspect, test, register, publish, and run extensions. See [Assistant MCP for extension development](./ASSISTANT_MCP.md) for the configuration and tool guide.
+
 This guide gets you building your first Assistant extension in minutes. We'll walk through a working example, then explain each piece.
 
 ## The Simplest Extension: Hello World

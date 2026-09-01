@@ -5,10 +5,11 @@
 After resolving `ExtensionDocsRoot`, read the documentation in this order:
 
 1. `QUICK_START.md` for extension shape and execution model.
-2. The matching platform guide for runtime behavior (see the mapping below).
-3. `ARGS_DEVELOPER_GUIDE.md` when changing configuration classes.
-4. `COOKBOOK.md` for reusable implementation patterns.
-5. `REFERENCE.md` for exact field syntax and validation rules.
+2. `ASSISTANT_MCP.md` when creating, testing, registering, publishing, or running an extension through Assistant.
+3. The matching platform guide for runtime behavior (see the mapping below).
+4. `ARGS_DEVELOPER_GUIDE.md` when changing configuration classes.
+5. `COOKBOOK.md` for reusable implementation patterns.
+6. `REFERENCE.md` for exact field syntax and validation rules.
 
 Select the platform guide that matches the active extension template:
 

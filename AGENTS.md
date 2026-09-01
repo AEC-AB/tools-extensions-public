@@ -60,6 +60,7 @@ Use the default Markdown output for focused investigation. Add `--json`, `--tsv`
 For comprehensive guides on extension development, configuration classes (Args), field attributes, validation, and platform-specific patterns, see the [Extension Development Documentation](./docs/README.md).
 
 - **Getting started?** -> [Quick Start Guide](./docs/dotnet/QUICK_START.md)
+- **Assistant MCP project lifecycle and testing?** -> [Assistant MCP Guide](./docs/dotnet/ASSISTANT_MCP.md)
 - **Building with patterns?** -> [Cookbook](./docs/dotnet/COOKBOOK.md)
 - **Deep technical reference?** -> [Args Developer Guide](./docs/dotnet/ARGS_DEVELOPER_GUIDE.md)
 - **Looking up syntax?** -> [Reference](./docs/dotnet/REFERENCE.md)

@@ -55,7 +55,7 @@ partial class Build : NukeBuild
         if (changedPropsFiles.Count > 0)
         {
             var changedProps = changedPropsFiles
-                .Select(path => Path.GetDirectoryName(path)!)
+                .Select(path => Path.GetDirectoryName(path)!)!
                 .Select(dir => NormalizePath(dir))
                 .ToList();
 
@@ -63,18 +63,6 @@ partial class Build : NukeBuild
                  .Where(projDir => changedProps.Any(c => projDir.Contains(c)));
 
             projectsToBuild.AddRange(subProjects);
-        }
-
-        foreach (var projectPath in projects)
-        {
-            var projectDir = Path.GetDirectoryName(projectPath)!;
-            var changesInProject = changedFiles
-                .Where(path => NormalizePath(path).StartsWith(NormalizePath(projectDir) + "/", StringComparison.OrdinalIgnoreCase))
-                .ToList();
-            if (changesInProject.Count > 0)
-            {
-                projectsToBuild.Add(projectPath);
-            }
         }
 
         _projectsToBuild.AddRange(projectsToBuild

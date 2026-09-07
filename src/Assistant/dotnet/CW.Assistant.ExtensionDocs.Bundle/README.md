@@ -6,8 +6,9 @@ This package ships the raw extension implementation Markdown docs for coding age
 
 - `contentFiles/any/any/Resources/ExtensionDocs/*.md`
 - `contentFiles/any/any/Resources/ExtensionDocs/PLATFORM_GUIDES/*.md`
-- A transitive MSBuild target that copies the docs to consumer output under:
-  - `Resources/ExtensionDocs/`
+- A transitive MSBuild property, `$(CWAssistantExtensionDocsPath)`, that resolves to the docs directory in the restored NuGet package.
+
+The package does not copy documentation files to the consumer's `bin` or `obj` directories. The files remain in the NuGet package cache.
 
 ## Source of truth
 
@@ -33,4 +34,10 @@ The package can also be referenced directly when a standalone consumer needs the
 </ItemGroup>
 ```
 
-Read the package content at `contentFiles/any/any/Resources/ExtensionDocs/`. The transitive build target also copies the Markdown files to `Resources/ExtensionDocs/` in consumer output.
+Read the resolved documentation path from the generated MSBuild property:
+
+```powershell
+dotnet msbuild -getProperty:CWAssistantExtensionDocsPath
+```
+
+Agents can use the returned path to load the Markdown files directly from the restored NuGet package. The property is only set when the consumer has not already defined `CWAssistantExtensionDocsPath`, so a consumer can override it when needed.

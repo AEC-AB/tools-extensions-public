@@ -11,14 +11,14 @@ The RunCommand extension allows you to execute AutoCAD commands programmatically
 
 ## How to use this Extension
 1. **Single Command**: Provide a single AutoCAD command string (e.g., "LINE")
-2. **Multiple Commands**: Separate multiple commands with newline
-3. **Command Parameters**: Include command parameters and options as you would type them in AutoCAD
+2. **Multiple Commands**: Separate command input with newlines; the full multiline block is queued as one AutoCAD command stream
+3. **Command Parameters**: Put command parameters and follow-up prompt responses on later lines, exactly as you would in a `.scr` script
 
 
 ## Result Format
 The extension returns:
 - **Overall Status**: Succeeded, Failed, or PartiallySucceeded
-- **Individual Command Results**: Status and details for each executed command
+- **Queued Input Lines**: The non-empty lines that were queued for AutoCAD to process
 - **Error Messages**: Specific error information when commands fail
 
 ## Requirements
@@ -28,5 +28,7 @@ The extension returns:
 
 ## Notes
 - Commands are executed in the order provided
+- Commands and prompt responses are queued in the order provided as one continuous AutoCAD input stream
+- Each newline acts like pressing Enter, which allows interactive commands such as `LINE` to consume later lines as prompt input
 - If one command fails, the extension continues with the remaining commands
 - Empty or whitespace-only command lines are skipped

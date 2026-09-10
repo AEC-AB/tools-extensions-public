@@ -99,7 +99,7 @@ internal static class StreamBimDownloadService
 
         if (StreamBimPathHelper.ContainsWildcard(Path.GetFileName(normalizedConfiguredFile)))
         {
-            return await DownloadFilesByWildcardAsync(args, client, projectPath, fullFilePath, cancellationToken);
+            return await DownloadFilesByWildcardAsync(args, client, fullFilePath, null, cancellationToken);
         }
 
         var item = await client.GetObjectInfo(fullFilePath, token: cancellationToken);
@@ -110,12 +110,17 @@ internal static class StreamBimDownloadService
 
         if (item.Type == FtpObjectType.File)
         {
-            return StreamBimItemDownloadResult.FromSingle(await StreamBimFileTransferService.DownloadFileAsync(args, client, projectPath, item, cancellationToken));
+            return StreamBimItemDownloadResult.FromSingle(await StreamBimFileTransferService.DownloadFileAsync(
+                args,
+                client,
+                item,
+                StreamBimPathHelper.GetLeafName(item.FullName),
+                cancellationToken));
         }
 
         if (item.Type == FtpObjectType.Directory)
         {
-            return await DownloadFilesByWildcardAsync(args, client, projectPath, fullFilePath + "/*", cancellationToken);
+            return await DownloadFilesByWildcardAsync(args, client, fullFilePath + "/*", fullFilePath, cancellationToken);
         }
 
         return StreamBimItemDownloadResult.Empty;
@@ -124,30 +129,71 @@ internal static class StreamBimDownloadService
     private static async Task<StreamBimItemDownloadResult> DownloadFilesByWildcardAsync(
         StreamBIMDownloaderArgs args,
         AsyncFtpClient client,
-        string projectPath,
         string file,
+        string? directoryRoot,
         CancellationToken cancellationToken)
     {
         var folder = Path.GetDirectoryName(file)?.Replace('\\', '/');
         if (string.IsNullOrWhiteSpace(folder))
         {
-            return StreamBimItemDownloadResult.Empty;
+            return StreamBimItemDownloadResult.Failed(file.TrimStart('/'), "No matching files found.");
         }
 
         var builder = new StreamBimDownloadOutcomeBuilder();
         var pattern = Path.GetFileName(file);
-        await foreach (var itemInFolder in client.GetListingEnumerable(folder))
+        var filesFound = 0;
+        var foldersToVisit = new Queue<string>();
+        foldersToVisit.Enqueue(folder);
+
+        while (foldersToVisit.Count > 0)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (itemInFolder.Type != FtpObjectType.File || !StreamBimPathHelper.MatchesWildcard(itemInFolder.Name, pattern))
+            var currentFolder = foldersToVisit.Dequeue();
+            await foreach (var itemInFolder in client.GetListingEnumerable(currentFolder))
             {
-                continue;
-            }
+                cancellationToken.ThrowIfCancellationRequested();
 
-            builder.Add(await StreamBimFileTransferService.DownloadFileAsync(args, client, projectPath, itemInFolder, cancellationToken));
+                if (directoryRoot is not null && itemInFolder.Type == FtpObjectType.Directory)
+                {
+                    if (!StreamBimPathHelper.ContainsIgnoredFolder(itemInFolder.FullName))
+                    {
+                        foldersToVisit.Enqueue(itemInFolder.FullName);
+                    }
+
+                    continue;
+                }
+
+                if (itemInFolder.Type != FtpObjectType.File || !StreamBimPathHelper.MatchesWildcard(itemInFolder.Name, pattern))
+                {
+                    continue;
+                }
+
+                filesFound++;
+                var localRelativePath = directoryRoot is null
+                    ? StreamBimPathHelper.GetLeafName(itemInFolder.FullName)
+                    : GetRelativePath(directoryRoot, itemInFolder.FullName);
+                builder.Add(await StreamBimFileTransferService.DownloadFileAsync(
+                    args,
+                    client,
+                    itemInFolder,
+                    localRelativePath,
+                    cancellationToken));
+            }
         }
 
-        return builder.BuildItemResult();
+        return filesFound == 0
+            ? StreamBimItemDownloadResult.Failed(file.TrimStart('/'), "No matching files found.")
+            : builder.BuildItemResult();
+    }
+
+    private static string GetRelativePath(string directoryRoot, string remoteFilePath)
+    {
+        var normalizedRoot = directoryRoot.TrimEnd('/');
+        var normalizedFilePath = remoteFilePath.Replace('\\', '/');
+        if (!normalizedFilePath.StartsWith(normalizedRoot + "/", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Remote file is outside the selected folder.");
+        }
+
+        return normalizedFilePath[(normalizedRoot.Length + 1)..];
     }
 }

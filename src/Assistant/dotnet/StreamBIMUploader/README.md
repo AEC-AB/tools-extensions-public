@@ -1,29 +1,36 @@
 # StreamBIM File Uploader
 
-Uploads selected files from a local folder to StreamBIM.
+Uploads selected local files to StreamBIM.
+
+## Before you start
+
+Store the StreamBIM username and password in Windows Credential Manager. Use the saved credential's application ID when running this extension.
 
 ## Inputs
 
-- Credential application id: Credential Manager entry used for the StreamBIM login.
-- Project: StreamBIM project to upload files to. After changing this field, click Reload before expecting the file suggestions to change.
-- Upload folder: Local source folder containing the files to upload.
-- Files to upload: One or more file or folder paths relative to the upload folder. Wildcards with `*` and `?` are supported. This list only refreshes when you click Reload.
+- StreamBIM Credentials: Application ID of the Windows Credential Manager entry used for the StreamBIM login.
+- Project: StreamBIM project to upload files to.
+- Files to upload: Select one or more local files. Each is uploaded directly into the target folder.
 - Target folder: Optional remote folder path inside the StreamBIM project (e.g., `Uploads/2024`). Leave empty to upload to the project root.
-- Skip unchanged files: Skips files that already exist on StreamBIM with the same modified timestamp.
+- Verbose diagnostics: Writes a detailed per-file log for troubleshooting. Leave disabled for normal uploads.
 
-## Recommended workflow
+## Uploading files
 
-1. Enter the credential application id.
+1. Enter the credential application ID.
 2. Select the StreamBIM project.
-3. Click Reload.
-4. Select the local upload folder.
-5. Open Files to upload and type a file name, folder path, or wildcard pattern.
-6. Click Reload to refresh local file suggestions.
-7. Repeat the type-and-reload flow until the wanted files appear, then run the extension.
+3. Select one or more files.
+4. Optionally enter a target folder in StreamBIM.
+5. Run the extension.
+
+Selected files are uploaded directly into the target folder.
+
+## Results and recovery
+
+- The result summarizes processed, uploaded, skipped, and failed files.
+- If a selected file no longer exists, select it again and rerun the extension.
+- If the credential cannot be found, confirm that its application ID matches the Windows Credential Manager entry.
+- With Verbose diagnostics enabled, detailed upload logs are saved under `%TEMP%\StreamBIMUploader`. If an upload is cancelled or times out, use the newest log to identify the last scanned or uploaded path.
 
 ## Notes
 
-- The project picker options are loaded from StreamBIM using the configured credentials.
-- The local file picker options are loaded from the selected upload folder.
-- The UI does not refresh autofill suggestions automatically. Changing Project or Files to upload does not update suggestions until Reload is clicked.
-- Folders named `_backup` and folders ending with `-revs`, and anything inside them, are ignored.
+- Uploading folders and preserving a local folder structure are not supported. Select the individual files you want to upload.

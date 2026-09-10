@@ -18,19 +18,9 @@ public class StreamBIMUploaderCommand : IAssistantExtension<StreamBIMUploaderArg
             return Result.Text.Failed("Project is required.");
         }
 
-        if (string.IsNullOrWhiteSpace(args.UploadFolder))
-        {
-            return Result.Text.Failed("Upload folder is required.");
-        }
-
-        if (!Directory.Exists(args.UploadFolder))
-        {
-            return Result.Text.Failed($"Upload folder does not exist: '{args.UploadFolder}'.");
-        }
-
         if (args.Files.Count == 0)
         {
-            return Result.Text.Failed("Select at least one file or folder to upload.");
+            return Result.Text.Failed("Select at least one file to upload.");
         }
 
         try

@@ -9,7 +9,7 @@ internal static class StreamBimExtensionResultFactory
     {
         if (result.TotalCount == 0)
         {
-            return Result.Text.Failed("No files found.");
+            return Result.Text.Failed(ComposeMessage(result));
         }
 
         var message = ComposeMessage(result);
@@ -28,7 +28,7 @@ internal static class StreamBimExtensionResultFactory
 
     private static string ComposeMessage(StreamBimUploadResult result)
     {
-        var message = $"Uploaded {result.UploadedFiles.Count} files";
+        var message = $"Processed {result.TotalCount} files: {result.UploadedFiles.Count} uploaded, {result.SkippedFiles.Count} skipped, {result.FailedFiles.Count} failed.";
         if (result.UploadedFiles.Count > 0)
         {
             message += $"\n\n{string.Join("\n", result.UploadedFiles)}";
@@ -44,6 +44,12 @@ internal static class StreamBimExtensionResultFactory
         {
             message += $"\n\nFailed to upload {result.FailedFiles.Count} files";
             message += $"\n\n{string.Join("\n", result.FailedFiles.Select(x => x.FileName + ": " + x.ErrorMessage))}";
+        }
+
+        if (result.Diagnostics.Count > 0)
+        {
+            message += $"\n\nDiagnostics";
+            message += $"\n\n{string.Join("\n", result.Diagnostics)}";
         }
 
         return message;

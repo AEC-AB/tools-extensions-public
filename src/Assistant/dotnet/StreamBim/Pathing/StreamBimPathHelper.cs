@@ -79,33 +79,28 @@ internal static class StreamBimPathHelper
         return CombineFtpPath(safeProjectPath, normalizedConfiguredFile).TrimStart('/');
     }
 
-    internal static string CreateLocalPath(string downloadFolder, string projectPath, string remotePath)
+    internal static string CreateLocalPath(string downloadFolder, string relativeFilePath)
     {
-        var projectPrefix = NormalizeProjectPath(projectPath).TrimEnd('/');
-        var normalizedRemotePath = remotePath.Replace('\\', '/');
+        var normalizedRelativePath = NormalizeRelativePath(relativeFilePath);
+        var segments = normalizedRelativePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (segments.Length == 0)
+        {
+            throw new InvalidOperationException("The download path does not contain a valid file name.");
+        }
 
-        var relativeRemotePath = projectPrefix.Length == 0 || projectPrefix == "/"
-            ? normalizedRemotePath.TrimStart('/')
-            : normalizedRemotePath.StartsWith(projectPrefix + "/", StringComparison.OrdinalIgnoreCase)
-                ? normalizedRemotePath[(projectPrefix.Length + 1)..]
-                : normalizedRemotePath.TrimStart('/');
-
-        var relativePath = NormalizeRelativePath(relativeRemotePath);
-        var segments = relativePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-
-        var localPath = downloadFolder;
+        var downloadRoot = Path.GetFullPath(downloadFolder)
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var localPath = downloadRoot;
         foreach (var segment in segments)
         {
             if (Path.IsPathRooted(segment) || segment.Contains(Path.VolumeSeparatorChar))
             {
-                throw new InvalidOperationException("Remote path contains an invalid rooted path segment.");
+                throw new InvalidOperationException("The download path contains an invalid rooted path segment.");
             }
 
             localPath = Path.Combine(localPath, segment);
         }
 
-        var downloadRoot = Path.GetFullPath(downloadFolder)
-            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         var fullLocalPath = Path.GetFullPath(localPath);
         if (!fullLocalPath.StartsWith(downloadRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) &&
             !string.Equals(fullLocalPath, downloadRoot, StringComparison.OrdinalIgnoreCase))
@@ -116,15 +111,9 @@ internal static class StreamBimPathHelper
         return fullLocalPath;
     }
 
-    internal static string CreateRemotePath(string projectPath, string? targetFolder, string uploadFolder, string localFilePath)
+    internal static string CreateRemotePath(string projectPath, string? targetFolder, string relativeFilePath)
     {
-        var relativePath = Path.GetRelativePath(uploadFolder, localFilePath).Replace('\\', '/');
-
-        if (relativePath.StartsWith("..", StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException("Local file path is outside the upload folder.");
-        }
-
+        var relativePath = NormalizeRelativePath(relativeFilePath);
         var remoteBase = CombineFtpPath(projectPath, targetFolder);
         return CombineFtpPath(remoteBase, relativePath);
     }

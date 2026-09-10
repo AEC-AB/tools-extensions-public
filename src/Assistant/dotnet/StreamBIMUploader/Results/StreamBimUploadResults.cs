@@ -21,13 +21,14 @@ internal sealed record StreamBimSingleFileUploadResult(string? UploadedFile, str
 internal sealed record StreamBimItemUploadResult(
     IReadOnlyList<string> UploadedFiles,
     IReadOnlyList<string> SkippedFiles,
-    IReadOnlyList<FailedFile> FailedFiles)
+    IReadOnlyList<FailedFile> FailedFiles,
+    IReadOnlyList<string> Diagnostics)
 {
-    internal static StreamBimItemUploadResult Empty { get; } = new StreamBimItemUploadResult([], [], []);
+    internal static StreamBimItemUploadResult Empty { get; } = new StreamBimItemUploadResult([], [], [], []);
 
     internal static StreamBimItemUploadResult Failed(string fileName, string errorMessage)
     {
-        return new StreamBimItemUploadResult([], [], [new FailedFile(fileName, errorMessage)]);
+        return new StreamBimItemUploadResult([], [], [new FailedFile(fileName, errorMessage)], []);
     }
 
     internal static StreamBimItemUploadResult FromSingle(StreamBimSingleFileUploadResult result)
@@ -41,7 +42,8 @@ internal sealed record StreamBimItemUploadResult(
 internal sealed record StreamBimUploadResult(
     IReadOnlyList<string> UploadedFiles,
     IReadOnlyList<string> SkippedFiles,
-    IReadOnlyList<FailedFile> FailedFiles)
+    IReadOnlyList<FailedFile> FailedFiles,
+    IReadOnlyList<string> Diagnostics)
 {
     internal int SuccessfulCount => UploadedFiles.Count + SkippedFiles.Count;
 
@@ -53,12 +55,14 @@ internal sealed class StreamBimUploadOutcomeBuilder
     private readonly List<string> uploadedFiles = [];
     private readonly List<FailedFile> failedFiles = [];
     private readonly List<string> skippedFiles = [];
+    private readonly List<string> diagnostics = [];
 
     internal void Add(StreamBimItemUploadResult result)
     {
         uploadedFiles.AddRange(result.UploadedFiles);
         skippedFiles.AddRange(result.SkippedFiles);
         failedFiles.AddRange(result.FailedFiles);
+        diagnostics.AddRange(result.Diagnostics);
     }
 
     internal void Add(StreamBimSingleFileUploadResult result)
@@ -79,13 +83,18 @@ internal sealed class StreamBimUploadOutcomeBuilder
         }
     }
 
+    internal void AddDiagnostic(string diagnostic)
+    {
+        diagnostics.Add(diagnostic);
+    }
+
     internal StreamBimUploadResult BuildBatchResult()
     {
-        return new StreamBimUploadResult(uploadedFiles.ToArray(), skippedFiles.ToArray(), failedFiles.ToArray());
+        return new StreamBimUploadResult(uploadedFiles.ToArray(), skippedFiles.ToArray(), failedFiles.ToArray(), diagnostics.ToArray());
     }
 
     internal StreamBimItemUploadResult BuildItemResult()
     {
-        return new StreamBimItemUploadResult(uploadedFiles.ToArray(), skippedFiles.ToArray(), failedFiles.ToArray());
+        return new StreamBimItemUploadResult(uploadedFiles.ToArray(), skippedFiles.ToArray(), failedFiles.ToArray(), diagnostics.ToArray());
     }
 }

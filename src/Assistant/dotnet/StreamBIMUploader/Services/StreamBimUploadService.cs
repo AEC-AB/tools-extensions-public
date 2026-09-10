@@ -15,21 +15,39 @@ internal static class StreamBimUploadService
     {
         var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.Project);
         var builder = new StreamBimUploadOutcomeBuilder();
+        var diagnostics = StreamBimUploadDiagnostics.Create(args.VerboseDiagnostics);
+        client.Config.DataConnectionType = FtpDataConnectionType.PASVEX;
+        if (diagnostics.LogPath is not null)
+        {
+            builder.AddDiagnostic($"Detailed upload log: {diagnostics.LogPath}");
+        }
 
-        foreach (var configuredFile in args.Files)
+        diagnostics.Log($"Using FTP data connection mode {client.Config.DataConnectionType}.");
+
+        foreach (var localFilePath in args.Files)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            builder.Add(await UploadConfiguredFileWithRetriesAsync(args, client, projectPath, configuredFile, cancellationToken));
+            diagnostics.Log($"Selected file: '{localFilePath}'.");
+            builder.Add(await UploadFileWithRetriesAsync(
+                args,
+                client,
+                projectPath,
+                localFilePath,
+                Path.GetFileName(localFilePath),
+                diagnostics,
+                cancellationToken));
         }
 
         return builder.BuildBatchResult();
     }
 
-    private static async Task<StreamBimItemUploadResult> UploadConfiguredFileWithRetriesAsync(
+    private static async Task<StreamBimItemUploadResult> UploadFileWithRetriesAsync(
         StreamBIMUploaderArgs args,
         AsyncFtpClient client,
         string projectPath,
-        string configuredFile,
+        string localFilePath,
+        string remoteRelativePath,
+        StreamBimUploadDiagnostics diagnostics,
         CancellationToken cancellationToken)
     {
         for (var attempt = 0; attempt < 4; attempt++)
@@ -38,7 +56,21 @@ internal static class StreamBimUploadService
 
             try
             {
-                return await UploadConfiguredFileAsync(args, client, projectPath, configuredFile, cancellationToken);
+                diagnostics.Log($"Preparing upload: local='{localFilePath}', remote-relative='{remoteRelativePath}', attempt={attempt + 1}.");
+                if (!File.Exists(localFilePath))
+                {
+                    diagnostics.Log($"File not found: '{localFilePath}'.");
+                    return StreamBimItemUploadResult.Failed(localFilePath, "File not found.");
+                }
+
+                return StreamBimItemUploadResult.FromSingle(await StreamBimFileTransferService.UploadFileAsync(
+                    args,
+                    client,
+                    projectPath,
+                    localFilePath,
+                    remoteRelativePath,
+                    diagnostics,
+                    cancellationToken));
             }
             catch (OperationCanceledException)
             {
@@ -46,102 +78,37 @@ internal static class StreamBimUploadService
             }
             catch (ArgumentException exception)
             {
-                return StreamBimItemUploadResult.Failed(StreamBimPathHelper.CreateDisplayPath(projectPath, configuredFile), exception.Message);
+                return StreamBimItemUploadResult.Failed(localFilePath, exception.Message);
             }
             catch (Exception exception) when (attempt < 3 && StreamBimExceptionHelper.IsTransientFtpFailure(exception))
             {
+                diagnostics.Log($"Transient FTP failure for '{localFilePath}': {StreamBimExceptionHelper.GetInnermostMessage(exception)}. Retrying.");
                 var delay = (int)Math.Pow(attempt + 1, 2) * 1000;
                 await Task.Delay(delay, cancellationToken);
             }
             catch (FtpException exception)
             {
-                return StreamBimItemUploadResult.Failed(StreamBimPathHelper.CreateDisplayPath(projectPath, configuredFile), StreamBimExceptionHelper.GetInnermostMessage(exception));
+                return StreamBimItemUploadResult.Failed(localFilePath, StreamBimExceptionHelper.GetInnermostMessage(exception));
             }
             catch (IOException exception)
             {
-                return StreamBimItemUploadResult.Failed(StreamBimPathHelper.CreateDisplayPath(projectPath, configuredFile), StreamBimExceptionHelper.GetInnermostMessage(exception));
+                return StreamBimItemUploadResult.Failed(localFilePath, StreamBimExceptionHelper.GetInnermostMessage(exception));
             }
             catch (SocketException exception)
             {
-                return StreamBimItemUploadResult.Failed(StreamBimPathHelper.CreateDisplayPath(projectPath, configuredFile), StreamBimExceptionHelper.GetInnermostMessage(exception));
+                return StreamBimItemUploadResult.Failed(localFilePath, StreamBimExceptionHelper.GetInnermostMessage(exception));
             }
             catch (TimeoutException exception)
             {
-                return StreamBimItemUploadResult.Failed(StreamBimPathHelper.CreateDisplayPath(projectPath, configuredFile), StreamBimExceptionHelper.GetInnermostMessage(exception));
+                return StreamBimItemUploadResult.Failed(localFilePath, StreamBimExceptionHelper.GetInnermostMessage(exception));
             }
             catch (AuthenticationException exception)
             {
-                return StreamBimItemUploadResult.Failed(StreamBimPathHelper.CreateDisplayPath(projectPath, configuredFile), StreamBimExceptionHelper.GetInnermostMessage(exception));
+                return StreamBimItemUploadResult.Failed(localFilePath, StreamBimExceptionHelper.GetInnermostMessage(exception));
             }
         }
 
-        return StreamBimItemUploadResult.Failed(StreamBimPathHelper.CreateDisplayPath(projectPath, configuredFile), "Failed to upload.");
+        return StreamBimItemUploadResult.Failed(localFilePath, "Failed to upload.");
     }
 
-    private static async Task<StreamBimItemUploadResult> UploadConfiguredFileAsync(
-        StreamBIMUploaderArgs args,
-        AsyncFtpClient client,
-        string projectPath,
-        string configuredFile,
-        CancellationToken cancellationToken)
-    {
-        var normalizedConfiguredFile = StreamBimPathHelper.NormalizeRelativePath(configuredFile.Trim().TrimStart('/').TrimEnd('/'));
-        var displayPath = StreamBimPathHelper.CreateDisplayPath(projectPath, configuredFile);
-
-        if (StreamBimPathHelper.ContainsIgnoredFolder(normalizedConfiguredFile))
-        {
-            return StreamBimItemUploadResult.FromSingle(StreamBimSingleFileUploadResult.Skipped(displayPath));
-        }
-
-        var localPath = Path.Combine(args.UploadFolder, normalizedConfiguredFile.Replace('/', Path.DirectorySeparatorChar));
-
-        if (Directory.Exists(localPath))
-        {
-            return await UploadFilesByWildcardAsync(args, client, projectPath, localPath + Path.DirectorySeparatorChar + "*", cancellationToken);
-        }
-
-        if (StreamBimPathHelper.ContainsWildcard(Path.GetFileName(normalizedConfiguredFile)))
-        {
-            return await UploadFilesByWildcardAsync(args, client, projectPath, localPath, cancellationToken);
-        }
-
-        if (!File.Exists(localPath))
-        {
-            return StreamBimItemUploadResult.Failed(displayPath, "File not found.");
-        }
-
-        return StreamBimItemUploadResult.FromSingle(
-            await StreamBimFileTransferService.UploadFileAsync(args, client, projectPath, localPath, cancellationToken));
-    }
-
-    private static async Task<StreamBimItemUploadResult> UploadFilesByWildcardAsync(
-        StreamBIMUploaderArgs args,
-        AsyncFtpClient client,
-        string projectPath,
-        string localPath,
-        CancellationToken cancellationToken)
-    {
-        var folder = Path.GetDirectoryName(localPath);
-        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
-        {
-            return StreamBimItemUploadResult.Empty;
-        }
-
-        var pattern = Path.GetFileName(localPath);
-        if (string.IsNullOrWhiteSpace(pattern))
-        {
-            pattern = "*";
-        }
-
-        var builder = new StreamBimUploadOutcomeBuilder();
-        var files = Directory.EnumerateFiles(folder, pattern, SearchOption.TopDirectoryOnly);
-
-        foreach (var file in files)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            builder.Add(await StreamBimFileTransferService.UploadFileAsync(args, client, projectPath, file, cancellationToken));
-        }
-
-        return builder.BuildItemResult();
-    }
 }

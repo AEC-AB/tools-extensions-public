@@ -26,11 +26,11 @@ public class RevitExtensionDemoArgs
     public List<string> SheetNumbersList { get; set; } = [];
 
     [OptionsField(
-        Label = "Revit Categories ListBox",
-        ToolTip = "ListBox control with CompactMode displaying Revit categories as element IDs.",
+        Label = "Revit Categories",
+        ToolTip = "Select one or more Revit categories.",
         CompactMode = true)]
-    [RevitAutoFill(RevitAutoFillSource.Categories)]
-    public List<int> RevitCategories { get; set; } = [];
+    [MinLength(1, ErrorMessage = "Select at least one category.")]
+    public List<BuiltInCategory> RevitCategories { get; set; } = [];
 
     [DictionaryField(
         Label = "Family and Type Dictionary",

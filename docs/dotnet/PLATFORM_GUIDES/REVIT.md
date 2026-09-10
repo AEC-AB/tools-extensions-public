@@ -164,6 +164,23 @@ internal class CustomRevitAutoFillCollector : IRevitAutoFillCollector<RevitExten
 }
 ```
 
+## Multi-select Revit categories
+
+When an extension needs users to select one or more Revit categories, use an
+`OptionsField` with a `List<BuiltInCategory>`. This is the supported Revit
+pattern for a multi-select category input; do not model the collection as
+`List<int>`. Add `MinLength` when at least one category is required:
+
+```csharp
+[OptionsField(Label = "Categories", ToolTip = "Select one or more categories supported by the view filter.", CompactMode = true)]
+[MinLength(1, ErrorMessage = "Select at least one category.")]
+public List<BuiltInCategory> Categories { get; set; } = [];
+```
+
+Keep the property type as `List<BuiltInCategory>` so the selected values remain
+typed categories in the command. Use `OptionsField` for this multi-select
+case; `ChoiceField` is for a single scalar choice.
+
 ---
 
 For comprehensive reference, see [Args Developer Guide](../ARGS_DEVELOPER_GUIDE.md).

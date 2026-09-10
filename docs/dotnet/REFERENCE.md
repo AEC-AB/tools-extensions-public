@@ -246,7 +246,12 @@ public bool IncludeArchived { get; set; } = false;
 
 #### OptionsField
 
-Renders a dropdown list. Requires a collector or enum.
+Renders a dropdown or option list. Use it for both single-select and
+multi-select input, especially when the option set is too large for radio
+buttons or a segmented control. A collector or enum supplies the options.
+
+For multi-select properties, the supported collection types are `List<string>`
+and `List<TEnum>`, where `TEnum` is an enum type. `List<int>` is not supported.
 
 | Property | Type | Default | Purpose |
 |----------|------|---------|---------|
@@ -276,6 +281,19 @@ public enum ProjectType
 }
 ```
 
+**Multi-select example:**
+```csharp
+[OptionsField(Label = "Export formats", CompactMode = true)]
+public List<ExportFormat> Formats { get; set; } = [];
+
+public enum ExportFormat
+{
+    IFC,
+    DWG,
+    PDF
+}
+```
+
 When the property type is an enum:
 
 - Enum member name is used as the stored key value.
@@ -298,7 +316,9 @@ public enum ProjectType
 
 #### ChoiceField
 
-Renders a radio button or segmented control.
+Renders a radio button or segmented control for one mutually exclusive value.
+Use it for a small set of choices stored in a scalar property. Use
+`OptionsField` for multi-select input or larger option sets.
 
 | Property | Type | Default | Purpose |
 |----------|------|---------|---------|

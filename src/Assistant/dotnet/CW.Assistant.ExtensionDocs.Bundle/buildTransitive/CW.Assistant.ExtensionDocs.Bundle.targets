@@ -1,5 +1,5 @@
 <Project>
   <PropertyGroup Condition="'$(CWAssistantExtensionDocsPath)' == ''">
-    <CWAssistantExtensionDocsPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\contentFiles\any\any\Resources\ExtensionDocs'))</CWAssistantExtensionDocsPath>
+    <CWAssistantExtensionDocsPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../contentFiles/any/any/Resources/ExtensionDocs'))</CWAssistantExtensionDocsPath>
   </PropertyGroup>
 </Project>

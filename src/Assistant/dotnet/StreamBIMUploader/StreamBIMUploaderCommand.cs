@@ -18,9 +18,9 @@ public class StreamBIMUploaderCommand : IAssistantExtension<StreamBIMUploaderArg
             return Result.Text.Failed("Project is required.");
         }
 
-        if (args.Files.Count == 0)
+        if (args.Files.Count == 0 || args.Files.Any(string.IsNullOrWhiteSpace))
         {
-            return Result.Text.Failed("Select at least one file to upload.");
+            return Result.Text.Failed("Select at least one non-empty file to upload.");
         }
 
         try

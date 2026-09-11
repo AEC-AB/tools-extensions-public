@@ -33,7 +33,7 @@ internal static class StreamBimFileTransferService
                 return StreamBimSingleFileUploadResult.Skipped(remotePath.TrimStart('/'));
             }
 
-            var directoryFailure = await EnsureRemoteDirectoryAsync(
+            var directoryFailure = await ValidateRemoteDirectoryAsync(
                 client,
                 remotePath,
                 diagnostics,
@@ -202,7 +202,7 @@ internal static class StreamBimFileTransferService
         return FtpStatus.Failed;
     }
 
-    private static async Task<string?> EnsureRemoteDirectoryAsync(
+    private static async Task<string?> ValidateRemoteDirectoryAsync(
         AsyncFtpClient client,
         string remotePath,
         StreamBimUploadDiagnostics diagnostics,
@@ -214,54 +214,23 @@ internal static class StreamBimFileTransferService
             return null;
         }
 
-        diagnostics.Log($"Ensuring remote directory: '{remoteDirectory}'.");
-        // StreamBIM can stall when MLSD/SIZE is requested for a child folder that
-        // does not exist yet. Listing its known parent provides the same existence
-        // check without issuing that unsupported child-path query.
-        if (await IsRemoteDirectoryListedAsync(client, remoteDirectory, diagnostics, cancellationToken))
+        diagnostics.Log($"Validating remote directory: '{remoteDirectory}'.");
+        var directorySegments = remoteDirectory.Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var currentDirectory = string.Empty;
+        foreach (var directorySegment in directorySegments)
         {
-            return null;
-        }
-
-        diagnostics.Log($"Remote directory does not exist in its parent listing. Sending MKD: '{remoteDirectory}'.");
-        using var timeoutCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var createDirectoryTask = client.Execute($"MKD {remoteDirectory}", timeoutCancellationTokenSource.Token);
-        try
-        {
-            var createReply = await createDirectoryTask.WaitAsync(DirectoryCreationTimeout, cancellationToken);
-            if (!createReply.Success)
+            currentDirectory += "/" + directorySegment;
+            if (await IsRemoteDirectoryListedAsync(client, currentDirectory, diagnostics, cancellationToken))
             {
-                var failure = $"StreamBIM rejected creation of the remote directory '{remoteDirectory}': Code: {createReply.Code} Message: {createReply.Message}";
-                diagnostics.Log(failure);
-                return failure;
+                continue;
             }
 
-            diagnostics.Log($"Remote directory created by MKD: '{remoteDirectory}'.");
-        }
-        catch (TimeoutException)
-        {
-            timeoutCancellationTokenSource.Cancel();
-            var failure = $"Creating the remote directory timed out after {DirectoryCreationTimeout.TotalSeconds:0} seconds: '{remoteDirectory}'.";
+            var failure = $"The target folder '{remoteDirectory}' does not exist because '{currentDirectory}' was not found. Create the folder in StreamBIM and try again.";
             diagnostics.Log(failure);
             return failure;
         }
 
-        diagnostics.Log($"Reconnecting after creating remote directory: '{remoteDirectory}'.");
-        using var reconnectCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var reconnectTask = client.Connect(reConnect: true, token: reconnectCancellationTokenSource.Token);
-        try
-        {
-            await reconnectTask.WaitAsync(DirectoryCreationTimeout, cancellationToken);
-            diagnostics.Log("FTP reconnect completed after remote directory creation.");
-            return null;
-        }
-        catch (TimeoutException)
-        {
-            reconnectCancellationTokenSource.Cancel();
-            var failure = $"Reconnecting to StreamBIM timed out after creating remote directory '{remoteDirectory}'.";
-            diagnostics.Log(failure);
-            return failure;
-        }
+        return null;
     }
 
     private static async Task<string?> SetRemoteWorkingDirectoryAsync(

@@ -188,6 +188,16 @@ internal static class StreamBimFileTransferService
                     diagnostics.Log($"FTP upload timed out after {UploadAttemptTimeout.TotalMinutes:0} minutes: '{remotePath}'.");
                     throw new TimeoutException($"Upload timed out after {UploadAttemptTimeout.TotalMinutes:0} minutes: '{remotePath}'.");
                 }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    timeoutCancellationTokenSource.Cancel();
+                    if (!await WaitForCancellationAsync(uploadTask))
+                    {
+                        throw new StreamBimFtpRecoveryException($"FTP upload was cancelled and did not stop within {CancellationCleanupTimeout.TotalSeconds:0} seconds: '{remotePath}'.");
+                    }
+
+                    throw;
+                }
 
                 if (uploadStatus == FtpStatus.Failed)
                 {
@@ -296,6 +306,16 @@ internal static class StreamBimFileTransferService
                 diagnostics.Log(failure);
                 return failure;
             }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                timeoutCancellationTokenSource.Cancel();
+                if (!await WaitForCancellationAsync(setWorkingDirectoryTask))
+                {
+                    throw new StreamBimFtpRecoveryException($"Changing to the remote directory was cancelled and did not stop within {CancellationCleanupTimeout.TotalSeconds:0} seconds: '{remoteDirectory}'.");
+                }
+
+                throw;
+            }
             catch (FtpCommandException exception) when (attempt < RemoteDirectoryOperationAttempts - 1)
             {
                 diagnostics.Log(
@@ -362,6 +382,16 @@ internal static class StreamBimFileTransferService
                     var failure = $"Reconnecting to StreamBIM timed out after {DirectoryCreationTimeout.TotalSeconds:0} seconds while retrying the parent directory listing.";
                     diagnostics.Log(failure);
                     throw new TimeoutException(failure);
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    reconnectCancellationTokenSource.Cancel();
+                    if (!await WaitForCancellationAsync(reconnectTask))
+                    {
+                        throw new StreamBimFtpRecoveryException($"Reconnecting to StreamBIM was cancelled and did not stop within {CancellationCleanupTimeout.TotalSeconds:0} seconds while retrying the parent directory listing.");
+                    }
+
+                    throw;
                 }
             }
         }

@@ -1,15 +1,15 @@
-using RevitExtensionDemo.ACC.Responses.GetAllHubs;
-using RevitExtensionDemo.ACC.Responses.GetAllProjects;
-using RevitExtensionDemo.ACC.Responses.GetFolderContent;
-using RevitExtensionDemo.ACC.Responses.GetTopFolders;
+using RevitExtensionDemo.Forma.Responses.GetAllHubs;
+using RevitExtensionDemo.Forma.Responses.GetAllProjects;
+using RevitExtensionDemo.Forma.Responses.GetFolderContent;
+using RevitExtensionDemo.Forma.Responses.GetTopFolders;
 
-namespace RevitExtensionDemo.ACC;
+namespace RevitExtensionDemo.Forma;
 
-public class AccClient
+public class FormaClient
 {
     private readonly IExtensionHttpClient _client;
 
-    public AccClient(IExtensionHttpClient client)
+    public FormaClient(IExtensionHttpClient client)
     {
         _client = client;
     }

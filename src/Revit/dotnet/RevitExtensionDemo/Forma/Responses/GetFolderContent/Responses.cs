@@ -1,4 +1,4 @@
-namespace RevitExtensionDemo.ACC.Responses.GetFolderContent;
+namespace RevitExtensionDemo.Forma.Responses.GetFolderContent;
 // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
 // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
 public class Attributes

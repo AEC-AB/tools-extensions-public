@@ -11,6 +11,7 @@ internal static class StreamBimFileTransferService
 {
     private static readonly TimeSpan DirectoryCreationTimeout = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan UploadAttemptTimeout = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan CancellationCleanupTimeout = TimeSpan.FromSeconds(10);
     private const int RemoteDirectoryOperationAttempts = 3;
 
     internal static async Task<StreamBimSingleFileUploadResult> UploadFileAsync(
@@ -87,6 +88,10 @@ internal static class StreamBimFileTransferService
                 ? StreamBimSingleFileUploadResult.Skipped(remotePath.TrimStart('/'))
                 : StreamBimSingleFileUploadResult.Failed(remotePath.TrimStart('/'), "Failed to upload.");
         }
+        catch (StreamBimFtpRecoveryException)
+        {
+            throw;
+        }
         catch (OperationCanceledException)
         {
             throw;
@@ -99,9 +104,17 @@ internal static class StreamBimFileTransferService
         {
             return StreamBimSingleFileUploadResult.Failed(localFilePath, StreamBimExceptionHelper.GetInnermostMessage(exception));
         }
+        catch (FtpException exception) when (StreamBimExceptionHelper.IsTransientFtpFailure(exception))
+        {
+            throw;
+        }
         catch (FtpException exception)
         {
             return StreamBimSingleFileUploadResult.Failed(localFilePath, StreamBimExceptionHelper.GetInnermostMessage(exception));
+        }
+        catch (IOException exception) when (StreamBimExceptionHelper.IsTransientFtpFailure(exception))
+        {
+            throw;
         }
         catch (IOException exception)
         {
@@ -111,13 +124,25 @@ internal static class StreamBimFileTransferService
         {
             return StreamBimSingleFileUploadResult.Failed(localFilePath, StreamBimExceptionHelper.GetInnermostMessage(exception));
         }
+        catch (SocketException exception) when (StreamBimExceptionHelper.IsTransientFtpFailure(exception))
+        {
+            throw;
+        }
         catch (SocketException exception)
         {
             return StreamBimSingleFileUploadResult.Failed(localFilePath, StreamBimExceptionHelper.GetInnermostMessage(exception));
         }
+        catch (TimeoutException exception) when (StreamBimExceptionHelper.IsTransientFtpFailure(exception))
+        {
+            throw;
+        }
         catch (TimeoutException exception)
         {
             return StreamBimSingleFileUploadResult.Failed(localFilePath, StreamBimExceptionHelper.GetInnermostMessage(exception));
+        }
+        catch (AuthenticationException exception) when (StreamBimExceptionHelper.IsTransientFtpFailure(exception))
+        {
+            throw;
         }
         catch (AuthenticationException exception)
         {
@@ -155,6 +180,11 @@ internal static class StreamBimFileTransferService
                 catch (TimeoutException)
                 {
                     timeoutCancellationTokenSource.Cancel();
+                    if (!await WaitForCancellationAsync(uploadTask))
+                    {
+                        throw new StreamBimFtpRecoveryException($"FTP upload timed out and did not stop within {CancellationCleanupTimeout.TotalSeconds:0} seconds: '{remotePath}'.");
+                    }
+
                     diagnostics.Log($"FTP upload timed out after {UploadAttemptTimeout.TotalMinutes:0} minutes: '{remotePath}'.");
                     throw new TimeoutException($"Upload timed out after {UploadAttemptTimeout.TotalMinutes:0} minutes: '{remotePath}'.");
                 }
@@ -180,10 +210,14 @@ internal static class StreamBimFileTransferService
 
                 return uploadStatus;
             }
+            catch (StreamBimFtpRecoveryException)
+            {
+                throw;
+            }
             catch (TimeoutException exception)
             {
-                diagnostics.Log($"FTP upload timed out without retrying: '{remotePath}'. {exception.Message}");
-                return FtpStatus.Failed;
+                diagnostics.Log($"FTP upload timed out: '{remotePath}'. {exception.Message}");
+                throw;
             }
             catch (Exception exception) when (attempt < 2 &&
                 (exception is UnauthorizedAccessException || StreamBimExceptionHelper.IsTransientFtpFailure(exception)))
@@ -253,6 +287,11 @@ internal static class StreamBimFileTransferService
             catch (TimeoutException)
             {
                 timeoutCancellationTokenSource.Cancel();
+                if (!await WaitForCancellationAsync(setWorkingDirectoryTask))
+                {
+                    throw new StreamBimFtpRecoveryException($"Changing to the remote directory timed out and did not stop within {CancellationCleanupTimeout.TotalSeconds:0} seconds: '{remoteDirectory}'.");
+                }
+
                 var failure = $"Changing to the remote directory timed out after {DirectoryCreationTimeout.TotalSeconds:0} seconds: '{remoteDirectory}'.";
                 diagnostics.Log(failure);
                 return failure;
@@ -315,6 +354,11 @@ internal static class StreamBimFileTransferService
                 catch (TimeoutException)
                 {
                     reconnectCancellationTokenSource.Cancel();
+                    if (!await WaitForCancellationAsync(reconnectTask))
+                    {
+                        throw new StreamBimFtpRecoveryException($"Reconnecting to StreamBIM timed out and did not stop within {CancellationCleanupTimeout.TotalSeconds:0} seconds while retrying the parent directory listing.");
+                    }
+
                     var failure = $"Reconnecting to StreamBIM timed out after {DirectoryCreationTimeout.TotalSeconds:0} seconds while retrying the parent directory listing.";
                     diagnostics.Log(failure);
                     throw new TimeoutException(failure);
@@ -323,6 +367,18 @@ internal static class StreamBimFileTransferService
         }
 
         return false;
+    }
+
+    private static async Task<bool> WaitForCancellationAsync(Task operation)
+    {
+        var completedTask = await Task.WhenAny(operation, Task.Delay(CancellationCleanupTimeout));
+        if (completedTask != operation)
+        {
+            return false;
+        }
+
+        _ = operation.Exception;
+        return true;
     }
 
     private static async Task<bool> VerifyUploadedFileAsync(
@@ -383,3 +439,5 @@ internal static class StreamBimFileTransferService
         return true;
     }
 }
+
+internal sealed class StreamBimFtpRecoveryException(string message) : TimeoutException(message);

@@ -18,7 +18,8 @@ partial class Build : NukeBuild
             BuildAllProjects("Git repository not found.");
             return;
         }
-        var sourceDir = NormalizePath(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(gitFolder)!)!, "src"));
+        var repositoryRoot = NormalizePath(Path.GetDirectoryName(Path.GetDirectoryName(gitFolder)!)!);
+        var sourceDir = NormalizePath(Path.Combine(repositoryRoot, "src"));
         using var repo = new Repository(gitFolder);
 
         var currentBranch = repo.Head;
@@ -49,6 +50,10 @@ partial class Build : NukeBuild
             .Where(path => Path.GetFileName(path) == "Directory.Build.props")
             .ToList();
 
+        var changedSourceFiles = changedFiles
+            .Select(path => NormalizePath(Path.Combine(repositoryRoot, path)))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         var projectsToBuild = new List<string>();
 
         // If any Directory.Build.props files changed, rebuild all projects in the corresponding integration (all projects in subdirectories of the changed props file)
@@ -63,6 +68,27 @@ partial class Build : NukeBuild
                  .Where(projDir => changedProps.Any(c => projDir.Contains(c)));
 
             projectsToBuild.AddRange(subProjects);
+        }
+
+        foreach (var projectPath in projects)
+        {
+            var projectDirectory = NormalizePath(Path.GetDirectoryName(projectPath)!);
+            var hasChangesInProjectDirectory = changedSourceFiles.Any(path =>
+                path.StartsWith(projectDirectory + "/", StringComparison.OrdinalIgnoreCase));
+            if (hasChangesInProjectDirectory)
+            {
+                projectsToBuild.Add(projectPath);
+                continue;
+            }
+
+            var linkedSourceFiles = LoadProject(projectPath)
+                .GetItems("Compile")
+                .Select(item => NormalizePath(item.GetMetadataValue("FullPath")))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            if (changedSourceFiles.Overlaps(linkedSourceFiles))
+            {
+                projectsToBuild.Add(projectPath);
+            }
         }
 
         _projectsToBuild.AddRange(projectsToBuild

@@ -28,14 +28,23 @@ internal static class StreamBimUploadService
         {
             cancellationToken.ThrowIfCancellationRequested();
             diagnostics.Log($"Selected file: '{localFilePath}'.");
-            builder.Add(await UploadFileWithRetriesAsync(
-                args,
-                client,
-                projectPath,
-                localFilePath,
-                Path.GetFileName(localFilePath),
-                diagnostics,
-                cancellationToken));
+            try
+            {
+                builder.Add(await UploadFileWithRetriesAsync(
+                    args,
+                    client,
+                    projectPath,
+                    localFilePath,
+                    Path.GetFileName(localFilePath),
+                    diagnostics,
+                    cancellationToken));
+            }
+            catch (StreamBimFtpRecoveryException exception)
+            {
+                builder.Add(StreamBimItemUploadResult.Failed(localFilePath, exception.Message));
+                builder.AddDiagnostic("The FTP client was not reused after a timed-out operation that did not stop during cleanup.");
+                break;
+            }
         }
 
         return builder.BuildBatchResult();
@@ -71,6 +80,10 @@ internal static class StreamBimUploadService
                     remoteRelativePath,
                     diagnostics,
                     cancellationToken));
+            }
+            catch (StreamBimFtpRecoveryException)
+            {
+                throw;
             }
             catch (OperationCanceledException)
             {

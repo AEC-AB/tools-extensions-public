@@ -179,7 +179,10 @@ internal static class StreamBimDownloadService
         while (foldersToVisit.Count > 0)
         {
             var currentFolder = foldersToVisit.Dequeue();
-            await foreach (var itemInFolder in client.GetListingEnumerable(currentFolder))
+            await foreach (var itemInFolder in client.GetListingEnumerable(
+                currentFolder,
+                cancellationToken,
+                cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
 

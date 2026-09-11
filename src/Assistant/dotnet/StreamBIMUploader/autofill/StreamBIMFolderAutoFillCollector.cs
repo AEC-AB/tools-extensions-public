@@ -14,6 +14,7 @@ internal sealed class StreamBIMFolderAutoFillCollector : IAsyncAutoFillCollector
     private const int MaxSuggestionDepth = 2;
     private const string SelectProjectMessage = "Select a project and click Reload";
     private const string NoResultsMessage = "No folders found. Try changing the folder path and clicking Reload.";
+    private const string InvalidFolderPathMessage = "Folder paths cannot contain '.' or '..' segments.";
 
     public async Task<Dictionary<string, string>> Get(StreamBIMUploaderArgs args, CancellationToken cancellationToken)
     {
@@ -36,7 +37,19 @@ internal sealed class StreamBIMFolderAutoFillCollector : IAsyncAutoFillCollector
             using var client = await StreamBimFtpClientFactory.CreateAndConnectClientAsync(credentials, cancellationToken);
             client.Config.DataConnectionType = FtpDataConnectionType.PASVEX;
 
-            var lookupContext = CreateLookupContext(args.TargetFolder);
+            LookupContext lookupContext;
+            try
+            {
+                lookupContext = CreateLookupContext(args.TargetFolder);
+            }
+            catch (ArgumentException)
+            {
+                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [InvalidFolderPathMessage] = InvalidFolderPathMessage,
+                };
+            }
+
             var folders = await GetFoldersAsync(
                 client,
                 StreamBimPathHelper.NormalizeProjectPath(args.Project),
@@ -122,19 +135,21 @@ internal sealed class StreamBIMFolderAutoFillCollector : IAsyncAutoFillCollector
 
     private static LookupContext CreateLookupContext(string? targetFolder)
     {
-        var normalized = targetFolder?
+        var normalizedInput = targetFolder?
             .Trim()
             .Replace('\\', '/')
             .TrimStart('/') ?? string.Empty;
+        var endsWithSeparator = normalizedInput.EndsWith("/", StringComparison.Ordinal);
+        var normalized = StreamBimPathHelper.NormalizeRelativePath(normalizedInput);
 
         if (string.IsNullOrWhiteSpace(normalized))
         {
             return new LookupContext(string.Empty, string.Empty);
         }
 
-        if (normalized.EndsWith("/", StringComparison.Ordinal))
+        if (endsWithSeparator)
         {
-            return new LookupContext(normalized.TrimEnd('/'), string.Empty);
+            return new LookupContext(normalized, string.Empty);
         }
 
         var lastSeparatorIndex = normalized.LastIndexOf('/');

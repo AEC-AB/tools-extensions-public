@@ -1,5 +1,6 @@
 using LibGit2Sharp;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Globbing;
 using Nuke.Common;
 using Nuke.Common.Utilities.Collections;
 
@@ -88,6 +89,12 @@ partial class Build : NukeBuild
             if (changedSourceFiles.Overlaps(linkedSourceFiles))
             {
                 projectsToBuild.Add(projectPath);
+                continue;
+            }
+
+            if (ChangedFilesMatchCompileIncludes(projectPath, changedSourceFiles))
+            {
+                projectsToBuild.Add(projectPath);
             }
         }
 
@@ -113,6 +120,21 @@ partial class Build : NukeBuild
 
         Console.WriteLine($"ComputeChangedProjects fallback: {reason} Building all projects.");
         _projectsToBuild.AddRange(projects);
+    }
+
+    bool ChangedFilesMatchCompileIncludes(string projectPath, IReadOnlySet<string> changedSourceFiles)
+    {
+        var projectDirectory = Path.GetDirectoryName(projectPath)!;
+        var compileIncludes = LoadProject(projectPath)
+            .Xml.Items
+            .Where(item => string.Equals(item.ItemType, "Compile", StringComparison.OrdinalIgnoreCase))
+            .Select(item => item.Include)
+            .Where(include => !string.IsNullOrWhiteSpace(include))
+            .Select(include => MSBuildGlob.Parse(projectDirectory, include!))
+            .ToList();
+
+        return changedSourceFiles.Any(changedSourceFile =>
+            compileIncludes.Any(include => include.IsMatch(changedSourceFile)));
     }
 
     static string NormalizePath(string path) =>

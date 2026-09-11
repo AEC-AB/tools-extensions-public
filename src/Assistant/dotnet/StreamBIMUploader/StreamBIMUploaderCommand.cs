@@ -10,7 +10,7 @@ public class StreamBIMUploaderCommand : IAssistantExtension<StreamBIMUploaderArg
     {
         if (string.IsNullOrWhiteSpace(args.ApplicationName))
         {
-            return Result.Text.Failed("Credential application id is required.");
+            return Result.Text.Failed("StreamBIM Credentials are required.");
         }
 
         if (string.IsNullOrWhiteSpace(args.Project))

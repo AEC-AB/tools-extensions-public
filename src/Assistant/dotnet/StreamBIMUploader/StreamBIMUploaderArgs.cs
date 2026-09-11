@@ -23,7 +23,10 @@ public class StreamBIMUploaderArgs
 
     [TextField(
         Label = "Target folder",
-        ToolTip = "Optional remote folder path inside the StreamBIM project to upload files into (e.g., 'Uploads/2024'). Leave empty to upload to the project root.")]
+        ToolTip = "Remote folder path inside the StreamBIM project to upload files into (e.g., 'Uploads/2024'). Leave empty to upload to the project root.",
+        HelperText = "Enter part of a folder path and click Reload to see matching StreamBIM folder suggestions.",
+        CollectorType = typeof(StreamBIMFolderAutoFillCollector),
+        CollectorSortOrder = SortOrder.SortByAscending)]
     public string TargetFolder { get; set; } = string.Empty;
 
     [BooleanField(

@@ -11,7 +11,7 @@ Store the StreamBIM username and password in Windows Credential Manager. Use the
 - StreamBIM Credentials: Application ID of the Windows Credential Manager entry used for the StreamBIM login.
 - Project: StreamBIM project to upload files to.
 - Files to upload: Select one or more local files. Each is uploaded directly into the target folder.
-- Target folder: Optional remote folder path inside the StreamBIM project (e.g., `Uploads/2024`). Leave empty to upload to the project root.
+- Target folder: Optional remote folder path inside the StreamBIM project (e.g., `Uploads/2024`). Leave empty to upload to the project root. After selecting a project, type part of a folder path and click Reload to see matching folder suggestions.
 - Verbose diagnostics: Writes a detailed per-file log for troubleshooting. Leave disabled for normal uploads.
 
 ## Uploading files

@@ -31,6 +31,7 @@ public class StreamBIMDownloaderArgs
     [ListField(
         Label = "Files/Folders to download",
         ToolTip = "Enter a project-relative file or folder path, for example \"Planning/Electrical/design.pdf\". Folder downloads include subfolders. Wildcards with * and ? are supported.",
+        HelperText = "Enter part of a file or folder path and click Reload to see matching StreamBIM suggestions.",
         CollectorType = typeof(StreamBIMFilesAndFolderAutoFillCollector),
         CollectorSortOrder = SortOrder.SortByAscending)]
     [MinLength(1, ErrorMessage = "Add at least one file or folder to download.")]

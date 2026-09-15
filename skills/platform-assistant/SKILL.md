@@ -8,10 +8,7 @@ Use this skill when editing `*Command.cs`, collector code, or Assistant-specific
 
 ## Load these docs first
 
-Use the `extension-docs` MCP tool:
-
-1. `operation=content` with document id `assistant`
-2. `operation=search` with focused topics such as `assistant variables` or `dry run` when you need a narrower example
+Use `../docs-routing/SKILL.md` to resolve `ExtensionDocsRoot`, then read `PLATFORM_GUIDES/ASSISTANT.md`. Search that file for topics such as `variables` or `dry run` when you need a narrower example.
 
 ## Platform scope
 

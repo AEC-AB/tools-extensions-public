@@ -448,6 +448,8 @@ For view authoring:
 - Do not catch `OperationCanceledException`.
 - Do not use `catch (Exception)`.
 - Catch only specific expected exceptions you can turn into actionable UX.
+- If an expected host exception cannot become an actionable result, perform
+  required cleanup and rethrow it.
 - Let unexpected exceptions bubble up; Assistant handles unhandled exceptions.
 
 ### Practical pattern

@@ -255,8 +255,8 @@ These tell Assistant how to render each property as a form field.
 - `IntegerField` — Integer input
 - `DoubleField` — Floating-point input
 - `BooleanField` — Checkbox/toggle
-- `OptionsField` — Dropdown list
-- `ChoiceField` — Radio buttons
+- `OptionsField` — Single- or multi-select dropdown/list
+- `ChoiceField` — Radio buttons or segmented control for a single choice
 - `FilePickerField` — File open dialog
 - `FolderPickerField` — Folder open dialog
 - `SaveFileField` — File save dialog
@@ -296,6 +296,28 @@ public string ProjectName { get; set; } = "";
 ```
 
 See [Reference](./REFERENCE.md) for detailed properties of each field type.
+
+### Choosing OptionsField vs ChoiceField
+
+Use `OptionsField` when users choose from a list of options. It is the correct
+field for multi-select input and for option sets that are too large to present
+comfortably as radio buttons or a segmented control. `OptionsField` supports
+single values and these collection types:
+
+- `List<string>` for string options
+- `List<TEnum>` for options represented by an enum type
+
+For example, a multi-select enum field is declared as:
+
+```csharp
+[OptionsField(Label = "Export formats", CompactMode = true)]
+public List<ExportFormat> Formats { get; set; } = [];
+```
+
+Use `ChoiceField` only for a small set of mutually exclusive choices stored in
+a single scalar property, such as one export format. Do not use `ChoiceField`
+for multi-select input or large option sets. `List<int>` is not a supported
+collection type for `OptionsField`; use `List<string>` or `List<TEnum>` instead.
 
 ### CollectorType: Optional vs Required
 

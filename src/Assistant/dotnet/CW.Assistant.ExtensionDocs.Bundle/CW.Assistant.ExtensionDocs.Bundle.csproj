@@ -9,7 +9,7 @@
 
     <PackageId>CW.Assistant.ExtensionDocs.Bundle</PackageId>
     <Title>CW Assistant Extension Docs Bundle</Title>
-    <Description>Versioned extension implementation docs bundle for Assistant MCP consumers.</Description>
+    <Description>Versioned offline extension implementation documentation bundle for coding agents and extension developers.</Description>
     <Authors>CW</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>

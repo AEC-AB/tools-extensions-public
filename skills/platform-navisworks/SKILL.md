@@ -8,10 +8,7 @@ Use this skill when editing `*Command.cs`, collector code, or Navisworks-specifi
 
 ## Load these docs first
 
-Use the `extension-docs` MCP tool:
-
-1. `operation=content` with document id `navisworks`
-2. `operation=search` with focused topics such as `current selection` when you need examples
+Use `../docs-routing/SKILL.md` to resolve `ExtensionDocsRoot`, then read `PLATFORM_GUIDES/NAVISWORKS.md`. Search that file for topics such as `current selection` when you need examples.
 
 ## API context
 

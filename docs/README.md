@@ -34,25 +34,11 @@ Welcome to the comprehensive guide for building Tools extensions, including Assi
 
 ## Accessing Docs with Agents
 
-If you use coding agents, configure MCP once and let the agent read these docs directly instead of copying content manually.
+Extension projects receive these docs in `CW.Assistant.ExtensionDocs.Bundle`, transitively through `CW.Assistant.Extensions.Contracts`. Agents resolve the exact bundle version from the project's `obj/project.assets.json` and read its local NuGet package directory:
 
-Example `.vscode/mcp.json`:
+`contentFiles/any/any/Resources/ExtensionDocs`
 
-```json
-{
-	"servers": {
-		"assistant": {
-			"type": "stdio",
-			"command": "assistant",
-			"args": [
-				"mcp"
-			]
-		}
-	}
-}
-```
-
-With this setup, agents can search and open documentation pages through the MCP documentation tools while you keep docs content centralized in this `docs/` folder.
+The docs therefore match the project's resolved dependency version and remain available offline after restore. See `skills/docs-routing/SKILL.md` for the routing procedure. When maintaining the documentation itself in this repository, edit `docs/dotnet/`, which remains the package source.
 
 ## Choose Extension Type First
 

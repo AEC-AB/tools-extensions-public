@@ -72,6 +72,33 @@ internal static class StreamBimPathHelper
         return !string.IsNullOrEmpty(fileName) && (fileName.Contains('*') || fileName.Contains('?'));
     }
 
+    internal static IReadOnlyList<string> CreateConfiguredFileCandidates(string projectPath, string? configuredFile)
+    {
+        if (string.IsNullOrWhiteSpace(configuredFile))
+        {
+            return [string.Empty];
+        }
+
+        var normalized = NormalizeRelativePath(configuredFile.Trim().TrimStart('/').TrimEnd('/'));
+        var trimmedProjectPath = projectPath.Trim('/');
+        if (string.IsNullOrEmpty(trimmedProjectPath))
+        {
+            return [normalized];
+        }
+
+        if (string.Equals(normalized, trimmedProjectPath, StringComparison.OrdinalIgnoreCase))
+        {
+            return [normalized, string.Empty];
+        }
+
+        if (normalized.StartsWith(trimmedProjectPath + "/", StringComparison.OrdinalIgnoreCase))
+        {
+            return [normalized, normalized[(trimmedProjectPath.Length + 1)..]];
+        }
+
+        return [normalized];
+    }
+
     internal static string CreateDisplayPath(string projectPath, string configuredFile)
     {
         var safeProjectPath = NormalizeProjectPath(projectPath);
@@ -136,28 +163,6 @@ internal static class StreamBimPathHelper
     {
         var regex = "^" + Regex.Escape(fileNameWithWildcard).Replace("\\?", ".").Replace("\\*", ".*") + "$";
         return Regex.IsMatch(fileName, regex, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    }
-
-    internal static string NormalizeConfiguredFile(string projectPath, string? configuredFile)
-    {
-        if (string.IsNullOrWhiteSpace(configuredFile))
-        {
-            return string.Empty;
-        }
-
-        var normalized = NormalizeRelativePath(configuredFile.Trim().TrimStart('/').TrimEnd('/'));
-        var trimmedProjectPath = projectPath.Trim('/');
-        if (!string.IsNullOrEmpty(trimmedProjectPath) &&
-            normalized.StartsWith(trimmedProjectPath + "/", StringComparison.OrdinalIgnoreCase))
-        {
-            normalized = normalized[(trimmedProjectPath.Length + 1)..];
-        }
-        else if (string.Equals(normalized, trimmedProjectPath, StringComparison.OrdinalIgnoreCase))
-        {
-            normalized = string.Empty;
-        }
-
-        return normalized;
     }
 
     internal static string NormalizeProjectPath(string? project)

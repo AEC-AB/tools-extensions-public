@@ -2,13 +2,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ExtensionId>StreamBIMUploader</ExtensionId>
-    <Version>1.0.1</Version>
     <Title>StreamBIM File Uploader</Title>
     <Description>Upload selected local files to StreamBIM.</Description>
     <PackageTags>StreamBIM;Upload;Assistant;Extension;AssistantExtension</PackageTags>
     <PackageIcon>Icon.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="CW.Assistant.Extensions.Assistant" Version="26.*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>compile</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="FluentFTP" Version="48.0.1" />
     <PackageReference Include="Meziantou.Framework.Win32.CredentialManager" Version="1.7.3" />
   </ItemGroup>

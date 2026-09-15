@@ -90,27 +90,89 @@ internal static class StreamBimDownloadService
         string configuredFile,
         CancellationToken cancellationToken)
     {
-        var normalizedConfiguredFile = StreamBimPathHelper.NormalizeConfiguredFile(projectPath, configuredFile);
-        var fullFilePath = StreamBimPathHelper.CombineFtpPath(projectPath, normalizedConfiguredFile);
-        var displayPath = fullFilePath.TrimStart('/');
+        var candidates = StreamBimPathHelper.CreateConfiguredFileCandidates(projectPath, configuredFile);
+        var configuredPath = StreamBimPathHelper.CombineFtpPath(projectPath, candidates[0]);
 
-        if (StreamBimPathHelper.ContainsIgnoredFolder(fullFilePath))
+        if (StreamBimPathHelper.ContainsIgnoredFolder(configuredPath))
         {
-            return StreamBimItemDownloadResult.FromSingle(StreamBimSingleFileDownloadResult.Skipped(displayPath));
+            return StreamBimItemDownloadResult.FromSingle(StreamBimSingleFileDownloadResult.Skipped(configuredPath.TrimStart('/')));
         }
 
-        if (StreamBimPathHelper.ContainsWildcard(Path.GetFileName(normalizedConfiguredFile)))
+        ConfiguredFileResolution? closestMiss = null;
+        foreach (var candidate in candidates)
         {
-            return await DownloadFilesByWildcardAsync(args, client, fullFilePath, null, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var resolved = await ResolveConfiguredFileAsync(client, projectPath, candidate, cancellationToken);
+            if (resolved.Item is not { } item)
+            {
+                closestMiss = SelectClosestMiss(closestMiss, resolved);
+                continue;
+            }
+
+            return await DownloadResolvedItemAsync(args, client, resolved, item, cancellationToken);
         }
 
-        var resolution = await ResolveFtpPathAsync(client, fullFilePath, cancellationToken);
-        var item = await client.GetObjectInfo(fullFilePath, token: cancellationToken)
-            ?? await TryResolveItemFromParentListingAsync(client, fullFilePath, cancellationToken)
-            ?? resolution.Item;
-        if (item is null)
+        return closestMiss is null
+            ? StreamBimItemDownloadResult.Failed(configuredPath.TrimStart('/'), "File not found.")
+            : StreamBimItemDownloadResult.Failed(
+                closestMiss.FullPath.TrimStart('/'),
+                CreatePathNotFoundMessage(closestMiss.Resolution, closestMiss.IsWildcard));
+    }
+
+    private static async Task<ConfiguredFileResolution> ResolveConfiguredFileAsync(
+        AsyncFtpClient client,
+        string projectPath,
+        string relativePath,
+        CancellationToken cancellationToken)
+    {
+        var fullPath = StreamBimPathHelper.CombineFtpPath(projectPath, relativePath);
+        var isWildcard = StreamBimPathHelper.ContainsWildcard(Path.GetFileName(relativePath));
+        var lookupPath = isWildcard
+            ? Path.GetDirectoryName(fullPath)?.Replace('\\', '/') ?? string.Empty
+            : fullPath;
+
+        if (string.IsNullOrWhiteSpace(lookupPath))
         {
-            return StreamBimItemDownloadResult.Failed(displayPath, CreatePathNotFoundMessage(resolution, false));
+            return new ConfiguredFileResolution(fullPath, isWildcard, null, new FtpPathResolution(null, "/", null, isWildcard, []));
+        }
+
+        var resolution = await ResolveFtpPathAsync(client, lookupPath, cancellationToken);
+        var item = resolution.Item;
+        if (item is null && !isWildcard && !resolution.MissingSegmentShouldBeFolder)
+        {
+            item = await client.GetObjectInfo(fullPath, token: cancellationToken)
+                ?? await TryResolveItemFromParentListingAsync(client, fullPath, cancellationToken);
+        }
+
+        if (isWildcard && item?.Type != FtpObjectType.Directory)
+        {
+            item = null;
+        }
+
+        return new ConfiguredFileResolution(fullPath, isWildcard, item, resolution);
+    }
+
+    private static ConfiguredFileResolution SelectClosestMiss(
+        ConfiguredFileResolution? currentMiss,
+        ConfiguredFileResolution candidateMiss) =>
+        currentMiss is null || GetValidPathDepth(candidateMiss.Resolution) > GetValidPathDepth(currentMiss.Resolution)
+            ? candidateMiss
+            : currentMiss;
+
+    private static int GetValidPathDepth(FtpPathResolution resolution) =>
+        resolution.ValidParentPath.Split('/', StringSplitOptions.RemoveEmptyEntries).Length;
+
+    private static async Task<StreamBimItemDownloadResult> DownloadResolvedItemAsync(
+        StreamBIMDownloaderArgs args,
+        AsyncFtpClient client,
+        ConfiguredFileResolution resolved,
+        FtpListItem item,
+        CancellationToken cancellationToken)
+    {
+        if (resolved.IsWildcard)
+        {
+            return await DownloadFilesByWildcardAsync(args, client, resolved.FullPath, null, cancellationToken);
         }
 
         if (item.Type == FtpObjectType.File)
@@ -125,7 +187,7 @@ internal static class StreamBimDownloadService
 
         if (item.Type == FtpObjectType.Directory)
         {
-            return await DownloadFilesByWildcardAsync(args, client, fullFilePath + "/*", fullFilePath, cancellationToken);
+            return await DownloadFilesByWildcardAsync(args, client, resolved.FullPath + "/*", resolved.FullPath, cancellationToken);
         }
 
         return StreamBimItemDownloadResult.Empty;
@@ -355,6 +417,12 @@ internal static class StreamBimDownloadService
 
         return distances[left.Length, right.Length];
     }
+
+    private sealed record ConfiguredFileResolution(
+        string FullPath,
+        bool IsWildcard,
+        FtpListItem? Item,
+        FtpPathResolution Resolution);
 
     private sealed record FtpPathResolution(
         FtpListItem? Item,

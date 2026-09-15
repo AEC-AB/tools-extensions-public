@@ -30,8 +30,9 @@ Individual files are saved directly in the destination folder. When downloading 
 - If only some files are available or downloadable, the extension returns partial success and lists each warning.
 - If none of the requested files are found, the extension fails.
 - If the credential cannot be found, confirm that its application ID matches the Windows Credential Manager entry.
-- If a path is reported as missing, verify the project-relative path and try again.
+- If a path is reported as missing, verify the project-relative path and try again. The reported message names the last folder that was found, so it shows where the path stops matching StreamBIM.
 
 ## Notes
 
+- Paths are relative to the selected project. When a project contains a root folder with the same name as the project itself, keep that folder in the path exactly as the suggestions show it. A path that starts with the project name is tried as a real folder first, and only if that folder does not exist is the leading project name treated as a redundant prefix and removed, so pasting a full path that repeats the project name also works.
 - Folders named `_backup` and folders ending with `-revs`, and anything inside them, are ignored.

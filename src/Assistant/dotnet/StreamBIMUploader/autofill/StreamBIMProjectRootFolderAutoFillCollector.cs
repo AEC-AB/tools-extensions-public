@@ -1,12 +1,12 @@
 using System.Runtime.Versioning;
 using CW.Assistant.Extensions.Assistant.Collectors;
 
-namespace StreamBIMDownloader;
+namespace StreamBIMUploader;
 
 [SupportedOSPlatform("windows")]
-internal class StreamBIMProjectRootFolderAutoFillCollector : IAsyncAutoFillCollector<StreamBIMDownloaderArgs>
+internal class StreamBIMProjectRootFolderAutoFillCollector : IAsyncAutoFillCollector<StreamBIMUploaderArgs>
 {
-    public async Task<Dictionary<string, string>> Get(StreamBIMDownloaderArgs args, CancellationToken cancellationToken)
+    public async Task<Dictionary<string, string>> Get(StreamBIMUploaderArgs args, CancellationToken cancellationToken)
     {
         try
         {

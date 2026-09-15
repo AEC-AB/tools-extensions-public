@@ -3,10 +3,6 @@ using System.Collections.Generic;
 
 namespace StreamBIMDownloader;
 
-internal sealed record UserCredentials(string UserName, string Password);
-
-internal sealed record FailedFile(string FileName, string ErrorMessage);
-
 internal sealed record StreamBimSingleFileDownloadResult(string? DownloadedFile, string? SkippedFile, FailedFile? Failure)
 {
     internal static StreamBimSingleFileDownloadResult Downloaded(string fileName)

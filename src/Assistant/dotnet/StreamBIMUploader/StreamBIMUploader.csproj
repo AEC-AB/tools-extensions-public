@@ -2,7 +2,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ExtensionId>StreamBIMUploader</ExtensionId>
-    <Version>1.0.1</Version>
     <Title>StreamBIM File Uploader</Title>
     <Description>Upload selected local files to StreamBIM.</Description>
     <PackageTags>StreamBIM;Upload;Assistant;Extension;AssistantExtension</PackageTags>

@@ -8,10 +8,6 @@
     <PackageTags>AssistantExtension;Assistant;Extension</PackageTags>
   </PropertyGroup>
 <ItemGroup>
-	<PackageReference Include="CW.Assistant.Extensions.Assistant" Version="26.*">
-	  <PrivateAssets>all</PrivateAssets>
-	  <IncludeAssets>compile</IncludeAssets>
-	</PackageReference>
 	<PackageReference Include="Meziantou.Framework.Win32.CredentialManager" Version="1.7.3" />
 </ItemGroup>
 </Project>

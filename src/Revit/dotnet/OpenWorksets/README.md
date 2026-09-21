@@ -34,7 +34,7 @@ When the extension runs it:
 2. **Works out which worksets to open.** It collects the user worksets of the document, keeps the ones that are selected or that match a pattern, and drops the ones that are already open.
 3. **Finds the linked models** whose link type lives in one of those worksets.
 4. **Moves those links to a temporary workset**, so opening a workset does not drag its linked models into the temporary view.
-5. **Creates a temporary 3D view** named "Opening worksets...".
+5. **Creates a temporary 3D view**, named `Opening worksets...` plus a random suffix so it cannot clash with a view the model already has.
 6. **Creates one throw-away element in each closed workset** and shows those elements in the temporary view. Showing an element is what makes Revit open its workset.
 7. **Restores your original view** and rolls back every model change. The temporary view, elements and workset are discarded; only the open/closed state of the worksets remains.
 8. **Reloads the linked models** that were found in step 3 and are not already loaded.
@@ -134,7 +134,7 @@ When **Assistant runs the action as a dry run**, the extension reports the works
 
 ### Issue 7: "No temporary 3D view could be created"
 
-- **Causes**: The model has no usable 3D view family type.
+- **Causes**: The model has no 3D view family type, or Revit refused to create an isometric view from any of them. The message quotes what Revit reported.
 - **Solution**: Try creating a 3D view manually in Revit. If that also fails, the model's view types need attention before the extension can run.
 
 ### Issue 8: The run takes a long time
@@ -180,6 +180,7 @@ When **Assistant runs the action as a dry run**, the extension reports the works
 ## Version History
 
 - **Version 1.1.0**
+  - Fixed: the extension failed with "Unable to create 3D view" in any model that already contained a view named `Opening worksets...`. The temporary view now gets a random suffix, a name Revit rejects no longer costs the run the view, and the error Revit actually reported is included in the failure message instead of being discarded.
   - Migrated into the public Assistant extensions repository.
   - Results are now a Markdown report with a workset table and a link table, and report the real open/closed state after the run instead of assuming success.
   - Worksets that are already open are skipped consistently, whether they were picked by name or matched by a pattern.

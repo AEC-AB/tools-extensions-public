@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <ExtensionId>OpenWorksets</ExtensionId>
-    <Authors>COWI Tools</Authors>
+    <Authors>AEC AB</Authors>
     <Version>1.1.0</Version>
     <Title>Open Worksets</Title>
     <Description>Open closed worksets in Revit models using direct selection or regular expression matching. Reloads the linked models that live in those worksets and reports workset and link status.</Description>

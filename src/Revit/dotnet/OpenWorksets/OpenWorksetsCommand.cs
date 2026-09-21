@@ -5,7 +5,7 @@ namespace OpenWorksets;
 
 public class OpenWorksetsCommand : IRevitExtension<OpenWorksetsArgs>
 {
-    private const string TemporaryViewName = "Opening worksets...";
+    private const string TemporaryViewNamePrefix = "Opening worksets...";
 
     public IExtensionResult Run(IRevitExtensionContext context, OpenWorksetsArgs args, CancellationToken cancellationToken)
     {
@@ -44,8 +44,8 @@ public class OpenWorksetsCommand : IRevitExtension<OpenWorksetsArgs>
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (!TryOpenWorksets(uiDocument, document, selection.ToOpen, links))
-            return Result.Text.Failed($"No temporary 3D view could be created in '{document.Title}', so no worksets were opened. Check that the model has a 3D view family type and that you can create a 3D view manually, then run the extension again.");
+        if (!TryOpenWorksets(uiDocument, document, selection.ToOpen, links, out var viewFailureReason))
+            return Result.Text.Failed(BuildNoViewMessage(document, viewFailureReason));
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -121,6 +121,19 @@ public class OpenWorksetsCommand : IRevitExtension<OpenWorksetsArgs>
         return message.ToString();
     }
 
+    private static string BuildNoViewMessage(Document document, string? failureReason)
+    {
+        var message = new StringBuilder($"No temporary 3D view could be created in '{document.Title}', so no worksets were opened.");
+
+        if (string.IsNullOrWhiteSpace(failureReason))
+            message.Append(" The model has no 3D view family type to create one from.");
+        else
+            message.Append($" Revit reported: {failureReason}");
+
+        message.Append(" Check that you can create a 3D view manually in this model, then run the extension again.");
+        return message.ToString();
+    }
+
     /// <summary>
     /// Forces Revit to open the requested worksets by creating a throw-away element in each of
     /// them and showing those elements in a temporary 3D view. Every model change happens inside
@@ -128,14 +141,14 @@ public class OpenWorksetsCommand : IRevitExtension<OpenWorksetsArgs>
     /// survives the operation.
     /// </summary>
     /// <returns><c>false</c> when no temporary 3D view could be created.</returns>
-    private static bool TryOpenWorksets(UIDocument uiDocument, Document document, List<WorksetInfo> worksets, List<RevitLinkType> links)
+    private static bool TryOpenWorksets(UIDocument uiDocument, Document document, List<WorksetInfo> worksets, List<RevitLinkType> links, out string? viewFailureReason)
     {
         using var group = new TransactionGroup(document, "Open worksets");
         group.Start();
 
         MoveLinksToTemporaryWorkset(document, links);
 
-        var view = CreateTemporaryView(document);
+        var view = CreateTemporaryView(document, out viewFailureReason);
         if (view is null)
         {
             group.RollBack();
@@ -240,53 +253,96 @@ public class OpenWorksetsCommand : IRevitExtension<OpenWorksetsArgs>
         }
     }
 
-    private static View3D? CreateTemporaryView(Document document)
+    /// <param name="failureReason">What Revit last reported when a view could not be created,
+    /// or <c>null</c> when the document offers no 3D view type at all.</param>
+    private static View3D? CreateTemporaryView(Document document, out string? failureReason)
     {
+        failureReason = null;
+        var name = GetUnusedViewName(document);
+
+        // A view family type of the three-dimensional family is what is guaranteed to produce an
+        // isometric view. The types of the existing 3D views are only a fallback: they can belong
+        // to a view template or to a perspective view, which CreateIsometric may refuse.
         var viewTypeIds = new FilteredElementCollector(document)
-            .OfClass(typeof(View3D))
-            .OfType<View3D>()
-            .Select(view => view.GetTypeId())
-            .Distinct()
-            .ToList();
-
-        var temporaryView = TryCreateView(document, viewTypeIds);
-        if (temporaryView is not null)
-            return temporaryView;
-
-        viewTypeIds = new FilteredElementCollector(document)
             .OfClass(typeof(ViewFamilyType))
             .OfType<ViewFamilyType>()
             .Where(viewFamilyType => viewFamilyType.ViewFamily == ViewFamily.ThreeDimensional)
             .Select(viewFamilyType => viewFamilyType.Id)
             .ToList();
 
-        return TryCreateView(document, viewTypeIds);
-    }
+        viewTypeIds.AddRange(new FilteredElementCollector(document)
+            .OfClass(typeof(View3D))
+            .OfType<View3D>()
+            .Where(view => !view.IsTemplate)
+            .Select(view => view.GetTypeId()));
 
-    private static View3D? TryCreateView(Document document, List<ElementId> viewTypeIds)
-    {
-        foreach (var viewTypeId in viewTypeIds)
+        foreach (var viewTypeId in viewTypeIds.Distinct())
         {
-            using var transaction = new Transaction(document, "Create temporary view");
-            transaction.Start();
-            OpenWorksetsFailurePreprocessor.Attach(transaction);
-
-            try
-            {
-                var view = View3D.CreateIsometric(document, viewTypeId);
-                view.Name = TemporaryViewName;
-                if (transaction.Commit() == TransactionStatus.Committed)
-                    return view;
-            }
-            catch (Autodesk.Revit.Exceptions.ApplicationException)
-            {
-                // This view family type cannot produce an isometric view here; try the next one.
-            }
-
-            if (transaction.HasStarted())
-                transaction.RollBack();
+            var view = TryCreateView(document, viewTypeId, name, ref failureReason);
+            if (view is not null)
+                return view;
         }
 
+        return null;
+    }
+
+    /// <summary>
+    /// Revit refuses a view name that is already taken, and a model can easily contain a view
+    /// left behind by an earlier task that names its temporary view the same way. Build a name
+    /// no view in the document uses, so creating the temporary view cannot fail over its name.
+    /// </summary>
+    private static string GetUnusedViewName(Document document)
+    {
+        var usedNames = new HashSet<string>(
+            new FilteredElementCollector(document)
+                .OfClass(typeof(View))
+                .OfType<View>()
+                .Select(view => view.Name),
+            StringComparer.OrdinalIgnoreCase);
+
+        string name;
+        do
+        {
+            name = $"{TemporaryViewNamePrefix} {Guid.NewGuid().ToString("N").Substring(0, 8)}";
+        }
+        while (usedNames.Contains(name));
+
+        return name;
+    }
+
+    private static View3D? TryCreateView(Document document, ElementId viewTypeId, string name, ref string? failureReason)
+    {
+        using var transaction = new Transaction(document, "Create temporary view");
+        transaction.Start();
+        OpenWorksetsFailurePreprocessor.Attach(transaction);
+
+        View3D view;
+        try
+        {
+            view = View3D.CreateIsometric(document, viewTypeId);
+        }
+        catch (Autodesk.Revit.Exceptions.ApplicationException exception)
+        {
+            // This view family type cannot produce an isometric view here; the caller tries the next.
+            failureReason = exception.Message;
+            transaction.RollBack();
+            return null;
+        }
+
+        // The name only labels the view while it is on screen, so a name Revit will not accept
+        // must not cost us the view. Keep the name Revit generated and carry on.
+        try
+        {
+            view.Name = name;
+        }
+        catch (Autodesk.Revit.Exceptions.ApplicationException)
+        {
+        }
+
+        if (transaction.Commit() == TransactionStatus.Committed)
+            return view;
+
+        failureReason = "Revit rolled back the transaction that creates the temporary view.";
         return null;
     }
 

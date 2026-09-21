@@ -99,10 +99,13 @@ public class OpenWorksetsCommand : IRevitExtension<OpenWorksetsArgs>
         return new WorksetSelection(toOpen, alreadyOpen, missing);
     }
 
-    private static IList<Workset> GetUserWorksets(Document document) =>
-        new FilteredWorksetCollector(document)
+    private static IList<Workset> GetUserWorksets(Document document)
+    {
+        using var collector = new FilteredWorksetCollector(document);
+        return collector
             .OfKind(WorksetKind.UserWorkset)
             .ToWorksets();
+    }
 
     private static string GetKey(WorksetId worksetId) =>
         worksetId.IntegerValue.ToString(CultureInfo.InvariantCulture);
@@ -177,7 +180,8 @@ public class OpenWorksetsCommand : IRevitExtension<OpenWorksetsArgs>
     {
         var worksetIds = new HashSet<int>(worksets.Select(workset => workset.Id.IntegerValue));
 
-        return new FilteredElementCollector(document)
+        using var collector = new FilteredElementCollector(document);
+        return collector
             .OfClass(typeof(RevitLinkType))
             .OfType<RevitLinkType>()
             .Where(link => worksetIds.Contains(link.WorksetId.IntegerValue))
@@ -198,7 +202,8 @@ public class OpenWorksetsCommand : IRevitExtension<OpenWorksetsArgs>
         OpenWorksetsFailurePreprocessor.Attach(transaction);
 
         var temporaryWorkset = Workset.Create(document, Guid.NewGuid().ToString());
-        var linkInstances = new FilteredElementCollector(document)
+        using var collector = new FilteredElementCollector(document);
+        var linkInstances = collector
             .OfClass(typeof(RevitLinkInstance))
             .OfType<RevitLinkInstance>()
             .ToLookup(instance => instance.GetTypeId());
@@ -263,14 +268,16 @@ public class OpenWorksetsCommand : IRevitExtension<OpenWorksetsArgs>
         // A view family type of the three-dimensional family is what is guaranteed to produce an
         // isometric view. The types of the existing 3D views are only a fallback: they can belong
         // to a view template or to a perspective view, which CreateIsometric may refuse.
-        var viewTypeIds = new FilteredElementCollector(document)
+        using var viewFamilyTypes = new FilteredElementCollector(document);
+        var viewTypeIds = viewFamilyTypes
             .OfClass(typeof(ViewFamilyType))
             .OfType<ViewFamilyType>()
             .Where(viewFamilyType => viewFamilyType.ViewFamily == ViewFamily.ThreeDimensional)
             .Select(viewFamilyType => viewFamilyType.Id)
             .ToList();
 
-        viewTypeIds.AddRange(new FilteredElementCollector(document)
+        using var existingViews = new FilteredElementCollector(document);
+        viewTypeIds.AddRange(existingViews
             .OfClass(typeof(View3D))
             .OfType<View3D>()
             .Where(view => !view.IsTemplate)
@@ -293,8 +300,9 @@ public class OpenWorksetsCommand : IRevitExtension<OpenWorksetsArgs>
     /// </summary>
     private static string GetUnusedViewName(Document document)
     {
+        using var collector = new FilteredElementCollector(document);
         var usedNames = new HashSet<string>(
-            new FilteredElementCollector(document)
+            collector
                 .OfClass(typeof(View))
                 .OfType<View>()
                 .Select(view => view.Name),

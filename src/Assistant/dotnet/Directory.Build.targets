@@ -1,0 +1,10 @@
+<Project>
+
+    <PropertyGroup>
+        <ExtensionId Condition="'$(ExtensionId)' == ''">$(MSBuildProjectName)</ExtensionId>
+        <AssemblyName>$(ExtensionId).$(Version)</AssemblyName>
+        <TargetName>$(AssemblyName)</TargetName>
+        <PackageId>$(ExtensionId)</PackageId>
+    </PropertyGroup>
+
+</Project>

@@ -2,7 +2,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <Version>0.0.1</Version>
     <Title>Assistant Demo Extension</Title>
     <Description>AssistantDemoExtension Description</Description>
   </PropertyGroup>

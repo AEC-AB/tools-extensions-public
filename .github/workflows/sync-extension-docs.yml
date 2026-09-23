@@ -1,0 +1,121 @@
+name: Sync released extension docs
+
+on:
+  repository_dispatch:
+    types:
+      - extension-docs-published
+  workflow_dispatch:
+    inputs:
+      package_version:
+        description: Published CW.Assistant.Extensions.Docs version
+        required: true
+        type: string
+      source_sha:
+        description: Source commit in AEC-AB/tools
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: extension-docs-sync
+  cancel-in-progress: false
+
+jobs:
+  sync_docs:
+    name: Sync documentation package
+    runs-on: windows-2022
+    timeout-minutes: 15
+    env:
+      PACKAGE_VERSION: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.package_version || inputs.package_version }}
+      SOURCE_SHA: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.source_sha || inputs.source_sha }}
+
+    steps:
+      - name: Validate request
+        shell: pwsh
+        run: |
+          if ($env:PACKAGE_VERSION -notmatch '^[0-9A-Za-z][0-9A-Za-z.+-]*$') {
+            throw 'package_version is missing or invalid.'
+          }
+          if ($env:SOURCE_SHA -notmatch '^[0-9a-fA-F]{7,64}$') {
+            throw 'source_sha is missing or invalid.'
+          }
+
+      - name: Create repository token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.EXTENSION_DOCS_SYNC_APP_ID }}
+          private-key: ${{ secrets.EXTENSION_DOCS_SYNC_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: tools-extensions-public
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Checkout public repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - name: Test synchronization script
+        shell: pwsh
+        run: ./.github/scripts/tests/Test-Sync-ExtensionDocs.ps1
+
+      - name: Synchronize released documentation
+        shell: pwsh
+        run: >-
+          ./.github/scripts/Sync-ExtensionDocs.ps1
+          -PackageVersion $env:PACKAGE_VERSION
+          -SourceSha $env:SOURCE_SHA
+          -RepositoryRoot $env:GITHUB_WORKSPACE
+
+      - name: Create or update publication pull request
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git diff --quiet -- docs
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host 'The public documentation already matches this package.'
+            exit 0
+          }
+          if ($LASTEXITCODE -ne 1) {
+            throw "git diff failed with exit code $LASTEXITCODE."
+          }
+
+          $branch = "automation/extension-docs/$env:PACKAGE_VERSION"
+          git config user.name 'extension-docs[bot]'
+          git config user.email 'extension-docs[bot]@users.noreply.github.com'
+          git checkout -B $branch
+          git add -- docs
+          git commit -m "docs: publish extension docs $env:PACKAGE_VERSION"
+          if ($LASTEXITCODE -ne 0) { throw 'git commit failed.' }
+          git push --force-with-lease origin "HEAD:refs/heads/$branch"
+          if ($LASTEXITCODE -ne 0) { throw 'git push failed.' }
+
+          $bodyPath = Join-Path $env:RUNNER_TEMP 'extension-docs-pr.md'
+          @"
+          Publishes the extension documentation from `CW.Assistant.Extensions.Docs` `$env:PACKAGE_VERSION`.
+
+          Source commit in `AEC-AB/tools`: `$env:SOURCE_SHA`
+
+          The generated files under `docs/dotnet/` should not be edited in this repository.
+          "@ | Set-Content -LiteralPath $bodyPath
+
+          $pullRequest = gh pr list --base main --head $branch --state open --json number --jq '.[0].number'
+          if ([string]::IsNullOrWhiteSpace($pullRequest)) {
+            gh pr create `
+              --base main `
+              --head $branch `
+              --title "docs: publish extension docs $env:PACKAGE_VERSION" `
+              --body-file $bodyPath
+          }
+          else {
+            gh pr edit $pullRequest `
+              --title "docs: publish extension docs $env:PACKAGE_VERSION" `
+              --body-file $bodyPath
+          }
+
+          if ($LASTEXITCODE -ne 0) { throw 'Pull request creation or update failed.' }

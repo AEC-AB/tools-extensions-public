@@ -1,0 +1,75 @@
+name: Validate extension docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - README.md
+      - docs/**
+      - .github/scripts/**
+      - .github/workflows/sync-extension-docs.yml
+      - .github/workflows/validate-extension-docs.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - README.md
+      - docs/**
+      - .github/scripts/**
+      - .github/workflows/sync-extension-docs.yml
+      - .github/workflows/validate-extension-docs.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate_docs:
+    name: Validate published documentation
+    runs-on: windows-2022
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test synchronization
+        shell: pwsh
+        run: ./.github/scripts/tests/Test-Sync-ExtensionDocs.ps1
+
+      - name: Validate repository documentation links
+        shell: pwsh
+        run: ./.github/scripts/Test-MarkdownLinks.ps1 -RootPath $env:GITHUB_WORKSPACE
+
+      - name: Verify generated documentation
+        shell: pwsh
+        run: |
+          $generatedDocs = Join-Path $env:GITHUB_WORKSPACE 'docs/dotnet'
+          $landingPagePath = Join-Path $env:GITHUB_WORKSPACE 'docs/README.md'
+          $landingPage = Get-Content -Raw -LiteralPath $landingPagePath
+
+          if (-not (Test-Path -LiteralPath $generatedDocs)) {
+            if (-not $landingPage.Contains('Pending initial publication')) {
+              throw 'docs/dotnet is missing, but the landing page is not in its initial pending state.'
+            }
+            Write-Host 'No stable documentation release has been published yet.'
+            exit 0
+          }
+
+          $provenance = [Regex]::Match(
+            $landingPage,
+            'CW\.Assistant\.Extensions\.Docs (?<version>[0-9A-Za-z][0-9A-Za-z.+-]*)\]\([^)]+\)\. Source commit: `(?<sha>[0-9a-fA-F]{7,64})`\.')
+          if (-not $provenance.Success) {
+            throw 'The landing page does not contain valid package and source provenance.'
+          }
+
+          ./.github/scripts/Sync-ExtensionDocs.ps1 `
+            -PackageVersion $provenance.Groups['version'].Value `
+            -SourceSha $provenance.Groups['sha'].Value `
+            -RepositoryRoot $env:GITHUB_WORKSPACE
+
+          git diff --exit-code -- docs
+          if ($LASTEXITCODE -ne 0) {
+            throw 'docs/dotnet does not match the recorded released package. Edit the source documentation in AEC-AB/tools.'
+          }

@@ -76,13 +76,13 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          git diff --quiet -- docs
-          if ($LASTEXITCODE -eq 0) {
+          $docsChanges = @(git status --porcelain=v1 --untracked-files=all -- docs)
+          if ($LASTEXITCODE -ne 0) {
+            throw "git status failed with exit code $LASTEXITCODE."
+          }
+          if ($docsChanges.Count -eq 0) {
             Write-Host 'The public documentation already matches this package.'
             exit 0
-          }
-          if ($LASTEXITCODE -ne 1) {
-            throw "git diff failed with exit code $LASTEXITCODE."
           }
 
           $branch = "automation/extension-docs/$env:PACKAGE_VERSION"

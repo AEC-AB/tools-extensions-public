@@ -1,10 +1,14 @@
 # Security review summary
 
+<!-- pass-status: written by the runner -->
+> **Incomplete pass.** Run 20260925-214417 did not finish: the model server stopped answering mid-run. The findings below are what it got to; the rest of the codebase is not reviewed yet. The next nightly sweep picks this repo up again.
+<!-- /pass-status -->
+
 Rewritten by the AEC security review agent on every run. Internal only.
 
 ## Scope
 
-Run `20260925-214417` — first pass. Reviewed the StreamBIM credential storage and FTP transfer security area (`src/Assistant/dotnet/StreamBim/`, `src/Assistant/dotnet/StreamBIMUploader/`, `src/Assistant/dotnet/StreamBIMDownloader/`), the Dalux API key handling area (`src/Assistant/dotnet/DaluxCloudUpload/`, `src/Assistant/dotnet/DaluxCloudDownload/`), and performed a full git history audit for secrets across all branches.
+Run `20260925-214417` — first pass. Reviewed the StreamBIM credential storage and FTP transfer security area (`src/Assistant/dotnet/StreamBim/`, `src/Assistant/dotnet/StreamBIMUploader/`, `src/Assistant/dotnet/StreamBIMDownloader/`), the Dalux API key handling area (`src/Assistant/dotnet/DaluxCloudUpload/`, `src/Assistant/dotnet/DaluxCloudDownload/`), a full git history audit for secrets across all branches, and the Dalux API authentication area (`src/Assistant/dotnet/DaluxCloudUpload/Services/DaluxApiService.cs`, `src/Assistant/dotnet/DaluxCloudDownload/Services/DaluxApiService.cs`).
 
 ## Counts
 
@@ -46,3 +50,4 @@ First run — no previous run.
 - Error message exposure in DaluxApiService
 - Build pipeline permissions
 - Workflow token scoping
+- FluentFTP security

@@ -4,7 +4,7 @@ Overwritten by the agent on every run. Plain Markdown, under 3500 characters, no
 
 ## Run scope and headline
 
-Run `20260925-214417` is a first-pass full sweep of `tools-extensions-public`, covering the StreamBIM credential storage area, the Dalux API key handling area, and a git history audit for secrets. Headline: one High, one Low, one Info, three findings filed, sweep fifteen percent complete.
+Run `20260925-214417` is a first-pass full sweep of `tools-extensions-public`, covering the StreamBIM credential storage area, the Dalux API key handling area, a git history audit for secrets, and the Dalux API authentication area. Headline: one High, one Low, one Info, three findings filed, sweep thirty percent complete.
 
 ## New findings
 
@@ -36,3 +36,4 @@ None — this is a first run.
 - Error message exposure in DaluxApiService
 - Build pipeline permissions
 - Workflow token scoping
+- FluentFTP security

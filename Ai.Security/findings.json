@@ -9,7 +9,8 @@
     "last_verified": "20260925-214417",
     "page": "SEC-001-streambim-credential-storage.md",
     "introduced": "commit 183a206, 2026-09-15",
-    "notes": "Credentials stored in Windows Credential Manager (DPAPI), FTP uses TLS 1.2 Explicit encryption. No explicit certificate validation callback on FTP client; password held as plaintext string in memory via UserCredentials record. No credential leakage in logs. Git history clean of hardcoded secrets."
+    "notes": "Credentials stored in Windows Credential Manager (DPAPI), FTP uses TLS 1.2 Explicit encryption. No explicit certificate validation callback on FTP client; password held as plaintext string in memory via UserCredentials record. No credential leakage in logs. Git history clean of hardcoded secrets.",
+    "category": "Secrets / Config"
   },
   {
     "id": "SEC-002",
@@ -21,7 +22,8 @@
     "last_verified": "20260925-214417",
     "page": "SEC-002-dalux-api-key-handling.md",
     "introduced": "commit 4658b6b, 2026-09-25",
-    "notes": "DaluxCloudUpload passes args.ApiKey (default: 'Dalux API Key') instead of looked-up apiKey variable to DaluxApiService. HttpClient has no timeout or certificate validation callback. Error messages include base URL."
+    "notes": "DaluxCloudUpload passes args.ApiKey (default: 'Dalux API Key') instead of looked-up apiKey variable to DaluxApiService. HttpClient has no timeout or certificate validation callback. Error messages include base URL.",
+    "category": "Secrets / Auth"
   },
   {
     "id": "SEC-003",
@@ -33,6 +35,7 @@
     "last_verified": "20260925-214417",
     "page": "SEC-003-git-history-audit-clean.md",
     "introduced": "N/A",
-    "notes": "Full git log -p -S audit across all branches for password, secret, key, apiKey, PRIVATE KEY, connection, Token/AuthToken/Bearer/api_token - no secrets found in history. Repository is clean."
+    "notes": "Full git log -p -S audit across all branches for password, secret, key, apiKey, PRIVATE KEY, connection, Token/AuthToken/Bearer/api_token - no secrets found in history. Repository is clean.",
+    "category": "Secrets"
   }
 ]

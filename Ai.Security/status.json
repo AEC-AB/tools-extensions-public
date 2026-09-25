@@ -1,0 +1,7 @@
+{
+  "complete": false,
+  "run": "20260925-214417",
+  "reason": "the model server stopped answering mid-run",
+  "next": "picked up again by the next nightly sweep",
+  "written_by": "runner"
+}

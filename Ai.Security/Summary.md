@@ -4,7 +4,7 @@ Rewritten by the AEC security review agent on every run. Internal only.
 
 ## Scope
 
-Run `20260925-214417` — first pass. Reviewed the StreamBIM credential storage and FTP transfer security area (`src/Assistant/dotnet/StreamBim/`, `src/Assistant/dotnet/StreamBIMUploader/`, `src/Assistant/dotnet/StreamBIMDownloader/`) and the Dalux API key handling area (`src/Assistant/dotnet/DaluxCloudUpload/`, `src/Assistant/dotnet/DaluxCloudDownload/`).
+Run `20260925-214417` — first pass. Reviewed the StreamBIM credential storage and FTP transfer security area (`src/Assistant/dotnet/StreamBim/`, `src/Assistant/dotnet/StreamBIMUploader/`, `src/Assistant/dotnet/StreamBIMDownloader/`), the Dalux API key handling area (`src/Assistant/dotnet/DaluxCloudUpload/`, `src/Assistant/dotnet/DaluxCloudDownload/`), and performed a full git history audit for secrets across all branches.
 
 ## Counts
 
@@ -12,11 +12,12 @@ Run `20260925-214417` — first pass. Reviewed the StreamBIM credential storage 
 |---|---|---|
 | High | 1 | 1 |
 | Low | 1 | 1 |
-| **Total** | **2** | **2** |
+| Info | 1 | 1 |
+| **Total** | **3** | **3** |
 
 | Status | Count |
 |---|---|
-| Open | 2 |
+| Open | 3 |
 
 ## Top open findings
 
@@ -24,13 +25,14 @@ Run `20260925-214417` — first pass. Reviewed the StreamBIM credential storage 
 
 2. **SEC-001** (Low) — StreamBIM credential storage and FTP transfer security: minor defense-in-depth gaps — no explicit certificate validation callback on FTP client, password held as plaintext string in memory via `UserCredentials` record.
 
+3. **SEC-003** (Info) — Git history audit: searched all branches with `git log -p -S` for password, secret, key, apiKey, PRIVATE KEY, connection, Token/AuthToken/Bearer/api_token — no secrets found in history.
+
 ## What changed since previous run
 
 First run — no previous run.
 
 ## Areas not yet covered
 
-- Commit history for secrets
 - StreamBIM file operations (path validation, injection)
 - Dalux file path handling (path traversal)
 - GitHub workflow secrets access

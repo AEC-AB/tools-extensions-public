@@ -32,12 +32,12 @@
 | Structure mapping | Full codebase tree | 20260925-214417 | Repo map built from structure only; no code logic reviewed yet |
 | Secrets | StreamBIM credential storage | 20260925-214417 | SEC-001: Credentials stored in Windows Credential Manager, FTP uses TLS 1.2 Explicit - overall sound, noted minor defense-in-depth gaps |
 | Secrets / Auth | Dalux API key handling | 20260925-214417 | SEC-002: Broken credential lookup in DaluxCloudUploadCommand.cs line 30 (passes args.ApiKey instead of looked-up apiKey variable); HttpClient gaps (no timeout, no cert validation callback) |
+| Secrets | Commit history for secrets | 20260925-214417 | SEC-003: git log -p -S audit across all branches for password, secret, key, apiKey, PRIVATE KEY, connection, Token/AuthToken/Bearer/api_token - no secrets found in history |
 
 ## Backlog (not yet reviewed, highest risk first)
 
 | Category | Area | Why | Hint |
 |---|---|---|---|
-| Secrets | Commit history for secrets | Sensitive values may have been committed and removed - use git log -p -S to check | `git log -p -S "password\|secret\|key" -- src/` |
 | Auth | Dalux API authentication | HttpClient with X-API-Key header - check for certificate validation, timeout, and transport security | DaluxApiService.cs |
 | Data protection | StreamBIM file operations | StreamBIM uploader/downloader handle user files - check path validation, injection, and local file access | StreamBimPathHelper.cs, FailedFile.cs |
 | Data protection | Dalux file path handling | Dalux download resolves folder paths from user input before writing to disk - check for path traversal | DaluxCloudDownloadCommand.cs, ResolveFolderAsync |

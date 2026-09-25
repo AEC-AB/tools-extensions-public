@@ -22,5 +22,17 @@
     "page": "SEC-002-dalux-api-key-handling.md",
     "introduced": "commit 4658b6b, 2026-09-25",
     "notes": "DaluxCloudUpload passes args.ApiKey (default: 'Dalux API Key') instead of looked-up apiKey variable to DaluxApiService. HttpClient has no timeout or certificate validation callback. Error messages include base URL."
+  },
+  {
+    "id": "SEC-003",
+    "severity": "Info",
+    "title": "Git history audit - no secrets found",
+    "status": "Open",
+    "location": "src/ across all branches",
+    "first_seen": "20260925-214417",
+    "last_verified": "20260925-214417",
+    "page": "SEC-003-git-history-audit-clean.md",
+    "introduced": "N/A",
+    "notes": "Full git log -p -S audit across all branches for password, secret, key, apiKey, PRIVATE KEY, connection, Token/AuthToken/Bearer/api_token - no secrets found in history. Repository is clean."
   }
 ]

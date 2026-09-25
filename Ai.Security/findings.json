@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "id": "SEC-001",
+    "severity": "Low",
+    "title": "StreamBIM credential storage and FTP transfer security",
+    "status": "Open",
+    "location": "src/Assistant/dotnet/StreamBim/Services/StreamBimCredentialProvider.cs line 1-51, src/Assistant/dotnet/StreamBim/Services/StreamBimFtpClientFactory.cs line 1-42, src/Assistant/dotnet/StreamBim/Models/UserCredentials.cs line 3",
+    "first_seen": "20260925-214417",
+    "last_verified": "20260925-214417",
+    "page": "SEC-001-streambim-credential-storage.md",
+    "introduced": "commit 183a206, 2026-09-15",
+    "notes": "Credentials stored in Windows Credential Manager (DPAPI), FTP uses TLS 1.2 Explicit encryption. No explicit certificate validation callback on FTP client; password held as plaintext string in memory via UserCredentials record. No credential leakage in logs. Git history clean of hardcoded secrets."
+  },
+  {
+    "id": "SEC-002",
+    "severity": "High",
+    "title": "Dalux API key handling - broken credential lookup in upload and minor HttpClient gaps",
+    "status": "Open",
+    "location": "src/Assistant/dotnet/DaluxCloudUpload/DaluxCloudUploadCommand.cs line 30, src/Assistant/dotnet/DaluxCloudUpload/Services/DaluxApiService.cs lines 20-24 and 118-143, src/Assistant/dotnet/DaluxCloudDownload/Services/DaluxApiService.cs lines 14-24 and 207-222",
+    "first_seen": "20260925-214417",
+    "last_verified": "20260925-214417",
+    "page": "SEC-002-dalux-api-key-handling.md",
+    "introduced": "commit 4658b6b, 2026-09-25",
+    "notes": "DaluxCloudUpload passes args.ApiKey (default: 'Dalux API Key') instead of looked-up apiKey variable to DaluxApiService. HttpClient has no timeout or certificate validation callback. Error messages include base URL."
+  }
+]

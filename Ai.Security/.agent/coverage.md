@@ -30,15 +30,14 @@
 | Category | Area | Run | Notes |
 |---|---|---|---|
 | Structure mapping | Full codebase tree | 20260925-214417 | Repo map built from structure only; no code logic reviewed yet |
+| Secrets | StreamBIM credential storage | 20260925-214417 | SEC-001: Credentials stored in Windows Credential Manager, FTP uses TLS 1.2 Explicit - overall sound, noted minor defense-in-depth gaps |
+| Secrets / Auth | Dalux API key handling | 20260925-214417 | SEC-002: Broken credential lookup in DaluxCloudUploadCommand.cs line 30 (passes args.ApiKey instead of looked-up apiKey variable); HttpClient gaps (no timeout, no cert validation callback) |
 
 ## Backlog (not yet reviewed, highest risk first)
 
 | Category | Area | Why | Hint |
 |---|---|---|---|
-| Secrets | StreamBIM credential storage | FTP uploader/downloaders use FluentFTP - check if credentials are stored in plaintext, env vars, or passed on CLI args | StreamBimCredentialProvider.cs, StreamBimPathHelper.cs |
-| Secrets | Dalux API key handling | Dalux extensions read API key from Windows Credential Manager - verify the credential name/lookup is safe and not logged | DaluxCloudUploadCommand.cs, DaluxCloudDownloadCommand.cs |
 | Secrets | Commit history for secrets | Sensitive values may have been committed and removed - use git log -p -S to check | `git log -p -S "password\|secret\|key" -- src/` |
-| Auth/Config | FluentFTP security | FTP protocol may lack TLS; FluentFTP has SecureAuth option - check if used | StreamBimFtpClientFactory.cs, StreamBIMUploader/Downloader |
 | Auth | Dalux API authentication | HttpClient with X-API-Key header - check for certificate validation, timeout, and transport security | DaluxApiService.cs |
 | Data protection | StreamBIM file operations | StreamBIM uploader/downloader handle user files - check path validation, injection, and local file access | StreamBimPathHelper.cs, FailedFile.cs |
 | Data protection | Dalux file path handling | Dalux download resolves folder paths from user input before writing to disk - check for path traversal | DaluxCloudDownloadCommand.cs, ResolveFolderAsync |
@@ -54,3 +53,5 @@
 | Data protection | Error message exposure | DaluxApiService error messages include base URL and network diagnostic info in exception handlers | HandleException method in DaluxApiService.cs |
 | Config | Build pipeline permissions | build-dotnet-changed.yml triggers on push to main and PR events - verify required reviewers/branch protection | .github/workflows/build-dotnet-changed.yml |
 | Auth | Workflow token scoping | sync-extension-docs.yml uses create-github-app-token with write permissions on contents and PRs | .github/workflows/sync-extension-docs.yml lines 46-54 |
+| Auth/Config | FluentFTP security | FTP protocol may lack TLS; FluentFTP has SecureAuth option - check if used | StreamBimFtpClientFactory.cs, StreamBIMUploader/Downloader |
+

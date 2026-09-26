@@ -47,19 +47,15 @@ Run `20260926-015629` is an incremental pass. Three new Critical and Medium find
 
 Run `20260926-215844` — incremental. Reviewed all seven Tekla extension file operation modules (IFCExport, ReadIn, RefreshReferenceModels, SaveModel, SetSelectionFilter, WriteOut, ZoomToSelected). One new Low finding: SEC-008 (IFCExport path traversal via unvalidated output file path). All other Tekla extensions have safe file operations with no user-typed paths or injection vectors.
 
+Run `20260926-215844` session 6 — incremental. Replaced the Backlog row "Tekla extensions file operations" with three smaller rows by sub-project: (1) IFCExport path traversal, (2) five file operation extensions, (3) SetSelectionFilter. Reviewed the first row (IFCExport = SEC-008): re-reviewed all four IFCExport files (TeklaIFCExportCommand.cs, TeklaIFCExportArgs.cs, IFCExportConfig.cs, GlobalUsings.cs), confirmed the finding is complete and accurate, moved to Reviewed. The second and third rows remain in the Backlog for a future session.
+
 ## Areas not yet covered
 
 - StreamBIM file path validation and injection (StreamBimPathHelper.cs, FailedFile.cs)
-- StreamBIM autofill collectors (path validation before use)
-- NuGet.config security (insecure source URLs or credentials)
-- Directory.Build.props/targets (sensitive defaults)
-- Build system command execution (unsanitized args in Build.cs)
-- PrintPDF telemetry and logging (PII or secret leakage)
-- .NET package versions (SBOM review)
-- API version skew in DaluxApiService (deprecated versions)
-- Shared code consistency across StreamBIM projects
-- Revit extension file operations (injection)
 - Navisworks extension file operations (logging and error handling)
+- PrintPDF telemetry and logging (PII or secret leakage)
 - StreamBIM diagnostics logging (sensitive data in output)
 - Error handling pattern inconsistency (swallowed exceptions, info leakage)
 - FluentFTP security (TLS enforcement)
+- GitHub workflow secrets access
+- Build pipeline permissions

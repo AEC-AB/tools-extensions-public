@@ -1,11 +1,4 @@
 {
-  "items": {
-    "injection | tekla extensions file operations": {
-      "attempts": 1,
-      "failures": [
-        "run 20260926-215844 session 5 (review): the row was not moved to Reviewed"
-      ]
-    }
-  },
+  "items": {},
   "unblock": {}
 }

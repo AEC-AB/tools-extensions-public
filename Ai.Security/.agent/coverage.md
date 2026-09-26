@@ -38,12 +38,13 @@
 | Injection / RCE | RunCommand command injection | 20260926-015629 | SEC-005: User-supplied command strings passed directly to AutoCAD SendCommand() with no whitelist or validation |
 | Injection / Path Traversal | DaluxCloudDownload path traversal | 20260926-015629 | SEC-006: Server-supplied RelativePath and FileName used in Path.Combine without traversal validation |
 | CI/CD security | GitHub workflows and scripts | 20260926-015629 | Verified input validation, security scanning, and token scoping in sync-extension-docs.yml, validate-extension-docs.yml, and build-dotnet-changed.yml. Sync-ExtensionDocs.ps1 has path traversal protection for .nupkg entries and private content scanning. |
+| Injection / Path Traversal | StreamBIM file path handling | 20260926-215844 | Reviewed StreamBimPathHelper.cs, autofill collectors, and file transfer services - path traversal protection in CreateLocalPath (bounds check), NormalizeRelativePath (rejects . and .. segments), and autofill input validation. No new finding. |
+| Injection | StreamBIM autofill collectors | 20260926-215844 | All four autofill collectors (Uploader/Downloader folder and project root) validated - they either call NormalizeRelativePath() which rejects . and .. segments, or delegate to collectors that only list FTP root directories (no user-supplied path input). No new finding. |
 
 ## Backlog (not yet reviewed, highest risk first)
 
 | Category | Area | Why | Hint |
 |---|---|---|---|
-| Injection | StreamBIM file path handling | StreamBIM uploader/downloader handle user files - check path validation in StreamBimPathHelper.cs | StreamBimPathHelper.cs, FailedFile.cs, StreamBimProjectRootFolderCollector.cs |
 | Injection | StreamBIM autofill collectors | Autofill collectors receive user project/folder paths - check for path validation before use | StreamBIMProjectRootFolderAutoFillCollector.cs, StreamBIMFolderAutoFillCollector.cs |
 | Config | NuGet.config security | Global and per-project nuget.config files - check for insecure source URLs or credentials | nuget.config, Tekla/*/nuget.config |
 | Config | Directory.Build.props/targets | Shared MSBuild props may contain sensitive defaults or insecure settings | Revit/ and Tekla/ Directory.Build.props, .targets |

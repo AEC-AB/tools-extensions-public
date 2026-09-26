@@ -8,9 +8,9 @@ Newest first, ten most recent runs only (the runner trims older entries; git his
 - Model: openai/spark-qwen3-35b
 - Branch: security/ai-security
 - Source tools-extensions-public @ 4658b6b
-- Items created: (agent fills in)
-- Items updated: (agent fills in)
-- Notes: (agent fills in)
+- Items created: none
+- Items updated: coverage.md (2 Reviewed entries moved from Backlog)
+- Notes: Incremental run with no changes in context/changes.md. Reviewed StreamBIM file path handling (StreamBimPathHelper.cs, autofill collectors, file transfer services): path traversal protection in CreateLocalPath (bounds check against download root), NormalizeRelativePath (rejects . and .. segments), and autofill input validation (NormalizeRelativePath called on all user-supplied paths). No new finding. Also checked the second backlog item (StreamBIM autofill collectors) incidentally - all four collectors validated or delegate to FTP root directory listing only. No new finding.
 
 ## Run 20260926-015629 - incremental
 

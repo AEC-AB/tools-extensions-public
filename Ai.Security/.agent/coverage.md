@@ -34,14 +34,17 @@
 | Secrets / Auth | Dalux API key handling | 20260925-214417 | SEC-002: Broken credential lookup in DaluxCloudUploadCommand.cs line 30 (passes args.ApiKey instead of looked-up apiKey variable); HttpClient gaps (no timeout, no cert validation callback) |
 | Secrets | Commit history for secrets | 20260925-214417 | SEC-003: git log -p -S audit across all branches for password, secret, key, apiKey, PRIVATE KEY, connection, Token/AuthToken/Bearer/api_token - no secrets found in history |
 | Auth | Dalux API authentication | 20260925-214417 | Verified DaluxApiService.cs in both upload and download projects - all auth concerns (X-API-Key over HTTPS, no timeout, no cert validation callback, base URL in error messages) already captured in SEC-002; no additional auth-specific findings |
+| Injection / RCE | LISPRunner command injection | 20260926-015629 | SEC-004: Both script-file and inline modes pass user content to AutoCAD via SendStringToExecute() with zero sanitization |
+| Injection / RCE | RunCommand command injection | 20260926-015629 | SEC-005: User-supplied command strings passed directly to AutoCAD SendCommand() with no whitelist or validation |
+| Injection / Path Traversal | DaluxCloudDownload path traversal | 20260926-015629 | SEC-006: Server-supplied RelativePath and FileName used in Path.Combine without traversal validation |
+| CI/CD security | GitHub workflows and scripts | 20260926-015629 | Verified input validation, security scanning, and token scoping in sync-extension-docs.yml, validate-extension-docs.yml, and build-dotnet-changed.yml. Sync-ExtensionDocs.ps1 has path traversal protection for .nupkg entries and private content scanning. |
 
 ## Backlog (not yet reviewed, highest risk first)
 
 | Category | Area | Why | Hint |
 |---|---|---|---|
-| Data protection | StreamBIM file operations | StreamBIM uploader/downloader handle user files - check path validation, injection, and local file access | StreamBimPathHelper.cs, FailedFile.cs |
-| Data protection | Dalux file path handling | Dalux download resolves folder paths from user input before writing to disk - check for path traversal | DaluxCloudDownloadCommand.cs, ResolveFolderAsync |
-| Config | GitHub workflow secrets access | sync-extension-docs.yml references secrets.EXTENSION_DOCS_SYNC_PRIVATE_KEY - verify least-privilege scoping | .github/workflows/sync-extension-docs.yml |
+| Injection | StreamBIM file path handling | StreamBIM uploader/downloader handle user files - check path validation in StreamBimPathHelper.cs | StreamBimPathHelper.cs, FailedFile.cs, StreamBimProjectRootFolderCollector.cs |
+| Injection | StreamBIM autofill collectors | Autofill collectors receive user project/folder paths - check for path validation before use | StreamBIMProjectRootFolderAutoFillCollector.cs, StreamBIMFolderAutoFillCollector.cs |
 | Config | NuGet.config security | Global and per-project nuget.config files - check for insecure source URLs or credentials | nuget.config, Tekla/*/nuget.config |
 | Config | Directory.Build.props/targets | Shared MSBuild props may contain sensitive defaults or insecure settings | Revit/ and Tekla/ Directory.Build.props, .targets |
 | Injection | Build system command execution | ExtensionBuilder.csproj produces dotnet run output - check for unsanitized args passed to build commands | Build.cs, Build.Compile.cs, Build.Final.cs |
@@ -51,7 +54,12 @@
 | Inconsistency | Shared code in multiple projects | StreamBim/ is shared via Compile Include across Uploader/Downloader - verify security logic is consistent | StreamBim/**/*.cs references |
 | Inconsistency | nuget.config duplicates | Tekla has per-project nuget.config files while root has one - verify all sources are identical | Tekla/*/nuget.config vs root nuget.config |
 | Data protection | Error message exposure | DaluxApiService error messages include base URL and network diagnostic info in exception handlers | HandleException method in DaluxApiService.cs |
-| Config | Build pipeline permissions | build-dotnet-changed.yml triggers on push to main and PR events - verify required reviewers/branch protection | .github/workflows/build-dotnet-changed.yml |
-| Auth | Workflow token scoping | sync-extension-docs.yml uses create-github-app-token with write permissions on contents and PRs | .github/workflows/sync-extension-docs.yml lines 46-54 |
+| Injection | Revit extensions file operations | DWGExport, LoadFamily, NWCExport, PrintPDF, ZoomToSelected all handle file paths - check for injection | Revit/dotnet/*/Command.cs files |
+| Injection | Tekla extensions file operations | IFCExport, WriteOut, ReadIn, SaveModel, etc. all handle file paths - check for injection | Tekla/dotnet/*/Command.cs files |
+| Data protection | Navisworks extensions | ClashDetectiveRunner, OpenDocument, SaveDocumentAs, ZoomToSelected handle model files - check logging and error handling | Navisworks/dotnet/*/ |
+| Logging | StreamBIM diagnostics logging | StreamBimUploadDiagnostics logs file paths and operations - check for sensitive data in diagnostics output | StreamBIMUploader/Services/StreamBimUploadDiagnostics.cs |
+| Inconsistency | Error handling patterns | Varied catch/return patterns across projects - check for swallowed exceptions or info leakage | Compare error handling in DaluxApiService vs StreamBimFileTransferService |
 | Auth/Config | FluentFTP security | FTP protocol may lack TLS; FluentFTP has SecureAuth option - check if used | StreamBimFtpClientFactory.cs, StreamBIMUploader/Downloader |
+| Config | GitHub workflow secrets access | sync-extension-docs.yml references secrets.EXTENSION_DOCS_SYNC_PRIVATE_KEY - verify least-privilege scoping | .github/workflows/sync-extension-docs.yml |
+| Config | Build pipeline permissions | build-dotnet-changed.yml triggers on push to main and PR events - verify required reviewers/branch protection | .github/workflows/build-dotnet-changed.yml |
 

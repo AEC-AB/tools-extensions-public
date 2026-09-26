@@ -16,4 +16,9 @@ Lines here are instructions for future runs. Humans may add lines at any time; t
 - StreamBIM projects use FluentFTP with TLS 1.2 Explicit; no certificate validation callback is set on the FTP client.
 - No logging framework is used in Dalux extensions; errors are returned as plain text Result objects.
 - `UserCredentials` record in StreamBIM holds passwords as plaintext strings in memory; no SecureString usage.
+- AutoCAD LISPRunner (LISPRunnerCommand.cs) calls `SendStringToExecute()` with user-supplied content from file paths or inline strings, zero sanitization, full AutoCAD Lisp API access.
+- AutoCAD RunCommand (RunCommandCommand.cs) calls `SendCommand()` with user-supplied command strings, no whitelist or validation, multi-line input allows command chaining.
+- DaluxCloudDownloadCommand.cs uses server-supplied `RelativePath` and `FileName` directly in `Path.Combine()` without traversal validation.
+- CI/CD workflows (sync-extension-docs.yml, validate-extension-docs.yml, build-dotnet-changed.yml) have proper input validation, path traversal protections for .nupkg extraction, and private content scanning in Sync-ExtensionDocs.ps1.
+- Sync-ExtensionDocs.ps1 line 52-53 has known path traversal protection for .nupkg entry names, showing team awareness of this vector in other code paths.
 

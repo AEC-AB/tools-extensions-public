@@ -2,6 +2,16 @@
 
 Newest first, ten most recent runs only (the runner trims older entries; git history and the pull requests are the full record). Header written by the runner, completed by the agent.
 
+## Run 20260926-015629 - incremental
+
+- Date: 2026-09-26T01:57Z
+- Model: openai/spark-qwen3-35b
+- Branch: security/ai-security
+- Source tools-extensions-public @ 4658b6b
+- Items created: SEC-004 (Critical, LISPRunner RCE), SEC-005 (Critical, RunCommand RCE), SEC-006 (Medium, Dalux path traversal)
+- Items updated: Findings.md (3 new rows), findings.json (3 new entries), coverage.md (4 new Reviewed entries, backlog updated), pr-summary.md
+- Notes: Incremental run with no changes in context/changes.md. Reviewed AutoCAD LISPRunner and RunCommand extensions - found two Critical RCE vulnerabilities via unsanitized command injection into AutoCAD. Reviewed DaluxCloudDownload - found Medium severity path traversal via server-supplied relative paths. Verified CI/CD workflows (sync-extension-docs.yml, validate-extension-docs.yml, build-dotnet-changed.yml) and scripts (Sync-ExtensionDocs.ps1, Test-MarkdownLinks.ps1) - input validation, path traversal protections, and private content scanning all properly implemented. Total findings: 6 (2 Critical, 1 High, 1 Medium, 1 Low, 1 Info). Sweep progress: ~20% complete (core AutoCAD extensions and Assistant extensions reviewed).
+
 ## Run 20260925-214417 - first run (full pass)
 
 - Date: 2026-09-25T21:45Z

@@ -4,36 +4,42 @@ Overwritten by the agent on every run. Plain Markdown, under 3500 characters, no
 
 ## Run scope and headline
 
-Run `20260925-214417` is a first-pass full sweep of `tools-extensions-public`, covering the StreamBIM credential storage area, the Dalux API key handling area, a git history audit for secrets, and the Dalux API authentication area. Headline: one High, one Low, one Info, three findings filed, sweep thirty percent complete.
+Run `20260926-015629` is an incremental pass on `tools-extensions-public`. No changes were detected in `context/changes.md`, but the full sweep continued. Two Critical RCE vulnerabilities were found in AutoCAD extensions (LISPRunner, RunCommand), one Medium path traversal in DaluxCloudDownload, and CI/CD workflows were verified as well-implemented. Headline: two Critical, one Medium, and three previously filed findings (High, Low, Info). Total six findings. Sweep twenty percent complete.
 
 ## New findings
 
-- SEC-001 (Low) — StreamBIM credential storage and FTP transfer security — `src/Assistant/dotnet/StreamBim/` — Credentials properly stored in Windows Credential Manager (DPAPI); FTP uses TLS 1.2 Explicit. Minor defense-in-depth gaps: no explicit certificate validation callback on FTP client, password held as plaintext string in memory.
-- SEC-002 (High) — Dalux API key handling — `src/Assistant/dotnet/DaluxCloudUpload/DaluxCloudUploadCommand.cs` line 30 — Broken credential lookup: the upload command reads the API key from Windows Credential Manager but then passes `args.ApiKey` (default value `"Dalux API Key"`) instead of the looked-up variable to `DaluxApiService`, making every upload fail with an auth error. HttpClient gaps in both upload and download services: no timeout, no certificate validation callback. Error messages include base URL.
-- SEC-003 (Info) — Git history audit — `src/` across all branches — No secrets, credentials, or private keys found in git history. Searched all branches with `git log -p -S` for password, secret, key, apiKey, PRIVATE KEY, connection, Token/AuthToken/Bearer/api_token. All matches were legitimate code additions only.
+- SEC-004 (Critical) — LISPRunner arbitrary AutoCAD Lisp execution — `src/AutoCAD/dotnet/LISPRunner/LISPRunnerCommand.cs` lines 20-57 — Both script-file and inline modes call `SendStringToExecute()` with user-supplied content (file path or inline string) and zero sanitization. Full AutoCAD Lisp API access.
+
+- SEC-005 (Critical) — RunCommand arbitrary AutoCAD command injection — `src/AutoCAD/dotnet/RunCommand/RunCommandCommand.cs` lines 81-86 — User-supplied command strings passed directly to AutoCAD `SendCommand()` with no whitelist, validation, or sanitization. Multi-line input allows command chaining.
+
+- SEC-006 (Medium) — DaluxCloudDownload path traversal via server-supplied relative path — `src/Assistant/dotnet/DaluxCloudDownload/DaluxCloudDownloadCommand.cs` lines 368-378, 314-316 — Server-supplied `RelativePath` and `FileName` used directly in `Path.Combine()` without traversal validation. Supply-chain attack vector if Dalux API is compromised.
 
 ## Status changes
 
-None — this is a first run.
+None — all findings remain Open. The context/changes.md was empty, indicating no user changes to the codebase.
 
 ## Reviewer attention
 
-- SEC-002 (High) is a functional bug in the upload extension that also exposes a lack of code review on credential handling: the credential lookup variable is computed and validated but never used in the service construction.
-- SEC-002 notes that the download extension correctly passes the looked-up variable — the upload extension should follow the same pattern.
+- SEC-004 and SEC-005 are Critical RCE vulnerabilities in the AutoCAD extensions. These allow arbitrary AutoCAD command execution from user-supplied input. While intentional design may be to let users run arbitrary commands (the tools are CLI utilities), the security risk is that any script or file dropped in the working directory could execute. Reviewers should decide if command whitelisting, user confirmation, or signed scripts are required.
+
+- SEC-006 is a Medium severity supply-chain risk. The path values come from the Dalux API, not the user directly, but a compromised Dalux server could inject `../` sequences. The fix is straightforward (validate resolved paths remain within the output folder).
+
+- CI/CD workflows (sync-extension-docs.yml, validate-extension-docs.yml, build-dotnet-changed.yml) and scripts (Sync-ExtensionDocs.ps1, Test-MarkdownLinks.ps1) were reviewed and found to have proper input validation, path traversal protections, and private content scanning. No issues filed here.
 
 ## Not yet covered
 
-- StreamBIM file operations (path validation, injection)
-- Dalux file path handling (path traversal)
-- GitHub workflow secrets access
-- NuGet.config security
-- Directory.Build.props/targets
-- Build system command execution
-- PrintPDF telemetry/logging
+- StreamBIM file path validation and injection (StreamBimPathHelper.cs, FailedFile.cs)
+- StreamBIM autofill collectors (path validation before use)
+- NuGet.config security (insecure source URLs or credentials)
+- Directory.Build.props/targets (sensitive defaults)
+- Build system command execution (unsanitized args in Build.cs)
+- PrintPDF telemetry and logging (PII or secret leakage)
 - .NET package versions (SBOM review)
-- API version skew in DaluxApiService
+- API version skew in DaluxApiService (deprecated versions)
 - Shared code consistency across StreamBIM projects
-- Error message exposure in DaluxApiService
-- Build pipeline permissions
-- Workflow token scoping
-- FluentFTP security
+- Revit extension file operations (injection)
+- Tekla extension file operations (injection)
+- Navisworks extension file operations (logging and error handling)
+- StreamBIM diagnostics logging (sensitive data in output)
+- Error handling pattern inconsistency (swallowed exceptions, info leakage)
+- FluentFTP security (TLS enforcement)

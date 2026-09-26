@@ -1,4 +1,11 @@
 {
-  "items": {},
+  "items": {
+    "injection | tekla file operations (readin, refreshreferencemodels, savemodel, writeout, zoomtoselected)": {
+      "attempts": 1,
+      "failures": [
+        "run 20260926-215844 session 7 (review): the row was not moved to Reviewed"
+      ]
+    }
+  },
   "unblock": {}
 }

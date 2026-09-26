@@ -52,6 +52,7 @@ Run `20260926-215844` session 6 — incremental. Replaced the Backlog row "Tekla
 ## Areas not yet covered
 
 - StreamBIM file path validation and injection (StreamBimPathHelper.cs, FailedFile.cs)
+- Tekla file operations (ReadIn, RefreshReferenceModels, SaveModel, WriteOut, ZoomToSelected) - macro builder strings need verification
 - Navisworks extension file operations (logging and error handling)
 - PrintPDF telemetry and logging (PII or secret leakage)
 - StreamBIM diagnostics logging (sensitive data in output)

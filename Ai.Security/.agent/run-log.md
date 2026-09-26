@@ -9,8 +9,8 @@ Newest first, ten most recent runs only (the runner trims older entries; git his
 - Branch: security/ai-security
 - Source tools-extensions-public @ 4658b6b
 - Items created: none
-- Items updated: coverage.md (2 Reviewed entries moved from Backlog)
-- Notes: Incremental run with no changes in context/changes.md. Reviewed StreamBIM file path handling (StreamBimPathHelper.cs, autofill collectors, file transfer services): path traversal protection in CreateLocalPath (bounds check against download root), NormalizeRelativePath (rejects . and .. segments), and autofill input validation (NormalizeRelativePath called on all user-supplied paths). No new finding. Also checked the second backlog item (StreamBIM autofill collectors) incidentally - all four collectors validated or delegate to FTP root directory listing only. No new finding.
+- Items updated: coverage.md (Reviewed entry for StreamBIM autofill collectors moved from Backlog with full evidence)
+- Notes: First session (run 20260926-015629) stopped mid-run. Second session (20260926-215844) reviewed StreamBIM file path handling: StreamBimPathHelper.cs CreateLocalPath (bounds check against download root), NormalizeRelativePath (rejects . and .. segments), autofill input validation. No new finding. Also incidentally checked autofill collectors: all four validated or delegate to FTP root only. No new finding. Third session (current) completes the backlog row for StreamBIM autofill collectors with full evidence: reviewed all four collectors (Uploader folder, Uploader project root, Downloader project root, Downloader files+folder) - Uploader calls NormalizeRelativePath() rejecting . and .. segments; Downloader autofill is read-only FTP listing (user already has root access); project root collector only lists FTP root. No finding filed. Row moved to Reviewed.
 
 ## Run 20260926-015629 - incremental
 

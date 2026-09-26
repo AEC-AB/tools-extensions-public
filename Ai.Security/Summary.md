@@ -22,12 +22,12 @@ Run `20260926-015629` — incremental. Reviewed the AutoCAD LISPRunner and RunCo
 | High | 1 | 1 |
 | Medium | 1 | 1 |
 | Low | 2 | 2 |
-| Info | 1 | 1 |
-| **Total** | **7** | **7** |
+| Info | 2 | 2 |
+| **Total** | **8** | **8** |
 
 | Status | Count |
 |---|---|
-| Open | 7 |
+| Open | 8 |
 
 ## Top open findings
 
@@ -49,10 +49,13 @@ Run `20260926-215844` — incremental. Reviewed all seven Tekla extension file o
 
 Run `20260926-215844` session 6 — incremental. Replaced the Backlog row "Tekla extensions file operations" with three smaller rows by sub-project: (1) IFCExport path traversal, (2) five file operation extensions, (3) SetSelectionFilter. Reviewed the first row (IFCExport = SEC-008): re-reviewed all four IFCExport files (TeklaIFCExportCommand.cs, TeklaIFCExportArgs.cs, IFCExportConfig.cs, GlobalUsings.cs), confirmed the finding is complete and accurate, moved to Reviewed. The second and third rows remain in the Backlog for a future session.
 
+Run `20260926-215844` session 8 — incremental. Replaced the old single Backlog row "Tekla file operations (ReadIn, RefreshReferenceModels, SaveModel, WriteOut, ZoomToSelected)" with three smaller rows: (1) five file operation extensions safe assessment, (2) macro builder helper string safety, (3) extension result pattern variance. Reviewed the first row (five extensions = SEC-009): traced all ten Command.cs and Args.cs files, confirmed all safe - SDK APIs only, no user file paths, hardcoded string literals. Moved to Reviewed.
+
 ## Areas not yet covered
 
 - StreamBIM file path validation and injection (StreamBimPathHelper.cs, FailedFile.cs)
-- Tekla file operations (ReadIn, RefreshReferenceModels, SaveModel, WriteOut, ZoomToSelected) - macro builder strings need verification
+- Tekla macro builder helper string safety (CW.Assistant.Extensions.Tekla.Helpers/TeklaMacroBuilderHelper.cs)
+- Tekla extension result pattern variance (Result.Text vs Result.Empty.Succeeded consistency)
 - Navisworks extension file operations (logging and error handling)
 - PrintPDF telemetry and logging (PII or secret leakage)
 - StreamBIM diagnostics logging (sensitive data in output)

@@ -102,5 +102,18 @@
     "introduced": "Not determined",
     "notes": "Output file path from XML config or SaveFileField override goes through Path.GetFullPath() with no traversal validation. Directory.CreateDirectory() auto-creates parents. Inconsistent with Revit DWGExport/NWCExport which sanitize filenames via Regex.Replace.",
     "category": "Injection / Path Traversal"
+  },
+  {
+    "id": "SEC-009",
+    "severity": "Info",
+    "title": "Tekla five file operation extensions - safe assessment",
+    "status": "Open",
+    "location": "src/Tekla/dotnet/ReadIn/, RefreshReferenceModels/, SaveModel/, WriteOut/, ZoomToSelected/",
+    "first_seen": "20260926-215844",
+    "last_verified": "20260926-215844",
+    "page": "SEC-009-tekla-file-ops-safe-assessment.md",
+    "introduced": "N/A",
+    "notes": "Security review confirms no injection, path traversal, or command execution risk. All five extensions use only SDK APIs and hardcoded string literals. No user-typed file paths or command strings.",
+    "category": "Injection / Path Traversal"
   }
 ]

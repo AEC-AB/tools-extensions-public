@@ -6,3 +6,4 @@ SEC-005-rancmd-arbitrary-execution
 SEC-006-dalux-path-traversal
 SEC-007-dalux-base-url-in-error-messages
 SEC-008-tekla-ifcexport-path-traversal
+SEC-009-tekla-file-ops-safe-assessment

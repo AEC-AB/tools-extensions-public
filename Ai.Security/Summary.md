@@ -1,5 +1,9 @@
 # Security review summary
 
+<!-- pass-status: written by the runner -->
+> **Incomplete pass.** Run 20260926-015629 did not finish: the model server stopped answering mid-run. The findings below are what it got to; the rest of the codebase is not reviewed yet. The next nightly sweep picks this repo up again.
+<!-- /pass-status -->
+
 > **Incomplete pass.** Run 20260925-214417 did not finish: the model server stopped answering mid-run. The findings below are what it got to; the rest of the codebase is not reviewed yet. The next nightly sweep picks this repo up again.
 
 Rewritten by the AEC security review agent on every run. Internal only.

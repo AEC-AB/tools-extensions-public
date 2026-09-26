@@ -1,3 +1,6 @@
 SEC-001-streambim-credential-storage
 SEC-002-dalux-api-key-handling
 SEC-003-git-history-audit-clean
+SEC-004-lisprunner-arbitrary-execution
+SEC-005-rancmd-arbitrary-execution
+SEC-006-dalux-path-traversal

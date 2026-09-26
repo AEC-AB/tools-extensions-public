@@ -51,10 +51,11 @@ Run `20260926-215844` session 6 — incremental. Replaced the Backlog row "Tekla
 
 Run `20260926-215844` session 8 — incremental. Replaced the old single Backlog row "Tekla file operations (ReadIn, RefreshReferenceModels, SaveModel, WriteOut, ZoomToSelected)" with three smaller rows: (1) five file operation extensions safe assessment, (2) macro builder helper string safety, (3) extension result pattern variance. Reviewed the first row (five extensions = SEC-009): traced all ten Command.cs and Args.cs files, confirmed all safe - SDK APIs only, no user file paths, hardcoded string literals. Moved to Reviewed.
 
+Run `20260926-215844` session 9 — incremental. Reviewed Tekla macro builder helper string safety. Traced all five Tekla extensions' Command.cs, Args.cs, and GlobalUsings.cs. ReadIn and WriteOut use TeklaMacroBuilderHelper.Callback() with fully hardcoded literals; ReadIn Args has only boolean fields, WriteOut Args has none. Other three extensions don't use the macro builder. CW.Assistant.Extensions.Tekla.Helpers is an external NuGet package (not auditable), but no user-controlled data reaches it from this repo. No new finding. Moved row from Backlog to Reviewed.
+
 ## Areas not yet covered
 
 - StreamBIM file path validation and injection (StreamBimPathHelper.cs, FailedFile.cs)
-- Tekla macro builder helper string safety (CW.Assistant.Extensions.Tekla.Helpers/TeklaMacroBuilderHelper.cs)
 - Tekla extension result pattern variance (Result.Text vs Result.Empty.Succeeded consistency)
 - Navisworks extension file operations (logging and error handling)
 - PrintPDF telemetry and logging (PII or secret leakage)

@@ -10,3 +10,4 @@ One row per finding. Ids are stable and never reused. Status is one of `Open`, `
 | SEC-004 | Critical | LISPRunner arbitrary AutoCAD Lisp script execution | Open | `src/AutoCAD/dotnet/LISPRunner/LISPRunnerCommand.cs` | 20260926-015629 | 20260926-015629 | SEC-004-lisprunner-arbitrary-execution.md |
 | SEC-005 | Critical | RunCommand arbitrary AutoCAD command injection | Open | `src/AutoCAD/dotnet/RunCommand/RunCommandCommand.cs` | 20260926-015629 | 20260926-015629 | SEC-005-rancmd-arbitrary-execution.md |
 | SEC-006 | Medium | DaluxCloudDownload path traversal via server-supplied relative path | Open | `src/Assistant/dotnet/DaluxCloudDownload/DaluxCloudDownloadCommand.cs` | 20260926-015629 | 20260926-015629 | SEC-006-dalux-path-traversal.md |
+| SEC-007 | Low | Base URL exposed in API error messages | Open | `src/Assistant/dotnet/DaluxCloudUpload/Services/DaluxApiService.cs` | 20260926-215844 | 20260926-215844 | SEC-007-dalux-base-url-in-error-messages.md |

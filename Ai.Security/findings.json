@@ -76,5 +76,18 @@
     "introduced": "commit 0cbd897, 2026-09-22",
     "notes": "Server-supplied file.RelativePath and file.FileName used directly in Path.Combine without validation. Supply-chain attack vector: compromised Dalux API could inject ../ sequences.",
     "category": "Injection / Path Traversal"
+  },
+  {
+    "id": "SEC-007",
+    "severity": "Low",
+    "title": "Base URL exposed in API error messages",
+    "status": "Open",
+    "location": "src/Assistant/dotnet/DaluxCloudUpload/Services/DaluxApiService.cs line 122-130",
+    "first_seen": "20260926-215844",
+    "last_verified": "20260926-215844",
+    "page": "SEC-007-dalux-base-url-in-error-messages.md",
+    "introduced": "Not determined",
+    "notes": "HandleException<T> method includes _baseUrl ('https://node1.field.dalux.com/service/api') in error messages returned to client. Same code exists in DaluxCloudDownload/Services/DaluxApiService.cs.",
+    "category": "Data protection / Information disclosure"
   }
 ]

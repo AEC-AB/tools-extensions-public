@@ -21,4 +21,9 @@ Lines here are instructions for future runs. Humans may add lines at any time; t
 - DaluxCloudDownloadCommand.cs uses server-supplied `RelativePath` and `FileName` directly in `Path.Combine()` without traversal validation.
 - CI/CD workflows (sync-extension-docs.yml, validate-extension-docs.yml, build-dotnet-changed.yml) have proper input validation, path traversal protections for .nupkg extraction, and private content scanning in Sync-ExtensionDocs.ps1.
 - Sync-ExtensionDocs.ps1 line 52-53 has known path traversal protection for .nupkg entry names, showing team awareness of this vector in other code paths.
+- Tekla IFCExport uses XmlSerializer for config file deserialization without disabling external entity processing; XmlSerializer is reasonably safe against XXE by default in .NET but the output file path from the config XML is not validated against traversal before Directory.CreateDirectory() and export.
+- Tekla IFCExport has both a FilePickerField (for XML config selection) and a SaveFileField (for output path override); both paths converge to exportConfig.OutputFile with only Path.GetFullPath() normalization - no sanitization.
+- All other Tekla extensions (ReadIn, RefreshReferenceModels, SaveModel, WriteOut, ZoomToSelected) have no user file input - they operate purely on Tekla API model objects.
+- SetSelectionFilter (Tekla) uses SelectionFilterCollector to list available filter names from Tekla directories, constraining user input to valid filter names only.
+- Revit extensions (DWGExport, NWCExport) sanitize output filenames with `Regex.Replace(fileName, "[<>:\"/\\|?*]", "_")` but Tekla IFCExport has no equivalent sanitization - an inconsistency across the same product family.
 

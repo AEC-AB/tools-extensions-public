@@ -89,5 +89,18 @@
     "introduced": "Not determined",
     "notes": "HandleException<T> method includes _baseUrl ('https://node1.field.dalux.com/service/api') in error messages returned to client. Same code exists in DaluxCloudDownload/Services/DaluxApiService.cs.",
     "category": "Data protection / Information disclosure"
+  },
+  {
+    "id": "SEC-008",
+    "severity": "Low",
+    "title": "Tekla IFCExport path traversal via unvalidated output file path",
+    "status": "Open",
+    "location": "src/Tekla/dotnet/IFCExport/TeklaIFCExportCommand.cs lines 20-39",
+    "first_seen": "20260926-215844",
+    "last_verified": "20260926-215844",
+    "page": "SEC-008-tekla-ifcexport-path-traversal.md",
+    "introduced": "Not determined",
+    "notes": "Output file path from XML config or SaveFileField override goes through Path.GetFullPath() with no traversal validation. Directory.CreateDirectory() auto-creates parents. Inconsistent with Revit DWGExport/NWCExport which sanitize filenames via Regex.Replace.",
+    "category": "Injection / Path Traversal"
   }
 ]

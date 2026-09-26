@@ -8,9 +8,9 @@ Newest first, ten most recent runs only (the runner trims older entries; git his
 - Model: openai/spark-qwen3-35b
 - Branch: security/ai-security
 - Source tools-extensions-public @ 4658b6b
-- Items created: none
-- Items updated: coverage.md (Reviewed entry for StreamBIM autofill collectors moved from Backlog with full evidence)
-- Notes: First session (run 20260926-015629) stopped mid-run. Second session (20260926-215844) reviewed StreamBIM file path handling: StreamBimPathHelper.cs CreateLocalPath (bounds check against download root), NormalizeRelativePath (rejects . and .. segments), autofill input validation. No new finding. Also incidentally checked autofill collectors: all four validated or delegate to FTP root only. No new finding. Third session (current) completes the backlog row for StreamBIM autofill collectors with full evidence: reviewed all four collectors (Uploader folder, Uploader project root, Downloader project root, Downloader files+folder) - Uploader calls NormalizeRelativePath() rejecting . and .. segments; Downloader autofill is read-only FTP listing (user already has root access); project root collector only lists FTP root. No finding filed. Row moved to Reviewed.
+- Items created: SEC-008 (Low, Tekla IFCExport path traversal)
+- Items updated: Findings.md (1 new row), findings.json (1 new entry), coverage.md (Reviewed entry for Tekla extensions file operations, backlog updated), Summary.md (count updated), pr-summary.md
+- Notes: Session 4 (current) reviewed all seven Tekla extension file operation modules: IFCExport (Command.cs, Args.cs, IFCExportConfig.cs, Collector.cs), ReadIn (Command.cs, Args.cs), RefreshReferenceModels (Command.cs, Args.cs), SaveModel (Command.cs, Args.cs), SetSelectionFilter (Command.cs, Args.cs, SelectionFilterCollector), WriteOut (Command.cs, Args.cs), ZoomToSelected (Command.cs, Args.cs). SEC-008 filed: IFCExport output file path from XML config or SaveFileField goes through Path.GetFullPath() with no traversal validation and automatic directory creation; inconsistent with Revit DWGExport/NWCExport which sanitize filenames. All other Tekla extensions are safe - no user-typed paths, no injection vectors. Found no evidence of the other suspected issues in IFCExport (XXE via XmlSerializer is low risk by default, BasePointName validated before use).
 
 ## Run 20260926-015629 - incremental
 

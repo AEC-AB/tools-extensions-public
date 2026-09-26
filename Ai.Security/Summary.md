@@ -21,13 +21,13 @@ Run `20260926-015629` — incremental. Reviewed the AutoCAD LISPRunner and RunCo
 | Critical | 2 | 2 |
 | High | 1 | 1 |
 | Medium | 1 | 1 |
-| Low | 1 | 1 |
+| Low | 2 | 2 |
 | Info | 1 | 1 |
-| **Total** | **6** | **6** |
+| **Total** | **7** | **7** |
 
 | Status | Count |
 |---|---|
-| Open | 6 |
+| Open | 7 |
 
 ## Top open findings
 
@@ -45,6 +45,8 @@ Run `20260926-015629` — incremental. Reviewed the AutoCAD LISPRunner and RunCo
 
 Run `20260926-015629` is an incremental pass. Three new Critical and Medium findings were filed (SEC-004, SEC-005, SEC-006). CI/CD workflows and scripts were verified as well-implemented. The backlog has been expanded with additional items identified during review.
 
+Run `20260926-215844` — incremental. Reviewed all seven Tekla extension file operation modules (IFCExport, ReadIn, RefreshReferenceModels, SaveModel, SetSelectionFilter, WriteOut, ZoomToSelected). One new Low finding: SEC-008 (IFCExport path traversal via unvalidated output file path). All other Tekla extensions have safe file operations with no user-typed paths or injection vectors.
+
 ## Areas not yet covered
 
 - StreamBIM file path validation and injection (StreamBimPathHelper.cs, FailedFile.cs)
@@ -57,7 +59,6 @@ Run `20260926-015629` is an incremental pass. Three new Critical and Medium find
 - API version skew in DaluxApiService (deprecated versions)
 - Shared code consistency across StreamBIM projects
 - Revit extension file operations (injection)
-- Tekla extension file operations (injection)
 - Navisworks extension file operations (logging and error handling)
 - StreamBIM diagnostics logging (sensitive data in output)
 - Error handling pattern inconsistency (swallowed exceptions, info leakage)

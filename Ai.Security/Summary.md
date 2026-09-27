@@ -43,6 +43,8 @@ Run `20260926-015629` — incremental. Reviewed the AutoCAD LISPRunner and RunCo
 
 ## What changed since previous run
 
+Run `20260927-005009` — incremental. No source changes (context/changes.md empty). Previous run 20260926-215844 completed fully: sweep done, 11 findings (2 Critical, 1 High, 2 Medium, 4 Low, 2 Info), backlog empty. No re-verification needed.
+
 Run `20260926-015629` is an incremental pass. Three new Critical and Medium findings were filed (SEC-004, SEC-005, SEC-006). CI/CD workflows and scripts were verified as well-implemented. The backlog has been expanded with additional items identified during review.
 
 Run `20260926-215844` — incremental. Reviewed all seven Tekla extension file operation modules (IFCExport, ReadIn, RefreshReferenceModels, SaveModel, SetSelectionFilter, WriteOut, ZoomToSelected). One new Low finding: SEC-008 (IFCExport path traversal via unvalidated output file path). All other Tekla extensions have safe file operations with no user-typed paths or injection vectors.
@@ -59,9 +61,4 @@ Run `20260926-215844` session 12 — incremental. Reviewed StreamBIM diagnostics
 
 ## Areas not yet covered
 
-- StreamBIM file path validation and injection (StreamBimPathHelper.cs, FailedFile.cs)
-- Error handling pattern inconsistency (swallowed exceptions, info leakage)
-- FluentFTP security (TLS enforcement)
-- GitHub workflow secrets access
-- Build pipeline permissions
-- PrintPDF telemetry and logging (PII or secret leakage)
+Backlog is empty. All tracked categories have been reviewed in run 20260926-215844.

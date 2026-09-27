@@ -21,13 +21,13 @@ Run `20260926-015629` — incremental. Reviewed the AutoCAD LISPRunner and RunCo
 | Critical | 2 | 2 |
 | High | 1 | 1 |
 | Medium | 2 | 2 |
-| Low | 2 | 2 |
+| Low | 4 | 4 |
 | Info | 2 | 2 |
-| **Total** | **9** | **9** |
+| **Total** | **11** | **11** |
 
 | Status | Count |
 |---|---|
-| Open | 9 |
+| Open | 11 |
 
 ## Top open findings
 
@@ -53,13 +53,15 @@ Run `20260926-215844` session 8 — incremental. Replaced the old single Backlog
 
 Run `20260926-215844` session 9 — incremental. Reviewed Tekla macro builder helper string safety. Traced all five Tekla extensions' Command.cs, Args.cs, and GlobalUsings.cs. ReadIn and WriteOut use TeklaMacroBuilderHelper.Callback() with fully hardcoded literals; ReadIn Args has only boolean fields, WriteOut Args has none. Other three extensions don't use the macro builder. CW.Assistant.Extensions.Tekla.Helpers is an external NuGet package (not auditable), but no user-controlled data reaches it from this repo. No new finding. Moved row from Backlog to Reviewed.
 
+Run `20260926-215844` session 11 — incremental. Reviewed Navisworks extensions (ClashDetectiveRunner, OpenDocument, SaveDocumentAs). SEC-010 filed: SaveDocumentAs path traversal via Directory.CreateDirectory() on unvalidated path (Medium), file path information disclosure in success messages (Low), exception detail logging to Trace. Moved row from Backlog to Reviewed.
+
+Run `20260926-215844` session 12 — incremental. Reviewed StreamBIM diagnostics logging. SEC-011 filed: StreamBimUploadDiagnostics writes full file paths, FTP operation details, and raw exception messages to a temp directory log file (Low). Opt-in via VerboseDiagnostics flag. No credentials in logs. Moved row from Backlog to Reviewed.
+
 ## Areas not yet covered
 
 - StreamBIM file path validation and injection (StreamBimPathHelper.cs, FailedFile.cs)
-- Tekla extension result pattern variance (Result.Text vs Result.Empty.Succeeded consistency)
-- PrintPDF telemetry and logging (PII or secret leakage)
-- StreamBIM diagnostics logging (sensitive data in output)
 - Error handling pattern inconsistency (swallowed exceptions, info leakage)
 - FluentFTP security (TLS enforcement)
 - GitHub workflow secrets access
 - Build pipeline permissions
+- PrintPDF telemetry and logging (PII or secret leakage)

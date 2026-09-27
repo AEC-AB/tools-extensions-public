@@ -26,4 +26,5 @@ Lines here are instructions for future runs. Humans may add lines at any time; t
 - All other Tekla extensions (ReadIn, RefreshReferenceModels, SaveModel, WriteOut, ZoomToSelected) have no user file input - they operate purely on Tekla API model objects.
 - SetSelectionFilter (Tekla) uses SelectionFilterCollector to list available filter names from Tekla directories, constraining user input to valid filter names only.
 - Revit extensions (DWGExport, NWCExport) sanitize output filenames with `Regex.Replace(fileName, "[<>:\"/\\|?*]", "_")` but Tekla IFCExport has no equivalent sanitization - an inconsistency across the same product family.
+- StreamBimUploadDiagnostics.cs writes to temp directory (%TEMP%\StreamBIMUploader\) with no log rotation or cleanup. All call sites traced: files paths, FTP operation details, and exception messages logged. Opt-in via VerboseDiagnostics flag.
 

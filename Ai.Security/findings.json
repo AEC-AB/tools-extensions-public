@@ -128,5 +128,18 @@
     "introduced": "Not determined",
     "notes": "Directory.CreateDirectory() called on unvalidated path from SaveFileField. Full file paths echoed in success messages by OpenDocument and SaveDocumentAs. Full exception details including stack traces logged to Trace in ClashDetectiveRunner.",
     "category": "Data protection / Path Traversal"
+  },
+  {
+    "id": "SEC-011",
+    "severity": "Low",
+    "title": "StreamBIM diagnostics logging of file paths and FTP operations",
+    "status": "Open",
+    "location": "src/Assistant/dotnet/StreamBIMUploader/Services/StreamBimUploadDiagnostics.cs, StreamBimUploadService.cs, StreamBimFileTransferService.cs",
+    "first_seen": "20260926-215844",
+    "last_verified": "20260926-215844",
+    "page": "SEC-011-streambim-diagnostics-logging.md",
+    "introduced": "Not determined",
+    "notes": "Verbose diagnostics log full local/remote file paths, FTP operation details, exception messages, and file sizes to temp directory log file. Opt-in via VerboseDiagnostics flag. No credentials in logs. Exception messages from FluentFTP logged verbatim which could reveal server details.",
+    "category": "Logging"
   }
 ]

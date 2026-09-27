@@ -1,26 +1,28 @@
-# Pull request summary - Session 13
+# Pull request summary - Sweep complete
 
 Overwritten by the agent on every run. Plain Markdown, under 3500 characters, no `#` followed by digits, no secret values.
 
 ## Run scope and headline
 
-Run `20260926-215844` session 13 reviewed all four remaining Backlog rows — FluentFTP security, GitHub workflow secrets access, build pipeline permissions, and PrintPDF telemetry/logging. All four areas confirmed safe with no new findings. Backlog is now empty; sweep is complete for tracked categories.
+Run `20260926-215844` (sessions 4-14) completed a full sweep of the tools-extensions-public repository. All tracked backlog areas have been reviewed. Total findings: eleven (2 Critical, 1 High, 2 Medium, 4 Low, 2 Info). No new findings this session; the four remaining backlog items were confirmed safe and moved to Reviewed. The sweep is now complete.
 
 ## New findings
 
-None this session.
+None. All eleven findings were created in earlier sessions (SEC-001 through SEC-011).
 
 ## Status changes
 
-- FluentFTP security: moved from Backlog to Reviewed — well-configured TLS 1.2, no override possible
-- GitHub workflow secrets access: moved from Backlog to Reviewed — least-privilege App token, no exposure
-- Build pipeline permissions: moved from Backlog to Reviewed — safe PR triggers, no sensitive ops
-- PrintPDF telemetry/logging: moved from Backlog to Reviewed — in-memory only, no PII or secrets
+- All four remaining Backlog rows moved to Reviewed: FluentFTP security, GitHub workflow secrets access, build pipeline permissions, PrintPDF telemetry/logging.
+- Backlog is now empty.
 
 ## Reviewer attention
 
-No actions required. All backlog items reviewed and confirmed safe. The two Critical findings (SEC-004, SEC-005) from earlier sessions remain the highest priority for remediation.
+- SEC-004 and SEC-005 (Critical): arbitrary AutoCAD command execution via unsanitized user input. Highest priority for remediation.
+- SEC-002 (High): broken Dalux credential lookup in DaluxCloudUploadCommand.cs line 30.
+- SEC-006 (Medium) and SEC-010 (Medium): path traversal via unvalidated directory creation in DaluxCloudDownload and Navisworks SaveDocumentAs.
+- All other findings are Lower severity or informational.
+- No suspected issues remain unconfirmed; all previous "suspected" items were re-verified and closed out as safe.
 
 ## Not yet covered
 
-Backlog is empty. All tracked areas have been reviewed. Areas covered: injection/RCE, path traversal, CI/CD security, credentials, NuGet config, dependencies, API consistency, data protection, logging, diagnostics, FTP security, workflow permissions, and telemetry.
+Backlog is empty. All tracked categories have been reviewed: injection/RCE, path traversal, CI/CD security, credentials, NuGet config, dependencies, API consistency, data protection, logging, diagnostics, FTP security, workflow permissions, telemetry, and all Revit, Tekla, AutoCAD, Navisworks, and Assistant extensions.

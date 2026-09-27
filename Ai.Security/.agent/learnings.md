@@ -10,21 +10,19 @@ Lines here are instructions for future runs. Humans may add lines at any time; t
 
 ## From the agent
 
-- DaluxCloudUpload/DaluxApiService.cs uses a new HttpClient() per instance with no timeout or certificate validation callback; HttpClient has no dependency injection or HttpMessageHandler pooling.
-- Both DaluxCloudUpload and DaluxCloudDownload share identical credential lookup patterns via Meziantou.Framework.Win32.CredentialManager, but the upload command has a bug where it ignores the lookup result.
-- DaluxApiService constructs API endpoints by string concatenation in both projects (e.g., `5.1/projects`, `5.1/projects/{projectId}/tasks`); no SQL injection risk but path traversal could be a concern if folder names from API responses are used in file operations.
-- StreamBIM projects use FluentFTP with TLS 1.2 Explicit; no certificate validation callback is set on the FTP client.
-- No logging framework is used in Dalux extensions; errors are returned as plain text Result objects.
-- `UserCredentials` record in StreamBIM holds passwords as plaintext strings in memory; no SecureString usage.
-- AutoCAD LISPRunner (LISPRunnerCommand.cs) calls `SendStringToExecute()` with user-supplied content from file paths or inline strings, zero sanitization, full AutoCAD Lisp API access.
-- AutoCAD RunCommand (RunCommandCommand.cs) calls `SendCommand()` with user-supplied command strings, no whitelist or validation, multi-line input allows command chaining.
-- DaluxCloudDownloadCommand.cs uses server-supplied `RelativePath` and `FileName` directly in `Path.Combine()` without traversal validation.
-- CI/CD workflows (sync-extension-docs.yml, validate-extension-docs.yml, build-dotnet-changed.yml) have proper input validation, path traversal protections for .nupkg extraction, and private content scanning in Sync-ExtensionDocs.ps1.
-- Sync-ExtensionDocs.ps1 line 52-53 has known path traversal protection for .nupkg entry names, showing team awareness of this vector in other code paths.
-- Tekla IFCExport uses XmlSerializer for config file deserialization without disabling external entity processing; XmlSerializer is reasonably safe against XXE by default in .NET but the output file path from the config XML is not validated against traversal before Directory.CreateDirectory() and export.
-- Tekla IFCExport has both a FilePickerField (for XML config selection) and a SaveFileField (for output path override); both paths converge to exportConfig.OutputFile with only Path.GetFullPath() normalization - no sanitization.
-- All other Tekla extensions (ReadIn, RefreshReferenceModels, SaveModel, WriteOut, ZoomToSelected) have no user file input - they operate purely on Tekla API model objects.
-- SetSelectionFilter (Tekla) uses SelectionFilterCollector to list available filter names from Tekla directories, constraining user input to valid filter names only.
-- Revit extensions (DWGExport, NWCExport) sanitize output filenames with `Regex.Replace(fileName, "[<>:\"/\\|?*]", "_")` but Tekla IFCExport has no equivalent sanitization - an inconsistency across the same product family.
-- StreamBimUploadDiagnostics.cs writes to temp directory (%TEMP%\StreamBIMUploader\) with no log rotation or cleanup. All call sites traced: files paths, FTP operation details, and exception messages logged. Opt-in via VerboseDiagnostics flag.
+- tools-extensions-public contains five CAD product extension families: AutoCAD (LISPRunner, RunCommand), Revit (DWGExport, LoadFamily, NWCExport, PrintPDF, ZoomToSelected), Tekla (IFCExport, ReadIn, RefreshReferenceModels, SaveModel, SetSelectionFilter, WriteOut, ZoomToSelected), Navisworks (ClashDetectiveRunner, OpenDocument, SaveDocumentAs), and a shared Assistant framework (StreamBIMUploader/Downloader, DaluxCloudUpload/Download).
+- AutoCAD extensions use SendStringToExecute() and SendCommand() - no sanitization, full access to AutoCAD APIs. Both have Critical RCE findings.
+- Revit extensions use UI file pickers (SaveFileField/FilePickerField) and sanitize filenames with Regex.Replace for output paths.
+- Tekla IFCExport uses XmlSerializer for config deserialization; output path goes through Path.GetFullPath() only - no filename sanitization. Inconsistent with Revit approach.
+- All Tekla extensions except IFCExport operate purely on SDK model objects with no user file input.
+- Navisworks SaveDocumentAs echoes full file paths in success messages; ClashDetectiveRunner logs full stack traces to Trace.
+- StreamBIM shared library (referenced by both Uploader and Downloader): CredentialManager for DPAPI storage, FluentFTP with TLS 1.2 Explicit, no certificate validation callback.
+- DaluxApiService is shared identically between DaluxCloudUpload and DaluxCloudDownload; both use string concatenation for API version endpoints.
+- Build system uses Nuke.Common (version 10.1.0) with four MSBuild-compatible steps; all secrets scoped via GitHub App token.
+- CI workflows: sync-extension-docs.yml (GitHub App token, private content scanning), validate-extension-docs.yml (PR-only, no secrets), build-dotnet-changed.yml (PR-only, no sensitive ops).
+- SBOM shows 7 NuGet packages: FluentFTP 48.0.1, Meziantou.Framework.Win32.CredentialManager 1.7.3, Microsoft.CSharp 4.7.0 (old), System.ComponentModel.Annotations 5.0.0, LibGit2Sharp 0.31.0 (build only), NuGet.Frameworks 7.9.0 (build only), Nuke.Common 10.1.0 (build only).
+- PrintPDF has its own SimpleLogger (in-memory) and Telemetry (in-memory counters) - both returned to UI dialog, no file I/O.
+- StreamBIM uploader diagnostics logs to %TEMP%\StreamBIMUploader\ - no log rotation. Opt-in via VerboseDiagnostics flag.
+- Eight nuget.config files total (1 root + 7 Tekla per-project); all reference api.nuget.org/v3 with <clear/>; semantically identical but different whitespace in one file.
+- Directory.Build.props and .targets files for Revit and Tekla projects have no secrets or insecure defaults; CW.Assistant.Extensions packages use wildcard version 26.* (reproducibility concern).
 

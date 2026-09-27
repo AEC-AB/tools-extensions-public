@@ -1,0 +1,63 @@
+# Coverage ledger
+
+## Source commits at last run
+
+| Repo | Branch | Commit | Run |
+|---|---|---|---|
+| tools-extensions-public | n/a (first run) | n/a | 20260925-214417 |
+
+## Repo map
+
+| Repo | Path | What it is | Entry points, config, pipelines |
+|---|---|---|---|
+| tools-extensions-public | `src/AutoCAD/dotnet/` | AutoCAD .NET extensions | LISPRunner.cs, RunCommand.cs (CLI entry points) |
+| tools-extensions-public | `src/Navisworks/dotnet/` | Navisworks .NET extensions | StreamBIM* projects (StreamBIMUploader, StreamBIMDownloader), DaluxCloudUpload, DaluxCloudDownload (CLI extensions with FluentFTP/HttpClient) |
+| tools-extensions-public | `src/Revit/dotnet/` | Revit .NET extensions | DWGExport, LoadFamily, NWCExport, PrintPDF, RevitExtensionDemo, ZoomToSelected (CLI extensions; PrintPDF has its own SimpleLogger, Telemetry) |
+| tools-extensions-public | `src/Tekla/dotnet/` | Tekla .NET extensions | IFCExport, ReadIn, RefreshReferenceModels, SaveModel, SetSelectionFilter, WriteOut, ZoomToSelected |
+| tools-extensions-public | `src/Assistant/dotnet/` | Assistant CLI framework + extensions | Assistant.csproj (shared framework), StreamBIM/ shared services, DaluxCloudUpload/Download, StreamBIMUploader/Downloader |
+| tools-extensions-public | `build/` | Build system (dotnet CLI tool) | ExtensionBuilder.csproj, ExtensionBuilder.slnx, Build.Compile.cs, Build.ComputeChangedProjects.cs, Build.Final.cs, Build.cs |
+| tools-extensions-public | `.github/workflows/` | CI/CD pipelines | build-dotnet-changed.yml, sync-extension-docs.yml, validate-extension-docs.yml |
+| tools-extensions-public | `.github/scripts/` | CI/CD scripts | Sync-ExtensionDocs.ps1, Test-MarkdownLinks.ps1, tests/Test-Sync-ExtensionDocs.ps1 |
+| tools-extensions-public | `nuget.config` | NuGet package source config (global) | n/a |
+| tools-extensions-public | `src/Revit/dotnet/Directory.Build.props` | MSBuild props (shared Revit project config) | n/a |
+| tools-extensions-public | `src/Revit/dotnet/Directory.Build.targets` | MSBuild targets (shared Revit build config) | n/a |
+| tools-extensions-public | `src/Tekla/dotnet/Directory.Build.props` | MSBuild props (shared Tekla project config) | n/a |
+| tools-extensions-public | `src/Tekla/dotnet/Directory.Build.targets` | MSBuild targets (shared Tekla build config) | n/a |
+| tools-extensions-public | `src/Tekla/dotnet/*/nuget.config` | Per-project NuGet config (multiple Tekla projects) | n/a |
+
+## Reviewed
+
+| Category | Area | Run | Notes |
+|---|---|---|---|
+| Injection / RCE | LISPRunner command injection | 20260926-015629 | SEC-004: Both script-file and inline modes pass user content to AutoCAD via SendStringToExecute() with zero sanitization |
+| Injection / RCE | RunCommand command injection | 20260926-015629 | SEC-005: User-supplied command strings passed directly to AutoCAD SendCommand() with no whitelist or validation |
+| Injection / Path Traversal | DaluxCloudDownload path traversal | 20260926-015629 | SEC-006: Server-supplied RelativePath and FileName used in Path.Combine without traversal validation |
+| CI/CD security | GitHub workflows and scripts | 20260926-015629 | Verified input validation, security scanning, and token scoping in sync-extension-docs.yml, validate-extension-docs.yml, and build-dotnet-changed.yml. Sync-ExtensionDocs.ps1 has path traversal protection for .nupkg entries and private content scanning. |
+| Injection / Path Traversal | StreamBIM file path handling | 20260926-215844 | Reviewed StreamBimPathHelper.cs, autofill collectors, and file transfer services - path traversal protection in CreateLocalPath (bounds check), NormalizeRelativePath (rejects . and .. segments), and autofill input validation. No new finding. |
+| Injection | StreamBIM autofill collectors | 20260926-215844 | All four autofill collectors validated - Uploader calls NormalizeRelativePath() which rejects . and .. segments; Downloader autofill is read-only FTP listing (no write risk); project root collector only lists FTP root. No new finding. |
+| Config | NuGet.config security | 20260926-215844 | Reviewed root nuget.config and 7 Tekla per-project nuget.config files - all reference official NuGet source (api.nuget.org/v3), use <clear/> to prevent inheritance, no credentials or third-party sources. No finding. |
+| Config | Directory.Build.props/targets | 20260926-215844 | Reviewed Revit and Tekla Directory.Build.props and .targets - no secrets, no insecure defaults, proper package isolation (PrivateAssets=all). Minor hygiene: CW.Assistant.Extensions packages use wildcard version 26.* (reproducibility concern). No finding. |
+| Dependencies | .NET package versions | 20260926-215844 | SBOM reviewed - 7 NuGet packages. Microsoft.CSharp 4.7.0 is old (.NET Core 3.1 era). All others current. No CVE claims possible offline. Transitive deps not in SBOM. Dependencies.md updated with full detail. |
+| Inconsistency | API version skew | 20260926-215844 | Reviewed DaluxApiService.cs in both upload and download projects - uses 5 API versions (1.0, 1.2, 5.0, 5.1, 5.2) consistently across both services. No cross-service version mismatch. Info: older versions (1.0, 1.2) could break silently if Dalux deprecates them. No new finding. |
+| Inconsistency | Shared code in multiple projects | 20260926-215844 | StreamBim/ is a single shared library (CredentialProvider, FtpClientFactory, PathHelper, ExceptionHelper, Models/UserCredentials) referenced by both Uploader and Downloader via Compile Include. Both consumers use identical code. No inconsistency. Security logic is centralized and consistent. No new finding. |
+| Data protection | Error message exposure | 20260926-215844 | SEC-007: HandleException<T> in DaluxApiService.cs lines 122-130 includes _baseUrl ("https://node1.field.dalux.com/service/api") in error messages returned to client. LOW severity information disclosure. Same code in DaluxCloudDownload version. Fix: remove _baseUrl from returned error text. |
+| Inconsistency | nuget.config duplicates | 20260926-215844 | Reviewed 8 nuget.config files (1 root + 7 Tekla). All reference official NuGet source (api.nuget.org/v3) with <clear/> to prevent inheritance. SetSelectionFilter/nuget.config uses different whitespace/indentation but is semantically identical. No credential or third-party source differences. LOW hygiene: inconsistent formatting across 8 identical-semantic files. No new finding. |
+| Injection | Revit extensions file operations | 20260926-215844 | Reviewed all five Revit Command.cs files (DWGExport, LoadFamily, NWCExport, PrintPDF, ZoomToSelected) plus ExportFileHelpers.cs and RevitExtensionDemoCommand.cs. File operations are UI-driven (file/folder picker), not user-typed. Output names are sanitized: DWGExport/NWCExport use `Regex.Replace(fileName, "[<>:"/\\|?*]", "_")`; PrintPDF uses `ExportFileHelpers.SanitizeFileName()` (replaces all invalid filename chars with `_`) and GUID-based temp files. No path traversal, command injection, or SQL injection vectors. All path operations are local file system, no remote calls. No new finding. |
+| Injection / Path Traversal | Tekla IFCExport path traversal | 20260926-215844 | SEC-008: Output file path from XML config (deserialized via XmlSerializer) or SaveFileField override goes through Path.GetFullPath() with no traversal validation and automatic Directory.CreateDirectory(). Inconsistent with Revit DWGExport/NWCExport which sanitize filenames. Reviewed full IFCExport codebase: TeklaIFCExportCommand.cs, TeklaIFCExportArgs.cs, IFCExportConfig.cs, GlobalUsings.cs - all code paths traced. |
+| Injection / Path Traversal | Tekla IFCExport path traversal (re-verify) | 20260926-215844 | Session 6: Re-reviewed all IFCExport files, confirmed SEC-008 finding is complete and accurate. Two converging input vectors traced (ExportConfigFilePath → File.ReadAllBytes → XmlSerializer → IFCExportConfig.OutputFile; FilePathOverride → exportConfig.OutputFile), user-editable XML content confirmed, Directory.CreateDirectory auto-creates parent dirs. No additional findings in IFCExport (XmlSerializer safe against XXE by default, BasePointName validated via GetBasePointByName before use). |
+| Injection | Tekla SetSelectionFilter | 20260926-215844 | Reviewed SelectObjectFromSelectionFilterCommand.cs, SelectionFilterCollector.cs, SelectObjectFromSelectionFilterArgs.cs. FilterName validated for null/whitespace (line 19), then passed to Tekla SDK's GetObjectsByFilterName() API (line 32). No file system, subprocess, or shell operations. SelectionFilterCollector constrains input to valid Tekla filter names from model property file directories. No finding. |
+| Injection / Path Traversal | Tekla five file operation extensions (ReadIn, RefreshReferenceModels, SaveModel, WriteOut, ZoomToSelected) | 20260926-215844 | SEC-009: All five extensions reviewed and confirmed safe - no user file path input, only SDK APIs and hardcoded macro string literals. Each extension has minimal Args (empty or boolean-only). ReadIn uses ModelHistory API, RefreshReferenceModels iterates ReferenceModel objects, SaveModel calls ModelHandler.Save(), WriteOut uses hardcoded macro callback, ZoomToSelected uses drawing UI APIs. No new finding. |
+| Injection / Path Traversal | Tekla macro builder helper string safety | 20260926-215844 | Reviewed ReadIn (TeklaReadInCommand.cs:27) and WriteOut (TeklaWriteOutCommand.cs:10) — TeklaMacroBuilderHelper.Callback() called with fully hardcoded literals only ("acmdRunPluginMethod", "SharingToolsFeature;Tool.SharingAutomation;r0.00:00:00"/"w", "main_frame"). ReadIn Args has only boolean fields (Save, FailTask); WriteOut Args has no fields. Other three Tekla extensions (RefreshReferenceModels, SaveModel, ZoomToSelected) do not use the macro builder. CW.Assistant.Extensions.Tekla.Helpers is an external NuGet package (not auditable source), but no user-controlled data reaches it from this repo's code. No finding. |
+| Inconsistency | Tekla extension result pattern variance | 20260926-215844 | Reviewed all five Command.cs files (ReadIn, RefreshReferenceModels, SaveModel, WriteOut, ZoomToSelected). Variance exists but no security impact: ReadIn and RefreshReferenceModels use Result.Text with descriptive messages; SaveModel always returns Succeeded regardless of ModelHandler.Save() bool return (message text differs); WriteOut always returns Result.Empty.Succeeded(); ZoomToSelected always returns Succeeded with no error handling on Show()/Hide(). These are local model operations only — no security boundary crossed. No new finding. |
+| Data protection / Path Traversal | Navisworks SaveDocumentAs path traversal and file path info disclosure | 20260926-215844 | SEC-010: SaveDocumentCommand.cs calls Directory.CreateDirectory() on unvalidated path from SaveFileField (line 11); OpenDocument and SaveDocumentAs echo full file paths in success messages (lines 26, 15); ClashDetectiveRunner logs full exception details to Trace (lines 39, 77, 84). Medium for directory creation abuse, LOW for information disclosure. |
+| Logging | StreamBIM diagnostics logging | 20260926-215844 | SEC-011: StreamBimUploadDiagnostics.cs writes full file paths, FTP operation details, and raw exception messages to a temp directory log file. Opt-in via VerboseDiagnostics flag. No credentials in logs. Reviewed all call sites in StreamBimUploadService.cs and StreamBimFileTransferService.cs. |
+| Auth/Config | FluentFTP security | 20260926-215844 | Well-configured: FtpEncryptionMode.Explicit with TLS 1.2 only, single factory, no override. No new finding. |
+| Config | GitHub workflow secrets access | 20260926-215844 | Least-privilege GitHub App token scoped to tools-extensions-public, no secret exposure. No new finding. |
+| Config | Build pipeline permissions | 20260926-215844 | Safe PR triggers (GitHub restricts fork secrets), no sensitive ops. No new finding. |
+| Logging | PrintPDF telemetry/logging | 20260926-215844 | In-memory only, returned to Revit UI dialog, no PII or secrets. No new finding. |
+
+## Backlog (not yet reviewed, highest risk first)
+
+| Category | Area | Why | Hint |
+|---|---|---|---|
+

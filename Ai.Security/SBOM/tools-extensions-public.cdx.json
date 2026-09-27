@@ -1,0 +1,1077 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "metadata": {
+    "tools": {
+      "components": [
+        {
+          "group": "@cdxgen",
+          "name": "cdxgen",
+          "version": "13.0.1",
+          "purl": "pkg:npm/%40cdxgen/cdxgen@13.0.1",
+          "type": "application",
+          "bom-ref": "pkg:npm/@cdxgen/cdxgen@13.0.1",
+          "publisher": "OWASP Foundation",
+          "authors": [
+            {
+              "name": "OWASP Foundation"
+            }
+          ]
+        }
+      ]
+    },
+    "authors": [
+      {
+        "name": "OWASP Foundation"
+      }
+    ],
+    "lifecycles": [
+      {
+        "phase": "build"
+      }
+    ],
+    "component": {
+      "group": "",
+      "name": "app",
+      "version": "latest",
+      "type": "application",
+      "purl": "pkg:nuget/app@latest",
+      "bom-ref": "pkg:nuget/app@latest",
+      "components": [
+        {
+          "group": "",
+          "name": "ZoomToSelected",
+          "version": "",
+          "description": "This extension will briefly show any selected hidden ModelObjects in the drawing to be able to zoom",
+          "purl": "pkg:nuget/ZoomToSelected@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/ZoomToSelected@latest"
+        },
+        {
+          "group": "",
+          "name": "TeklaWriteOut",
+          "version": "",
+          "description": "Writes out model changes to the cloud",
+          "purl": "pkg:nuget/TeklaWriteOut@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/TeklaWriteOut@latest"
+        },
+        {
+          "group": "",
+          "name": "TeklaSelectObjectFromSelectionFilter",
+          "version": "",
+          "description": "Select objects in a Tekla model based on filter",
+          "purl": "pkg:nuget/TeklaSelectObjectFromSelectionFilter@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/TeklaSelectObjectFromSelectionFilter@latest"
+        },
+        {
+          "group": "",
+          "name": "TeklaSaveModel",
+          "version": "",
+          "description": "Saves the current Tekla model",
+          "purl": "pkg:nuget/TeklaSaveModel@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/TeklaSaveModel@latest"
+        },
+        {
+          "group": "",
+          "name": "RefreshReferenceModels",
+          "version": "",
+          "description": "RefreshReferenceModels Description",
+          "purl": "pkg:nuget/RefreshReferenceModels@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/RefreshReferenceModels@latest"
+        },
+        {
+          "group": "",
+          "name": "TeklaReadIn",
+          "version": "",
+          "description": "Reads in model changes from the cloud",
+          "purl": "pkg:nuget/TeklaReadIn@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/TeklaReadIn@latest"
+        },
+        {
+          "group": "",
+          "name": "TeklaIFCExport",
+          "version": "",
+          "description": "Exports IFC",
+          "purl": "pkg:nuget/TeklaIFCExport@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/TeklaIFCExport@latest"
+        },
+        {
+          "group": "",
+          "name": "RevitExtensionDemo",
+          "version": "",
+          "description": "A demonstration extension for Revit in Assistant.",
+          "purl": "pkg:nuget/RevitExtensionDemo@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/RevitExtensionDemo@latest"
+        },
+        {
+          "group": "",
+          "name": "PrintPDF",
+          "version": "",
+          "description": "Print PDFs",
+          "purl": "pkg:nuget/PrintPDF@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/PrintPDF@latest"
+        },
+        {
+          "group": "",
+          "name": "NWCExport",
+          "version": "",
+          "description": "Automatically exports NWCs for selected views",
+          "purl": "pkg:nuget/NWCExport@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/NWCExport@latest"
+        },
+        {
+          "group": "",
+          "name": "LoadFamily",
+          "version": "",
+          "description": "Load multi families into Revit model",
+          "purl": "pkg:nuget/LoadFamily@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/LoadFamily@latest"
+        },
+        {
+          "group": "",
+          "name": "DWGExport",
+          "version": "",
+          "description": "Automatically exports DWGs for selected views/sheets",
+          "purl": "pkg:nuget/DWGExport@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/DWGExport@latest"
+        },
+        {
+          "group": "",
+          "name": "SaveDocumentAs",
+          "version": "",
+          "description": "Save document as in Navisworks",
+          "purl": "pkg:nuget/SaveDocumentAs@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/SaveDocumentAs@latest"
+        },
+        {
+          "group": "",
+          "name": "OpenDocument",
+          "version": "",
+          "description": "Open document in Navisworks",
+          "purl": "pkg:nuget/OpenDocument@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/OpenDocument@latest"
+        },
+        {
+          "group": "",
+          "name": "ClashDetectiveRunTest",
+          "version": "",
+          "purl": "pkg:nuget/ClashDetectiveRunTest@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/ClashDetectiveRunTest@latest"
+        },
+        {
+          "group": "",
+          "name": "RunCommand",
+          "version": "",
+          "description": "Set up a list of AutoCAD commands to be executed, similar to a .scr script file. Can be any command you can enter normally in the AutoCAD command line.",
+          "purl": "pkg:nuget/RunCommand@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/RunCommand@latest"
+        },
+        {
+          "group": "",
+          "name": "LISPRunner",
+          "version": "",
+          "description": "Run a LISP script in AutoCAD",
+          "purl": "pkg:nuget/LISPRunner@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/LISPRunner@latest"
+        },
+        {
+          "group": "",
+          "name": "SaveModel",
+          "version": "",
+          "description": "Save your AutoCAD file",
+          "purl": "pkg:nuget/SaveModel@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/SaveModel@latest"
+        },
+        {
+          "group": "",
+          "name": "StreamBIMUploader",
+          "version": "",
+          "description": "Upload selected local files to StreamBIM.",
+          "purl": "pkg:nuget/StreamBIMUploader@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/StreamBIMUploader@latest"
+        },
+        {
+          "group": "",
+          "name": "StreamBIMDownloader",
+          "version": "",
+          "description": "Download files from StreamBIM to a local folder.",
+          "purl": "pkg:nuget/StreamBIMDownloader@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/StreamBIMDownloader@latest"
+        },
+        {
+          "group": "",
+          "name": "DaluxCloudUpload",
+          "version": "",
+          "description": "Dalux Cloud Upload Extension",
+          "purl": "pkg:nuget/DaluxCloudUpload@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/DaluxCloudUpload@latest"
+        },
+        {
+          "group": "",
+          "name": "DaluxCloudDownload",
+          "version": "",
+          "description": "Download a file from a Dalux project to a local folder.",
+          "purl": "pkg:nuget/DaluxCloudDownload@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/DaluxCloudDownload@latest"
+        },
+        {
+          "group": "",
+          "name": "AssistantDemoExtension",
+          "version": "",
+          "description": "AssistantDemoExtension Description",
+          "purl": "pkg:nuget/AssistantDemoExtension@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/AssistantDemoExtension@latest"
+        },
+        {
+          "group": "",
+          "name": "ExtensionBuilder",
+          "version": "",
+          "purl": "pkg:nuget/ExtensionBuilder@latest",
+          "type": "application",
+          "bom-ref": "pkg:nuget/ExtensionBuilder@latest",
+          "properties": [
+            {
+              "name": "cdx:dotnet:output_type",
+              "value": "Exe"
+            },
+            {
+              "name": "cdx:dotnet:target_framework",
+              "value": "net10.0"
+            }
+          ]
+        }
+      ]
+    },
+    "properties": [
+      {
+        "name": "cdx:bom:componentNamespaces",
+        "value": "actions"
+      },
+      {
+        "name": "cdx:bom:componentSrcFiles",
+        "value": ".github/workflows/build-dotnet-changed.yml\\n.github/workflows/sync-extension-docs.yml\\n.github/workflows/validate-extension-docs.yml\\nbuild/ExtensionBuilder.csproj\\nsrc/Assistant/dotnet/DaluxCloudDownload/DaluxCloudDownload.csproj\\nsrc/Assistant/dotnet/DaluxCloudUpload/DaluxCloudUpload.csproj\\nsrc/Assistant/dotnet/StreamBIMDownloader/StreamBIMDownloader.csproj\\nsrc/Assistant/dotnet/StreamBIMUploader/StreamBIMUploader.csproj\\nsrc/AutoCAD/dotnet/AutoCADSaveModel/SaveModel.csproj\\nsrc/AutoCAD/dotnet/RunCommand/RunCommand.csproj\\nsrc/Navisworks/dotnet/OpenDocument/OpenDocument.csproj"
+      },
+      {
+        "name": "cdx:bom:componentTypes",
+        "value": "github\\nnuget"
+      }
+    ]
+  },
+  "components": [
+    {
+      "group": "actions",
+      "name": "checkout",
+      "version": "v4",
+      "scope": "required",
+      "purl": "pkg:github/actions/checkout@v4",
+      "type": "application",
+      "bom-ref": "pkg:github/actions/checkout@v4",
+      "properties": [
+        {
+          "name": "cdx:actions:isOfficial",
+          "value": "true"
+        },
+        {
+          "name": "cdx:actions:isVerified",
+          "value": "false"
+        },
+        {
+          "name": "cdx:github:action:isShaPinned",
+          "value": "false"
+        },
+        {
+          "name": "cdx:github:action:uses",
+          "value": "actions/checkout@v4"
+        },
+        {
+          "name": "cdx:github:action:versionPinningType",
+          "value": "tag"
+        },
+        {
+          "name": "cdx:github:checkout:persistCredentials",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:job:hasExplicitPermissionsBlock",
+          "value": "false"
+        },
+        {
+          "name": "cdx:github:job:name",
+          "value": "build"
+        },
+        {
+          "name": "cdx:github:job:name",
+          "value": "sync_docs"
+        },
+        {
+          "name": "cdx:github:job:name",
+          "value": "validate_docs"
+        },
+        {
+          "name": "cdx:github:job:runner",
+          "value": "windows-2022"
+        },
+        {
+          "name": "cdx:github:job:runner",
+          "value": "windows-latest"
+        },
+        {
+          "name": "cdx:github:step:hasSensitiveOperations",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:step:name",
+          "value": "Checkout"
+        },
+        {
+          "name": "cdx:github:step:name",
+          "value": "Checkout public repository"
+        },
+        {
+          "name": "cdx:github:step:sensitiveOperations",
+          "value": "checkout-persist-credentials"
+        },
+        {
+          "name": "cdx:github:workflow:file",
+          "value": "/app/.github/workflows/build-dotnet-changed.yml"
+        },
+        {
+          "name": "cdx:github:workflow:file",
+          "value": "/app/.github/workflows/sync-extension-docs.yml"
+        },
+        {
+          "name": "cdx:github:workflow:file",
+          "value": "/app/.github/workflows/validate-extension-docs.yml"
+        },
+        {
+          "name": "cdx:github:workflow:hasAnyExplicitPermissionsBlock",
+          "value": "false"
+        },
+        {
+          "name": "cdx:github:workflow:hasAnyExplicitPermissionsBlock",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:workflow:hasExplicitPermissionsBlock",
+          "value": "false"
+        },
+        {
+          "name": "cdx:github:workflow:hasExplicitPermissionsBlock",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:workflow:hasPullRequestTrigger",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:workflow:hasRepositoryDispatchTrigger",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:workflow:hasWorkflowDispatchInputs",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:workflow:hasWorkflowDispatchTrigger",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:workflow:name",
+          "value": "Build changed .NET projects"
+        },
+        {
+          "name": "cdx:github:workflow:name",
+          "value": "Sync released extension docs"
+        },
+        {
+          "name": "cdx:github:workflow:name",
+          "value": "Validate extension docs"
+        },
+        {
+          "name": "cdx:github:workflow:repositoryDispatchTypes",
+          "value": "extension-docs-published"
+        },
+        {
+          "name": "cdx:github:workflow:triggers",
+          "value": "pull_request,push,workflow_dispatch"
+        },
+        {
+          "name": "cdx:github:workflow:triggers",
+          "value": "push,pull_request,workflow_dispatch"
+        },
+        {
+          "name": "cdx:github:workflow:triggers",
+          "value": "repository_dispatch,workflow_dispatch"
+        },
+        {
+          "name": "cdx:github:workflow:workflowDispatchInputs",
+          "value": "package_version,source_sha"
+        },
+        {
+          "name": "cdx:github:workflow:workflowDispatchReceiverAliases",
+          "value": "Build changed .NET projects,build-dotnet-changed.yml,build-dotnet-changed,/app/.github/workflows/build-dotnet-changed.yml"
+        },
+        {
+          "name": "cdx:github:workflow:workflowDispatchReceiverAliases",
+          "value": "Sync released extension docs,sync-extension-docs.yml,sync-extension-docs,/app/.github/workflows/sync-extension-docs.yml"
+        },
+        {
+          "name": "cdx:github:workflow:workflowDispatchReceiverAliases",
+          "value": "Validate extension docs,validate-extension-docs.yml,validate-extension-docs,/app/.github/workflows/validate-extension-docs.yml"
+        },
+        {
+          "name": "internal:SrcFile",
+          "value": ".github/workflows/build-dotnet-changed.yml"
+        },
+        {
+          "name": "internal:SrcFile",
+          "value": ".github/workflows/sync-extension-docs.yml"
+        },
+        {
+          "name": "internal:SrcFile",
+          "value": ".github/workflows/validate-extension-docs.yml"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.5,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.5,
+                "value": ".github/workflows/build-dotnet-changed.yml"
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "official-action",
+        "pinning-tag",
+        "trusted-source"
+      ]
+    },
+    {
+      "group": "actions",
+      "name": "create-github-app-token",
+      "version": "v2",
+      "scope": "required",
+      "purl": "pkg:github/actions/create-github-app-token@v2",
+      "type": "application",
+      "bom-ref": "pkg:github/actions/create-github-app-token@v2",
+      "properties": [
+        {
+          "name": "cdx:actions:isOfficial",
+          "value": "true"
+        },
+        {
+          "name": "cdx:actions:isVerified",
+          "value": "false"
+        },
+        {
+          "name": "cdx:github:action:isShaPinned",
+          "value": "false"
+        },
+        {
+          "name": "cdx:github:action:uses",
+          "value": "actions/create-github-app-token@v2"
+        },
+        {
+          "name": "cdx:github:action:versionPinningType",
+          "value": "tag"
+        },
+        {
+          "name": "cdx:github:job:hasExplicitPermissionsBlock",
+          "value": "false"
+        },
+        {
+          "name": "cdx:github:job:name",
+          "value": "sync_docs"
+        },
+        {
+          "name": "cdx:github:job:runner",
+          "value": "windows-2022"
+        },
+        {
+          "name": "cdx:github:step:name",
+          "value": "Create repository token"
+        },
+        {
+          "name": "cdx:github:workflow:file",
+          "value": "/app/.github/workflows/sync-extension-docs.yml"
+        },
+        {
+          "name": "cdx:github:workflow:hasAnyExplicitPermissionsBlock",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:workflow:hasExplicitPermissionsBlock",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:workflow:hasRepositoryDispatchTrigger",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:workflow:hasWorkflowDispatchInputs",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:workflow:hasWorkflowDispatchTrigger",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:workflow:name",
+          "value": "Sync released extension docs"
+        },
+        {
+          "name": "cdx:github:workflow:repositoryDispatchTypes",
+          "value": "extension-docs-published"
+        },
+        {
+          "name": "cdx:github:workflow:triggers",
+          "value": "repository_dispatch,workflow_dispatch"
+        },
+        {
+          "name": "cdx:github:workflow:workflowDispatchInputs",
+          "value": "package_version,source_sha"
+        },
+        {
+          "name": "cdx:github:workflow:workflowDispatchReceiverAliases",
+          "value": "Sync released extension docs,sync-extension-docs.yml,sync-extension-docs,/app/.github/workflows/sync-extension-docs.yml"
+        },
+        {
+          "name": "internal:SrcFile",
+          "value": ".github/workflows/sync-extension-docs.yml"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.5,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.5,
+                "value": ".github/workflows/sync-extension-docs.yml"
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "official-action",
+        "pinning-tag",
+        "trusted-source"
+      ]
+    },
+    {
+      "group": "actions",
+      "name": "setup-dotnet",
+      "version": "v4",
+      "scope": "required",
+      "purl": "pkg:github/actions/setup-dotnet@v4",
+      "type": "application",
+      "bom-ref": "pkg:github/actions/setup-dotnet@v4",
+      "properties": [
+        {
+          "name": "cdx:actions:isOfficial",
+          "value": "true"
+        },
+        {
+          "name": "cdx:actions:isVerified",
+          "value": "false"
+        },
+        {
+          "name": "cdx:github:action:isShaPinned",
+          "value": "false"
+        },
+        {
+          "name": "cdx:github:action:uses",
+          "value": "actions/setup-dotnet@v4"
+        },
+        {
+          "name": "cdx:github:action:versionPinningType",
+          "value": "tag"
+        },
+        {
+          "name": "cdx:github:job:hasExplicitPermissionsBlock",
+          "value": "false"
+        },
+        {
+          "name": "cdx:github:job:name",
+          "value": "build"
+        },
+        {
+          "name": "cdx:github:job:runner",
+          "value": "windows-latest"
+        },
+        {
+          "name": "cdx:github:step:name",
+          "value": "Setup .NET 10 SDK"
+        },
+        {
+          "name": "cdx:github:step:name",
+          "value": "Setup .NET 8 SDK"
+        },
+        {
+          "name": "cdx:github:workflow:file",
+          "value": "/app/.github/workflows/build-dotnet-changed.yml"
+        },
+        {
+          "name": "cdx:github:workflow:hasAnyExplicitPermissionsBlock",
+          "value": "false"
+        },
+        {
+          "name": "cdx:github:workflow:hasExplicitPermissionsBlock",
+          "value": "false"
+        },
+        {
+          "name": "cdx:github:workflow:hasPullRequestTrigger",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:workflow:hasWorkflowDispatchTrigger",
+          "value": "true"
+        },
+        {
+          "name": "cdx:github:workflow:name",
+          "value": "Build changed .NET projects"
+        },
+        {
+          "name": "cdx:github:workflow:triggers",
+          "value": "pull_request,push,workflow_dispatch"
+        },
+        {
+          "name": "cdx:github:workflow:workflowDispatchReceiverAliases",
+          "value": "Build changed .NET projects,build-dotnet-changed.yml,build-dotnet-changed,/app/.github/workflows/build-dotnet-changed.yml"
+        },
+        {
+          "name": "internal:SrcFile",
+          "value": ".github/workflows/build-dotnet-changed.yml"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.5,
+            "methods": [
+              {
+                "technique": "source-code-analysis",
+                "confidence": 0.5,
+                "value": ".github/workflows/build-dotnet-changed.yml"
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "official-action",
+        "pinning-tag",
+        "trusted-source"
+      ]
+    },
+    {
+      "group": "",
+      "name": "FluentFTP",
+      "version": "48.0.1",
+      "purl": "pkg:nuget/FluentFTP@48.0.1",
+      "type": "library",
+      "bom-ref": "pkg:nuget/FluentFTP@48.0.1",
+      "properties": [
+        {
+          "name": "internal:SrcFile",
+          "value": "src/Assistant/dotnet/StreamBIMDownloader/StreamBIMDownloader.csproj"
+        },
+        {
+          "name": "internal:SrcFile",
+          "value": "src/Assistant/dotnet/StreamBIMUploader/StreamBIMUploader.csproj"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.7,
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.7,
+                "value": "src/Assistant/dotnet/StreamBIMUploader/StreamBIMUploader.csproj"
+              },
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.7,
+                "value": "src/Assistant/dotnet/StreamBIMDownloader/StreamBIMDownloader.csproj"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "group": "",
+      "name": "LibGit2Sharp",
+      "version": "0.31.0",
+      "purl": "pkg:nuget/LibGit2Sharp@0.31.0",
+      "type": "library",
+      "bom-ref": "pkg:nuget/LibGit2Sharp@0.31.0",
+      "properties": [
+        {
+          "name": "internal:SrcFile",
+          "value": "build/ExtensionBuilder.csproj"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.7,
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.7,
+                "value": "build/ExtensionBuilder.csproj"
+              }
+            ],
+            "concludedValue": "build/ExtensionBuilder.csproj"
+          }
+        ]
+      }
+    },
+    {
+      "group": "",
+      "name": "Meziantou.Framework.Win32.CredentialManager",
+      "version": "1.7.3",
+      "purl": "pkg:nuget/Meziantou.Framework.Win32.CredentialManager@1.7.3",
+      "type": "library",
+      "bom-ref": "pkg:nuget/Meziantou.Framework.Win32.CredentialManager@1.7.3",
+      "properties": [
+        {
+          "name": "internal:SrcFile",
+          "value": "src/Assistant/dotnet/DaluxCloudDownload/DaluxCloudDownload.csproj"
+        },
+        {
+          "name": "internal:SrcFile",
+          "value": "src/Assistant/dotnet/DaluxCloudUpload/DaluxCloudUpload.csproj"
+        },
+        {
+          "name": "internal:SrcFile",
+          "value": "src/Assistant/dotnet/StreamBIMDownloader/StreamBIMDownloader.csproj"
+        },
+        {
+          "name": "internal:SrcFile",
+          "value": "src/Assistant/dotnet/StreamBIMUploader/StreamBIMUploader.csproj"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.7,
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.7,
+                "value": "src/Assistant/dotnet/StreamBIMUploader/StreamBIMUploader.csproj"
+              },
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.7,
+                "value": "src/Assistant/dotnet/StreamBIMDownloader/StreamBIMDownloader.csproj"
+              },
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.7,
+                "value": "src/Assistant/dotnet/DaluxCloudUpload/DaluxCloudUpload.csproj"
+              },
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.7,
+                "value": "src/Assistant/dotnet/DaluxCloudDownload/DaluxCloudDownload.csproj"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "group": "",
+      "name": "Microsoft.CSharp",
+      "version": "4.7.0",
+      "purl": "pkg:nuget/Microsoft.CSharp@4.7.0",
+      "type": "library",
+      "bom-ref": "pkg:nuget/Microsoft.CSharp@4.7.0",
+      "properties": [
+        {
+          "name": "internal:SrcFile",
+          "value": "src/AutoCAD/dotnet/AutoCADSaveModel/SaveModel.csproj"
+        },
+        {
+          "name": "internal:SrcFile",
+          "value": "src/AutoCAD/dotnet/RunCommand/RunCommand.csproj"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.7,
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.7,
+                "value": "src/AutoCAD/dotnet/RunCommand/RunCommand.csproj"
+              },
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.7,
+                "value": "src/AutoCAD/dotnet/AutoCADSaveModel/SaveModel.csproj"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "group": "",
+      "name": "NuGet.Frameworks",
+      "version": "7.9.0",
+      "purl": "pkg:nuget/NuGet.Frameworks@7.9.0",
+      "type": "library",
+      "bom-ref": "pkg:nuget/NuGet.Frameworks@7.9.0",
+      "properties": [
+        {
+          "name": "internal:SrcFile",
+          "value": "build/ExtensionBuilder.csproj"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.7,
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.7,
+                "value": "build/ExtensionBuilder.csproj"
+              }
+            ],
+            "concludedValue": "build/ExtensionBuilder.csproj"
+          }
+        ]
+      }
+    },
+    {
+      "group": "",
+      "name": "Nuke.Common",
+      "version": "10.1.0",
+      "purl": "pkg:nuget/Nuke.Common@10.1.0",
+      "type": "library",
+      "bom-ref": "pkg:nuget/Nuke.Common@10.1.0",
+      "properties": [
+        {
+          "name": "internal:SrcFile",
+          "value": "build/ExtensionBuilder.csproj"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.7,
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.7,
+                "value": "build/ExtensionBuilder.csproj"
+              }
+            ],
+            "concludedValue": "build/ExtensionBuilder.csproj"
+          }
+        ]
+      }
+    },
+    {
+      "group": "",
+      "name": "System.ComponentModel.Annotations",
+      "version": "5.0.0",
+      "purl": "pkg:nuget/System.ComponentModel.Annotations@5.0.0",
+      "type": "library",
+      "bom-ref": "pkg:nuget/System.ComponentModel.Annotations@5.0.0",
+      "properties": [
+        {
+          "name": "internal:SrcFile",
+          "value": "src/Navisworks/dotnet/OpenDocument/OpenDocument.csproj"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "purl",
+            "confidence": 0.7,
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.7,
+                "value": "src/Navisworks/dotnet/OpenDocument/OpenDocument.csproj"
+              }
+            ],
+            "concludedValue": "src/Navisworks/dotnet/OpenDocument/OpenDocument.csproj"
+          }
+        ]
+      }
+    }
+  ],
+  "services": [],
+  "dependencies": [
+    {
+      "ref": "pkg:nuget/AssistantDemoExtension@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/ClashDetectiveRunTest@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/DWGExport@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/DaluxCloudDownload@latest",
+      "dependsOn": [
+        "pkg:nuget/Meziantou.Framework.Win32.CredentialManager@1.7.3"
+      ]
+    },
+    {
+      "ref": "pkg:nuget/DaluxCloudUpload@latest",
+      "dependsOn": [
+        "pkg:nuget/Meziantou.Framework.Win32.CredentialManager@1.7.3"
+      ]
+    },
+    {
+      "ref": "pkg:nuget/ExtensionBuilder@latest",
+      "dependsOn": [
+        "pkg:nuget/LibGit2Sharp@0.31.0",
+        "pkg:nuget/NuGet.Frameworks@7.9.0",
+        "pkg:nuget/Nuke.Common@10.1.0"
+      ]
+    },
+    {
+      "ref": "pkg:nuget/LISPRunner@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/LoadFamily@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/NWCExport@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/OpenDocument@latest",
+      "dependsOn": [
+        "pkg:nuget/System.ComponentModel.Annotations@5.0.0"
+      ]
+    },
+    {
+      "ref": "pkg:nuget/PrintPDF@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/RefreshReferenceModels@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/RevitExtensionDemo@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/RunCommand@latest",
+      "dependsOn": [
+        "pkg:nuget/Microsoft.CSharp@4.7.0"
+      ]
+    },
+    {
+      "ref": "pkg:nuget/SaveDocumentAs@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/SaveModel@latest",
+      "dependsOn": [
+        "pkg:nuget/Microsoft.CSharp@4.7.0"
+      ]
+    },
+    {
+      "ref": "pkg:nuget/StreamBIMDownloader@latest",
+      "dependsOn": [
+        "pkg:nuget/FluentFTP@48.0.1",
+        "pkg:nuget/Meziantou.Framework.Win32.CredentialManager@1.7.3"
+      ]
+    },
+    {
+      "ref": "pkg:nuget/StreamBIMUploader@latest",
+      "dependsOn": [
+        "pkg:nuget/FluentFTP@48.0.1",
+        "pkg:nuget/Meziantou.Framework.Win32.CredentialManager@1.7.3"
+      ]
+    },
+    {
+      "ref": "pkg:nuget/TeklaIFCExport@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/TeklaReadIn@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/TeklaSaveModel@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/TeklaSelectObjectFromSelectionFilter@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/TeklaWriteOut@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/ZoomToSelected@latest",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:nuget/app@latest",
+      "dependsOn": []
+    }
+  ]
+}

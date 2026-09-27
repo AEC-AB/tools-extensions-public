@@ -1,7 +1,7 @@
 {
-  "complete": false,
-  "run": "20260926-015629",
-  "reason": "the model server stopped answering mid-run",
-  "next": "picked up again by the next nightly sweep",
+  "complete": true,
+  "run": "20260927-005009",
+  "reason": "sweep complete: repo map written, backlog empty",
+  "next": null,
   "written_by": "runner"
 }

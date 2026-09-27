@@ -20,14 +20,14 @@ Run `20260926-015629` — incremental. Reviewed the AutoCAD LISPRunner and RunCo
 |---|---|---|
 | Critical | 2 | 2 |
 | High | 1 | 1 |
-| Medium | 1 | 1 |
+| Medium | 2 | 2 |
 | Low | 2 | 2 |
 | Info | 2 | 2 |
-| **Total** | **8** | **8** |
+| **Total** | **9** | **9** |
 
 | Status | Count |
 |---|---|
-| Open | 8 |
+| Open | 9 |
 
 ## Top open findings
 
@@ -39,7 +39,7 @@ Run `20260926-015629` — incremental. Reviewed the AutoCAD LISPRunner and RunCo
 
 4. **SEC-006** (Medium) — DaluxCloudDownload path traversal via server-supplied relative path: `file.RelativePath` and `file.FileName` from the Dalux API are used directly in `Path.Combine()` without traversal validation. A compromised Dalux API could inject `../` sequences.
 
-5. **SEC-001** (Low) — StreamBIM credential storage: credentials properly stored in Windows Credential Manager (DPAPI), FTP uses TLS 1.2 Explicit. Minor defense-in-depth gaps: no explicit certificate validation callback on FTP client, password held as plaintext string in memory.
+5. **SEC-010** (Medium) — Navisworks SaveDocumentAs path traversal via unvalidated directory creation: `Directory.CreateDirectory()` called on user-supplied path from `SaveFileField` without traversal validation; file paths also echoed in success messages.
 
 ## What changed since previous run
 
@@ -57,7 +57,6 @@ Run `20260926-215844` session 9 — incremental. Reviewed Tekla macro builder he
 
 - StreamBIM file path validation and injection (StreamBimPathHelper.cs, FailedFile.cs)
 - Tekla extension result pattern variance (Result.Text vs Result.Empty.Succeeded consistency)
-- Navisworks extension file operations (logging and error handling)
 - PrintPDF telemetry and logging (PII or secret leakage)
 - StreamBIM diagnostics logging (sensitive data in output)
 - Error handling pattern inconsistency (swallowed exceptions, info leakage)

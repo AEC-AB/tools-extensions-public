@@ -42,7 +42,8 @@ public class ReLoadRevitLinkFromCommand : IRevitExtension<ReLoadRevitLinkFromArg
         _hubId = args.HubId;
 #endif
 
-        var allLinks = new FilteredElementCollector(document).OfClass(typeof(RevitLinkType)).OfType<RevitLinkType>().Where(x => LinkPassesFilter(x, args)).ToList();
+        using var linkCollector = new FilteredElementCollector(document);
+        var allLinks = linkCollector.OfClass(typeof(RevitLinkType)).OfType<RevitLinkType>().Where(x => LinkPassesFilter(x, args)).ToList();
 
         try
         {
@@ -321,7 +322,7 @@ public class ReLoadRevitLinkFromCommand : IRevitExtension<ReLoadRevitLinkFromArg
         if (_bim360Server is null)
             throw new InvalidOperationException("BIM 360 Server was not set before reloading the link");
 
-        var externalResourceReference = new ExternalResourceReference(_bim360Server.GetServerId(), Dictionary_ExternalResource, string.Empty, string.Empty);
+        using var externalResourceReference = new ExternalResourceReference(_bim360Server.GetServerId(), Dictionary_ExternalResource, string.Empty, string.Empty);
         var result = linkType.LoadFrom(externalResourceReference, null);
         return result.LoadResult;
     }

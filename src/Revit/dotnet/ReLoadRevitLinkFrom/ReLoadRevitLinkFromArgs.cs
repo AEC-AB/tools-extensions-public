@@ -86,7 +86,8 @@ internal class LinksAutoFillCollector : IRevitAutoFillCollector<ReLoadRevitLinkF
             if (document is null)
                 return result;
 
-            var allLinks = new FilteredElementCollector(document).OfClass(typeof(RevitLinkType)).OfType<RevitLinkType>().ToList();
+            using var collector = new FilteredElementCollector(document);
+            var allLinks = collector.OfClass(typeof(RevitLinkType)).OfType<RevitLinkType>().ToList();
 
             foreach (var link in allLinks)
             {

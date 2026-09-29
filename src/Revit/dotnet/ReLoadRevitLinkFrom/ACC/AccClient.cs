@@ -17,7 +17,7 @@ public class AccClient(IExtensionHttpClient client)
     public GetFolderContentResponse.Root GetFolderContents(string projectId, string folderId)
     {
         var encodedFolderId = WebUtility.UrlEncode(folderId);
-        var request = new HttpRequestMessage(HttpMethod.Get, $"data/v1/projects/{projectId}/folders/{encodedFolderId}/contents");
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"data/v1/projects/{projectId}/folders/{encodedFolderId}/contents");
 
         var response = _client.Send(request);
         var json = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();

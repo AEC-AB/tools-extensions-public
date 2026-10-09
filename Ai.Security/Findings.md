@@ -1,0 +1,17 @@
+# Findings register
+
+One row per finding. Ids are stable and never reused. Status is one of `Open`, `Fixed`, `Accepted risk`, `False positive`. Reviewers change status by editing this table (and the finding page); the agent respects it and only re-verifies.
+
+| Id | Severity | Title | Status | Location | First seen | Last verified | Page |
+|---|---|---|---|---|---|---|---|
+| SEC-001 | Low | StreamBIM credential storage and FTP transfer security | Open | `src/Assistant/dotnet/StreamBim/` | 20260925-214417 | 20260925-214417 | SEC-001-streambim-credential-storage.md |
+| SEC-002 | High | Dalux API key handling - broken credential lookup in upload and minor HttpClient gaps | Open | `src/Assistant/dotnet/DaluxCloudUpload/`, `src/Assistant/dotnet/DaluxCloudDownload/` | 20260925-214417 | 20260925-214417 | SEC-002-dalux-api-key-handling.md |
+| SEC-003 | Info | Git history audit - no secrets found | Open | `src/` across all branches | 20260925-214417 | 20260925-214417 | SEC-003-git-history-audit-clean.md |
+| SEC-004 | Critical | LISPRunner arbitrary AutoCAD Lisp script execution | Open | `src/AutoCAD/dotnet/LISPRunner/LISPRunnerCommand.cs` | 20260926-015629 | 20260926-015629 | SEC-004-lisprunner-arbitrary-execution.md |
+| SEC-005 | Critical | RunCommand arbitrary AutoCAD command injection | Open | `src/AutoCAD/dotnet/RunCommand/RunCommandCommand.cs` | 20260926-015629 | 20260926-015629 | SEC-005-rancmd-arbitrary-execution.md |
+| SEC-006 | Medium | DaluxCloudDownload path traversal via server-supplied relative path | Open | `src/Assistant/dotnet/DaluxCloudDownload/DaluxCloudDownloadCommand.cs` | 20260926-015629 | 20260926-015629 | SEC-006-dalux-path-traversal.md |
+| SEC-007 | Low | Base URL exposed in API error messages | Open | `src/Assistant/dotnet/DaluxCloudUpload/Services/DaluxApiService.cs` | 20260926-215844 | 20260926-215844 | SEC-007-dalux-base-url-in-error-messages.md |
+| SEC-008 | Low | Tekla IFCExport path traversal via unvalidated output file path | Open | `src/Tekla/dotnet/IFCExport/TeklaIFCExportCommand.cs` | 20260926-215844 | 20261009-163727 | SEC-008-tekla-ifcexport-path-traversal.md |
+| SEC-009 | Info | Tekla five file operation extensions - safe assessment | Open | `src/Tekla/dotnet/ReadIn/`, `RefreshReferenceModels/`, `SaveModel/`, `WriteOut/`, `ZoomToSelected/` | 20260926-215844 | 20261009-163727 | SEC-009-tekla-file-ops-safe-assessment.md |
+| SEC-010 | Medium | Navisworks SaveDocumentAs path traversal via unvalidated directory creation and file path information disclosure | Open | `src/Navisworks/dotnet/SaveDocumentAs/SaveDocumentCommand.cs`, `OpenDocument/OpenDocumentCommand.cs` | 20260926-215844 | 20260926-215844 | SEC-010-navisworks-path-traversal-and-info-disclosure.md |
+| SEC-011 | Low | StreamBIM diagnostics logging of file paths and FTP operations | Open | `src/Assistant/dotnet/StreamBIMUploader/Services/StreamBimUploadDiagnostics.cs`, `StreamBimUploadService.cs`, `StreamBimFileTransferService.cs` | 20260926-215844 | 20260926-215844 | SEC-011-streambim-diagnostics-logging.md |

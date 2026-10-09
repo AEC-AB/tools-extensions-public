@@ -28,7 +28,7 @@
     ],
     "lifecycles": [
       {
-        "phase": "build"
+        "phase": "pre-build"
       }
     ],
     "component": {

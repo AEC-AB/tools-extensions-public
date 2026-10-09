@@ -2,6 +2,16 @@
 
 Newest first, ten most recent runs only (the runner trims older entries; git history and the pull requests are the full record). Header written by the runner, completed by the agent.
 
+## Run 20261009-163727 - incremental
+
+- Date: 2026-10-09T16:37Z
+- Model: openai/spark-qwen3-35b
+- Branch: security/ai-security
+- Source tools-extensions-public @ be9cc40
+- Items created: none (no new findings)
+- Items updated: Findings.md (2 last_verified updates), findings.json (2 entries updated), coverage.md (commit row and Reviewed entry), Summary.md (changes section)
+- Notes: Incremental run. Commit be9cc40 (Add Tekla 2025 support) changed only build configuration files (Directory.Build.props, 7 .csproj files) across src/Tekla/dotnet/ - no source code (.cs) files modified. SEC-008 (Tekla IFCExport path traversal) and SEC-009 (five Tekla extensions safe assessment) re-verified against be9cc40. Both findings confirmed still valid. SEC-008: IFCExportCommand.cs lines 30-38 still have no traversal validation and no filename sanitization, inconsistent with Revit extensions. SEC-009: all five file operation extensions still use only SDK APIs with hardcoded strings, no user-typed paths. No new findings. No secrets, no injection vectors, no new attack surfaces in the changed build config files.
+
 ## Run 20260927-005009 - incremental
 
 - Date: 2026-09-27T00:50Z

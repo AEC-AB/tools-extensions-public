@@ -39,6 +39,8 @@ Run `20260926-015629` — incremental. Reviewed the AutoCAD LISPRunner and RunCo
 
 ## What changed since previous run
 
+Run `20261009-163727` — incremental. Commit `be9cc40` (Add Tekla 2025 support) changed only build configuration files (Directory.Build.props, 7 .csproj files) across `src/Tekla/dotnet/` — no source code (.cs) files modified. SEC-008 (Tekla IFCExport path traversal) and SEC-009 (five Tekla extensions safe) re-verified against be9cc40. Both findings confirmed still valid — the path traversal issue in IFCExportCommand.cs line 30-38 (no traversal validation, no filename sanitization) and the safe assessment of the other five extensions remain unchanged. No new findings.
+
 Run `20260927-005009` — incremental. No source changes (context/changes.md empty). Previous run 20260926-215844 completed fully: sweep done, 11 findings (2 Critical, 1 High, 2 Medium, 4 Low, 2 Info), backlog empty. No re-verification needed.
 
 Run `20260926-015629` is an incremental pass. Three new Critical and Medium findings were filed (SEC-004, SEC-005, SEC-006). CI/CD workflows and scripts were verified as well-implemented. The backlog has been expanded with additional items identified during review.

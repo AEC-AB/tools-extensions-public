@@ -6,6 +6,10 @@
 |---|---|---|---|
 | tools-extensions-public | n/a (first run) | n/a | 20260925-214417 |
 
+| Repo | Branch | Commit | Run |
+|---|---|---|---|
+| tools-extensions-public | main | be9cc40 | 20261009-163727 |
+
 ## Repo map
 
 | Repo | Path | What it is | Entry points, config, pipelines |
@@ -55,6 +59,7 @@
 | Config | GitHub workflow secrets access | 20260926-215844 | Least-privilege GitHub App token scoped to tools-extensions-public, no secret exposure. No new finding. |
 | Config | Build pipeline permissions | 20260926-215844 | Safe PR triggers (GitHub restricts fork secrets), no sensitive ops. No new finding. |
 | Logging | PrintPDF telemetry/logging | 20260926-215844 | In-memory only, returned to Revit UI dialog, no PII or secrets. No new finding. |
+| Re-verification | Tekla build config changes at be9cc40 | 20261009-163727 | SEC-008 (IFCExport path traversal) and SEC-009 (five Tekla extensions safe) re-verified. Commit only changes build config (.csproj, Directory.Build.props) to add Tekla 2025 support - no source code (.cs) modifications. Both findings confirmed still valid. |
 
 ## Backlog (not yet reviewed, highest risk first)
 

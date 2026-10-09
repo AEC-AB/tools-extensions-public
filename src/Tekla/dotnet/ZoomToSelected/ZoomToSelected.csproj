@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Configurations>Debug;Debug 2020;Debug 2021;Debug 2022;Debug 2023;Debug 2024;Release 2020;Release 2021;Release 2022;Release 2023;Release 2024</Configurations>
+    <Configurations>Debug;Debug 2020;Debug 2021;Debug 2022;Debug 2023;Debug 2024;Debug 2025;Release 2020;Release 2021;Release 2022;Release 2023;Release 2024;Release 2025</Configurations>
     <ExtensionId>ZoomToSelected</ExtensionId>
     <Version>0.0.1</Version>
     <Title>Zoom To Selected</Title>

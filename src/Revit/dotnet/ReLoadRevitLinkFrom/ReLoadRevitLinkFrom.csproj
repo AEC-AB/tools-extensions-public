@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ExtensionId>ReLoadRevitLinkFrom</ExtensionId>
+    <Authors>AEC AB</Authors>
+    <Version>0.1.13</Version>
+    <Title>ReLoad Revit Link From</Title>
+    <Description>Reloads ACC Revit links from new location</Description>
+    <PackageTags>Revit;Assistant;Extension</PackageTags>
+    <PackageIcon>Icon.png</PackageIcon>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <Choose>
+    <When Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+      <ItemGroup>
+        <PackageReference Include="System.Text.Json" Version="4.6.0" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <PackageReference Include="System.Text.Json" Version="8.0.5" NoWarn="NU1603;NU1903" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+
+</Project>

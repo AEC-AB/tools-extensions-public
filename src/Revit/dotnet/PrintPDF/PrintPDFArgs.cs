@@ -28,31 +28,33 @@ public class PrintPDFArgs
         Categories = ["Sheets"],
         DisableCategorySelection = true,
         DisableModelSelection = true,
-        Visibility = $"{nameof(ExportOption)} == 'CustomFilter'",
+        Visibility = $"{nameof(ExportOption)} == '{nameof(ExportOptions.CustomFilter)}'",
         Hint = "Click to add filter rules")]
     public FilteredElementCollector? CustomFilter { get; set; }
 
     [TextField(
-        Label = "Sheet Set",
-        ToolTip = "Select a sheet set or Enter the name of the sheet set",
-        CollectorType = typeof(ViewSetCollector),
-        Visibility = $"{nameof(ExportOption)} == 'SheetSet'")]
+        Label = "ViewSet",
+        ToolTip = "Enter the saved sheet set name",
+        Visibility = $"{nameof(ExportOption)} == '{nameof(ExportOptions.SheetSet)}'")]
     [Required(ErrorMessage = "Value can not be empty")]
     public string? ViewSet { get; set; }
 
 #if R2025_OR_GREATER
     [TextField(
-        Label = "Sheet Collection",
-        ToolTip = "Select a sheet collection or Enter the name of the sheet collection",
-        CollectorType = typeof(ViewCollectionCollector),
-        Visibility = $"{nameof(ExportOption)} == 'SheetCollection'")]
+        Label = "ViewCollection",
+        ToolTip = "Enter the saved sheet collection name",
+        Visibility = $"{nameof(ExportOption)} == '{nameof(ExportOptions.SheetCollection)}'")]
     [Required(ErrorMessage = "Value can not be empty")]
     public string? ViewCollection { get; set; }
 #endif
     [TextField(
         Label = "Regex Pattern",
         ToolTip = "Regex pattern to search in sheet set/collection",
-        Visibility = $"{nameof(ExportOption)} == 'UseRegexInSheetSet' || {nameof(ExportOption)} == 'UseRegexInSheetCollections'")]
+#if R2025_OR_GREATER
+        Visibility = $"{nameof(ExportOption)} == '{nameof(ExportOptions.UseRegexInSheetSet)}' || {nameof(ExportOption)} == '{nameof(ExportOptions.UseRegexInSheetCollections)}'")]
+#else
+        Visibility = $"{nameof(ExportOption)} == '{nameof(ExportOptions.UseRegexInSheetSet)}'")]
+#endif
     [Required(ErrorMessage = "Value can not be empty")]
     public string? RegexPattern { get; set; }
 
@@ -104,7 +106,7 @@ public class PrintPDFArgs
     [BooleanField(
         Label = "Use sheet set name as PDF Name",
         ToolTip ="Use the selected sheet set name for the combined PDF",
-         Visibility = $"{nameof(Combine)} && {nameof(ExportOption)} == 'SheetSet'")]
+         Visibility = nameof(Combine))]
     public bool UseSheetSetNameAsPdfName { get; set; }
 
     [TextField(

@@ -1,0 +1,101 @@
+{
+  "Control": {
+    "prefix": [
+      "control"
+    ],
+    "body": [
+      "self.${1/([a-zA-z]*) +([a-z]*)/${1:/downcase}${2:/capitalize}/g} = controls.Text('${1:Control name}').setValue('Default value').setTooltip('Control ToolTip')"
+    ],
+    "description": "Control for script UI"
+  },
+  "Control save type": {
+    "prefix": [
+      "control-type-save"
+    ],
+    "body": [
+      "self.${1/([a-zA-z]*) +([a-z]*)/${1:/downcase}${2:/capitalize}/g} = controls.Save('${1:Save file}', {'${2:json}': '${2/(.*)/${1:/capitalize}/}', '*': 'All'})"
+    ],
+    "description": "Save file control"
+  },
+  "Control open type": {
+    "prefix": [
+      "control-type-browse"
+    ],
+    "body": [
+      "self.${1/([a-zA-z]*) +([a-z]*)/${1:/downcase}${2:/capitalize}/g} = controls.Browse('${1:Browse for file}', {'${2:json}': '${2/(.*)/${1:/capitalize}/}', '*': 'All'})"
+    ],
+    "description": "Browse file control"
+  },
+  "Control List type": {
+    "prefix": [
+      "control-type-list"
+    ],
+    "body": [
+      "self.${1/([a-zA-z]*) +([a-z]*)/${1:/downcase}${2:/capitalize}/g} = controls.List('${1:List}')"
+    ],
+    "description": "List control"
+  },
+  "Control ListBox type": {
+    "prefix": [
+      "control-type-list-box"
+    ],
+    "body": [
+      "self.${1/([a-zA-z]*) +([a-z]*)/${1:/downcase}${2:/capitalize}/g} = controls.ListBox('${1:List}')"
+    ],
+    "description": "List box control"
+  },
+  "Control ComboBox type": {
+    "prefix": [
+      "control-type-combo-box"
+    ],
+    "body": [
+      "self.${1/([a-zA-z]*) +([a-z]*)/${1:/downcase}${2:/capitalize}/g} = controls.ComboBox('${1:Combobox}').setItems({'key1': 'value1', 'key2': 'value2'})"
+    ],
+    "description": "Combo box control"
+  },
+  "Control RadioButton type": {
+    "prefix": [
+      "control-type-radio-button"
+    ],
+    "body": [
+      "self.${1/([a-zA-z]*) +([a-z]*)/${1:/downcase}${2:/capitalize}/g} = controls.RadioButton('${1:RadioButton}').setItems({'key1': 'value1', 'key2': 'value2'})"
+    ],
+    "description": "Radio button control"
+  },
+  "Control Dictionary type": {
+    "prefix": [
+      "control-type-dictionary"
+    ],
+    "body": [
+      "self.${1/([a-zA-z]*) +([a-z]*)/${1:/downcase}${2:/capitalize}/g} = controls.Dictionary('${1:Dictionary}')"
+    ],
+    "description": "Dictionary control"
+  },
+  "Control Multiline type": {
+    "prefix": [
+      "control-type-multiline"
+    ],
+    "body": [
+      "self.${1/([a-zA-z]*) +([a-z]*)/${1:/downcase}${2:/capitalize}/g} = controls.Text('${1:MultiLineText}').setSetting('IsMultiline','True')"
+    ],
+    "description": "Multiline Control"
+  },
+  "Control Date type": {
+    "prefix": [
+      "control-type-date"
+    ],
+    "body": [
+      "self.${1/([a-zA-z]*) +([a-z]*)/${1:/downcase}${2:/capitalize}/g} = controls.Date('${1:Date}')"
+    ],
+    "description": "Date Control"
+  },
+  "Control Color type": {
+    "prefix": [
+      "control-type-color"
+    ],
+    "body": [
+      "self.${1/([a-zA-z]*) +([a-z]*)/${1:/downcase}${2:/capitalize}/g} = controls.ColorPicker('${1:Color}')"
+    ],
+    "description": "Color Control"
+  }
+}

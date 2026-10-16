@@ -17,13 +17,27 @@ The published folder contains the C# extension and its NuGet dependency assembli
 
 ## Tests
 
+### Automatic unit tests
+
+```powershell
+dotnet test tests/IdsValidator.UnitTests/IdsValidator.UnitTests.csproj --configuration Release
+```
+
+The xUnit suite uses small IFC and IDS fixtures authored in C#. It tests the production validation service, managed engine and report writers without downloading the buildingSMART corpus. Coverage includes pass/fail outcomes, actual/expected evidence, version selection, cardinalities, invalid and missing inputs, cancellation, source integrity, Markdown/JSON/HTML output and BCF element links. These tests need the .NET SDK and restored NuGet dependencies; they need no archive, external process or model data download.
+
+`.github/workflows/validate-ids-validator.yml` runs these tests for relevant pull requests, verifies extension publishing and uploads TRX results. It never invokes the conformance runner.
+
+### On-demand buildingSMART conformance
+
+Run the **IDS buildingSMART conformance (on demand)** workflow manually in GitHub Actions, selecting the desired branch. It has only a `workflow_dispatch` trigger, so pull requests and pushes do not start it. Before the workflow is merged into the default branch, use the local command below.
+
 ```powershell
 dotnet run --configuration Release --project tests/IdsValidator/IdsValidator.Conformance.csproj -- tests/IdsValidator/.cache/cases tests/IdsValidator/artifacts
 ```
 
-The C# runner downloads the official buildingSMART corpus at commit `870f9c4e6e8f414e737b4d84ca1aa9b46fc6c8f3`, verifies archive SHA-256 `6035F80D1C40104AC7AEC8896954D40BFDA0A2F22A75CBF12A95283E7C2AB8B8`, and executes all 334 paired cases. It also generates integration regressions for version selection, malformed XML, schema input instead of IDS, missing files, malformed IFC, IFC4X3, material properties and IFC2X3 mappings. No source project IFC/IDS files are included or altered.
+The C# runner downloads the official buildingSMART corpus at commit `870f9c4e6e8f414e737b4d84ca1aa9b46fc6c8f3`, verifies archive SHA-256 `6035F80D1C40104AC7AEC8896954D40BFDA0A2F22A75CBF12A95283E7C2AB8B8`, and validates all 334 paired cases. Only IFC/IDS data is extracted; no code from the ZIP is executed. It also generates integration regressions for version selection, malformed XML, schema input instead of IDS, missing files, malformed IFC, IFC4X3, material properties and IFC2X3 mappings. No source project IFC/IDS files are included or altered.
 
-The runner calls the production `ValidationService`, managed engine, report writer and BCF writer. It checks expected statuses, selected diagnostics, input hashes and BCF schema/reference integrity. Results are written to `test-results.json` with per-case JSON, HTML, Markdown and BCF reports. `.github/workflows/validate-ids-validator.yml` runs the same C# suite and verifies publishing.
+The runner calls the production `ValidationService`, managed engine, report writer and BCF writer. It checks expected statuses, selected diagnostics, input hashes and BCF schema/reference integrity. Results are written to `test-results.json` with per-case JSON, HTML, Markdown and BCF reports. `.github/workflows/validate-ids-conformance.yml` runs this suite only on demand and uploads its machine-readable result.
 
 Assistant MCP is also used to build and run the production command, including a valid model, three known violations, invalid IDS and missing files. The PR evidence records those command statuses independently of the console tests. There is no production test-suite UI.
 

@@ -6,6 +6,7 @@ on:
       - 'src/Assistant/dotnet/IdsValidator/**'
       - 'src/Assistant/dotnet/Directory.Build.*'
       - 'tests/IdsValidator/**'
+      - 'tests/IdsValidator.UnitTests/**'
       - '.github/workflows/validate-ids-validator.yml'
   workflow_dispatch:
 
@@ -13,16 +14,16 @@ permissions:
   contents: read
 
 jobs:
-  conformance:
+  unit-tests:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-      - name: Run C# official corpus and integration checks
+      - name: Run C# unit tests
         shell: pwsh
-        run: dotnet run --configuration Release --project tests/IdsValidator/IdsValidator.Conformance.csproj -- tests/IdsValidator/.cache/cases tests/IdsValidator/artifacts
+        run: dotnet test tests/IdsValidator.UnitTests/IdsValidator.UnitTests.csproj --configuration Release --logger "trx;LogFileName=unit-tests.trx" --results-directory tests/IdsValidator.UnitTests/TestResults
       - name: Verify extension publishes
         shell: pwsh
         run: dotnet publish src/Assistant/dotnet/IdsValidator/IdsValidator.csproj --configuration Release --no-restore --output "$env:RUNNER_TEMP/ids-validator-package"
@@ -30,5 +31,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ids-validator-test-results
-          path: tests/IdsValidator/artifacts/test-results.json
+          name: ids-validator-unit-test-results
+          path: tests/IdsValidator.UnitTests/TestResults/*.trx

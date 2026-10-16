@@ -1,0 +1,34 @@
+name: Validate IDS Validator
+
+on:
+  pull_request:
+    paths:
+      - 'src/Assistant/dotnet/IdsValidator/**'
+      - 'src/Assistant/dotnet/Directory.Build.*'
+      - 'tests/IdsValidator/**'
+      - '.github/workflows/validate-ids-validator.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Run C# official corpus and integration checks
+        shell: pwsh
+        run: dotnet run --configuration Release --project tests/IdsValidator/IdsValidator.Conformance.csproj -- tests/IdsValidator/.cache/cases tests/IdsValidator/artifacts
+      - name: Verify extension publishes
+        shell: pwsh
+        run: dotnet publish src/Assistant/dotnet/IdsValidator/IdsValidator.csproj --configuration Release --no-restore --output "$env:RUNNER_TEMP/ids-validator-package"
+      - name: Upload machine-readable results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ids-validator-test-results
+          path: tests/IdsValidator/artifacts/test-results.json

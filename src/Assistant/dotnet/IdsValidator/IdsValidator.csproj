@@ -1,0 +1,26 @@
+<Project>
+  <PropertyGroup>
+    <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
+    <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="..\Directory.Build.props" />
+  <PropertyGroup>
+    <ExtensionId>IdsValidator</ExtensionId>
+    <Version Condition="'$(Version)' == ''">1.0.0</Version>
+    <Title>IDS Validator</Title>
+    <Description>Project-independent IFC validation against buildingSMART IDS 1.0, with local auditing, English reports and BCF.</Description>
+    <PackageTags>IFC;IDS;BCF;Validation;Assistant;Extension</PackageTags>
+  </PropertyGroup>
+  <!-- Resolve shared assembly naming before the SDK calculates project-reference paths. -->
+  <Import Project="..\Directory.Build.targets" />
+  <ItemGroup>
+    <PackageReference Include="ids-lib" Version="1.0.124" />
+    <PackageReference Include="Xbim.IDS.Validator.Core" Version="1.0.187" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.10" />
+    <PackageReference Update="CW.Assistant.Extensions.Assistant" IncludeAssets="compile;buildTransitive" />
+    <Content Include="README.md;THIRD-PARTY-NOTICES.md;DEVELOPMENT.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <EmbeddedResource Include="Schemas\*.xsd" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

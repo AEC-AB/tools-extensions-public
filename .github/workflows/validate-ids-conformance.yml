@@ -1,0 +1,26 @@
+name: IDS buildingSMART conformance (on demand)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      # The pinned archive supplies IFC/IDS data only. No archive code is executed.
+      - name: Run C# buildingSMART corpus and integration checks
+        shell: pwsh
+        run: dotnet run --configuration Release --project tests/IdsValidator/IdsValidator.Conformance.csproj -- tests/IdsValidator/.cache/cases tests/IdsValidator/artifacts
+      - name: Upload conformance results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ids-validator-conformance-results
+          path: tests/IdsValidator/artifacts/test-results.json

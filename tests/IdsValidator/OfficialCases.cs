@@ -8,8 +8,9 @@ internal static class OfficialCases
 
     public static async Task EnsureAsync(string directory)
     {
+        directory = Path.TrimEndingDirectorySeparator(Path.GetFullPath(directory));
         Directory.CreateDirectory(directory);
-        var archive = Path.Combine(Path.GetDirectoryName(directory)!, "IDS.zip");
+        var archive = Path.GetFullPath("IDS.zip", Path.GetDirectoryName(directory) ?? directory);
         if (!File.Exists(archive))
         {
             using var client = new HttpClient { Timeout = TimeSpan.FromMinutes(3) };
@@ -26,11 +27,20 @@ internal static class OfficialCases
         {
             var start = entry.FullName.IndexOf(marker, StringComparison.Ordinal);
             if (start < 0 || !(entry.FullName.EndsWith(".ids") || entry.FullName.EndsWith(".ifc"))) continue;
-            var target = Path.GetFullPath(Path.Combine(directory, entry.FullName[(start + marker.Length)..]));
-            if (!target.StartsWith(Path.GetFullPath(directory) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
-                throw new InvalidDataException("Unsafe corpus archive entry");
+            var target = ExtractionPath(directory, entry.FullName[(start + marker.Length)..]);
             Directory.CreateDirectory(Path.GetDirectoryName(target)!);
             entry.ExtractToFile(target, true);
         }
+    }
+
+    internal static string ExtractionPath(string directory, string relativePath)
+    {
+        directory = Path.GetFullPath(directory);
+        var prefix = Path.EndsInDirectorySeparator(directory) ? directory : directory + Path.DirectorySeparatorChar;
+        if (Path.IsPathRooted(relativePath)) throw new InvalidDataException("Rooted corpus archive entry");
+        var target = Path.GetFullPath(relativePath, directory);
+        if (!target.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("Unsafe corpus archive entry");
+        return target;
     }
 }

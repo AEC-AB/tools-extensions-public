@@ -4,6 +4,12 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Xml.Linq;
 using IdsValidator;
+using Microsoft.Extensions.Logging.Abstractions;
+using Xbim.IDS.Validator.Core;
+using Xbim.IDS.Validator.Core.Binders;
+using Xbim.IDS.Validator.Core.Configuration;
+using Xbim.Ifc;
+using Xbim.InformationSpecifications;
 using Xunit;
 
 namespace IdsValidatorTests;
@@ -67,6 +73,71 @@ public sealed class ValidatorTests : IDisposable
     {
         await using var engine = new EngineSession();
         return await ValidationService.ValidateAsync(ifc, ids, engine, CancellationToken.None);
+    }
+
+    [Theory]
+    [InlineData(false, "X", "Y", "requirements_failed")]
+    [InlineData(false, "Y", "X", "requirements_failed")]
+    [InlineData(true, "X", "Y", "requirements_failed")]
+    [InlineData(true, "Y", "X", "requirements_failed")]
+    [InlineData(false, "Y", "Z", "passed")]
+    [InlineData(true, "Y", "Z", "passed")]
+    public void Prohibited_resource_list_checks_all_values(bool profile, string first, string second, string expected)
+    {
+        ResourceList(profile, first, second, "prohibited", "IFCLABEL");
+        // Strict IDS auditing rejects prohibited value constraints. Test the binder
+        // directly so its collection semantics remain correct independently of auditing.
+        using var model = IfcStore.Open(ifc, ifcDatabaseSizeThreshHold: -1);
+        var binder = new StandardPropertyBinder(NullLogger<PsetFacetBinder>.Instance,
+            new IdsValueMapper([new IdsValueMapProvider()]));
+        binder.Initialise(new BinderContext { Model = model });
+        var facet = new IfcPropertyFacet { PropertySetName = "TestProperties", PropertyName = "Code", PropertyValue = "X" };
+        var result = new IdsValidationResult(model.Instances[1], null);
+        binder.ValidateEntity(model.Instances[1], facet, RequirementCardinalityOptions.Cardinality.Prohibited, result);
+        Assert.Equal(expected == "passed" ? ValidationStatus.Pass : ValidationStatus.Fail, result.ValidationStatus);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Prohibited_value_constraints_remain_rejected_by_strict_audit(bool includeDataType)
+    {
+        ResourceList(false, "X", "Y", "prohibited", "IFCLABEL");
+        if (includeDataType) ChangeIds(d => d.Descendants(Name("property")).Single().SetAttributeValue("dataType", "IFCLABEL"));
+        var result = await Validate();
+        Assert.Equal("technical_error", result.Status);
+        Assert.Contains(result.Errors, e => e.Code == "IDS_AUDIT_FAILED");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Resource_list_preserves_datatype_validation(bool profile)
+    {
+        ResourceList(profile, "X", "Y", "required", "IFCTEXT");
+        var result = await Validate();
+        Assert.Empty(result.Errors);
+        Assert.Equal("requirements_failed", result.Status);
+        Assert.Contains("IFCLABEL", JsonSerializer.Serialize(Assert.Single(result.Violations).Actual));
+    }
+
+    private void ResourceList(bool profile, string first, string second, string cardinality, string dataType)
+    {
+        var text = File.ReadAllText(ifc);
+        var start = text.IndexOf("#1=", StringComparison.Ordinal);
+        var end = text.IndexOf("ENDSEC;", start, StringComparison.Ordinal);
+        var resource = profile ? "IFCRECTANGLEPROFILEDEF(.AREA.,'Test profile',$,1.,1.)" : "IFCMATERIAL('Test material',$,$)";
+        var propertySet = profile ? "IFCPROFILEPROPERTIES" : "IFCMATERIALPROPERTIES";
+        File.WriteAllText(ifc, text[..start] + $"#1={resource};\n#2=IFCPROPERTYLISTVALUE('Code',$,(IFCLABEL('{first}'),IFCLABEL('{second}')),$);\n#3={propertySet}('TestProperties',$,(#2),#1);\n" + text[end..]);
+        ChangeIds(d => {
+            d.Descendants(Name("entity")).Single().Descendants(Name("simpleValue")).Single().Value = profile ? "IFCRECTANGLEPROFILEDEF" : "IFCMATERIAL";
+            d.Descendants(Name("requirements")).Single().ReplaceNodes(
+                new XElement(Name("property"), new XAttribute("cardinality", cardinality),
+                    cardinality == "prohibited" ? null : new XAttribute("dataType", dataType),
+                    new XElement(Name("propertySet"), new XElement(Name("simpleValue"), "TestProperties")),
+                    new XElement(Name("baseName"), new XElement(Name("simpleValue"), "Code")),
+                    new XElement(Name("value"), new XElement(Name("simpleValue"), "X"))));
+        });
     }
 
     [Fact]
@@ -295,6 +366,32 @@ public sealed class ValidatorTests : IDisposable
         Assert.True(result.BcfSchemaValidated);
         using var archive = ZipFile.OpenRead(result.BcfPath!);
         Assert.DoesNotContain(archive.Entries, e => e.FullName.EndsWith("markup.bcf"));
+    }
+
+    [Fact]
+    public void Bcf_preserves_multiple_topics_with_shared_and_missing_global_ids()
+    {
+        var result = new ValidationReport { IfcPath = ifc, IdsPath = ids, Status = "requirements_failed", Complete = true };
+        for (var index = 0; index < 3; index++)
+            result.Findings.Add(new Finding { Status = "requirements_failed", RuleId = $"Rule-{index}",
+                GlobalId = index < 2 ? GlobalId : null, EntityLabel = index + 1,
+                Actual = "Actual value", Expected = "Expected value", Facet = "Property" });
+        var output = Path.Join(directory, "reports") + Path.DirectorySeparatorChar;
+        Reports.Write(result, output);
+        Assert.Equal("requirements_failed", result.Status);
+        Assert.True(result.BcfSchemaValidated);
+        foreach (var path in new[] { result.JsonPath, result.HtmlPath, result.MarkdownPath, result.BcfPath! })
+            Assert.Equal(Path.TrimEndingDirectorySeparator(output), Path.GetDirectoryName(path));
+        using var archive = ZipFile.OpenRead(result.BcfPath!);
+        Assert.Equal(3, archive.Entries.Count(e => e.FullName.EndsWith("markup.bcf")));
+        var views = archive.Entries.Where(e => e.FullName.EndsWith(".bcfv")).ToArray();
+        Assert.Equal(2, views.Length);
+        foreach (var entry in views)
+        {
+            using var stream = entry.Open();
+            var component = Assert.Single(XDocument.Load(stream).Descendants("Component"));
+            Assert.Equal(GlobalId, (string?)component.Attribute("IfcGuid"));
+        }
     }
 
     [Fact]

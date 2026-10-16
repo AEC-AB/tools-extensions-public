@@ -25,13 +25,15 @@ internal static class Bcf
     public static void Write(ValidationReport report)
     {
         var target = report.BcfPath!;
+        var violations = report.Violations;
+        var globalIds = violations.Where(v => v.GlobalId is not null).Select(v => v.GlobalId!).ToHashSet(StringComparer.Ordinal);
         var temp = target + "." + Guid.NewGuid().ToString("N") + ".tmp";
         try
         {
             using (var zip = ZipFile.Open(temp, ZipArchiveMode.Create))
             {
                 Add(zip, "bcf.version", new XDocument(new XElement("Version", new XAttribute("VersionId", "2.1"))), "version.xsd");
-                foreach (var f in report.Violations)
+                foreach (var f in violations)
                 {
                     var topic = Guid.NewGuid().ToString(); var view = Guid.NewGuid().ToString();
                     var description = $"Rule ID: {f.RuleId}\nSpecification: {f.Specification}\nFacet: {f.Facet}\nIFC file: {report.IfcPath}\nIFC GlobalId: {f.GlobalId}\nSTEP ID: #{f.EntityLabel}\nActual: {JsonSerializer.Serialize(f.Actual)}\nExpected: {JsonSerializer.Serialize(f.Expected)}\nExpected description: {f.ExpectedDescription}\nReason: {f.Reason}";
@@ -50,11 +52,11 @@ internal static class Bcf
             }
             using (var zip = ZipFile.OpenRead(temp))
             {
-                if (zip.Entries.Count(e => e.FullName.EndsWith("/markup.bcf")) != report.FailedChecks) throw new IOException("BCF topic count does not match the violations.");
+                if (zip.Entries.Count(e => e.FullName.EndsWith("/markup.bcf")) != violations.Length) throw new IOException("BCF topic count does not match the violations.");
                 foreach (var entry in zip.Entries)
                 { using var stream = entry.Open(); var doc = XDocument.Load(stream); Validate(doc, entry.FullName == "bcf.version" ? "version.xsd" : entry.FullName.EndsWith(".bcfv") ? "visinfo.xsd" : "markup.xsd");
                     foreach (var component in doc.Descendants("Component"))
-                        if (!report.Violations.Any(v => v.GlobalId == (string?)component.Attribute("IfcGuid"))) throw new IOException("BCF references an element that is not in the findings.");
+                        if (!globalIds.Contains((string?)component.Attribute("IfcGuid") ?? "")) throw new IOException("BCF references an element that is not in the findings.");
                 }
             }
             File.Move(temp, target, true);

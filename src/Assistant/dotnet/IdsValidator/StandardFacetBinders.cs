@@ -73,6 +73,7 @@ public sealed class StandardPropertyBinder(ILogger<PsetFacetBinder> logger, IVal
     {
         if (!IsResource(item)) { base.ValidateEntity(item, facet, cardinality, result); return; }
         var context = CreateValidationContext(cardinality, facet);
+        var positiveContext = CreateValidationContext(Cardinality.Expected, facet);
         var sets = PropertySets(item).Where(s => facet.PropertySetName!.IsSatisfiedBy(s.Name)).ToArray();
         if (sets.Length == 0)
         {
@@ -102,7 +103,7 @@ public sealed class StandardPropertyBinder(ILogger<PsetFacetBinder> logger, IVal
                     var actual = GetNormalisedValue(value);
                     var valueExpected = cardinality != Cardinality.Prohibited || !facet.PropertyValue.IsNullOrEmpty();
                     populated |= IsValueRelevant(actual) == valueExpected;
-                    if (ValueSatifiesConstraint(facet, actual, context))
+                    if (ValueSatifiesConstraint(facet, actual, positiveContext))
                     {
                         matched = true;
                         if (string.IsNullOrEmpty(facet.DataType) || ValidateDataType(context, result, value, facet.DataType)) break;
@@ -112,7 +113,8 @@ public sealed class StandardPropertyBinder(ILogger<PsetFacetBinder> logger, IVal
                     ? ValidationMessage.Success(context, f => f.PropertyName!, property.Name, "Resource property provided in " + set.Name, property)
                     : ValidationMessage.Failure(context, f => f.PropertyName!, property.Name, "Resource property absent or prohibited in " + set.Name, property));
                 var actualValues = string.Join(",", values.Select(GetNormalisedValue));
-                Mark(result, matched
+                var valueSatisfied = cardinality == Cardinality.Prohibited ? !matched : matched;
+                Mark(result, valueSatisfied
                     ? ValidationMessage.Success(context, f => f.PropertyValue!, actualValues, "Resource property value matched", property)
                     : ValidationMessage.Failure(context, f => f.PropertyValue!, actualValues, "Resource property value did not match", property));
             }

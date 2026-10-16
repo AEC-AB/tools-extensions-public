@@ -10,12 +10,16 @@ public static class Reports
     public static void Write(ValidationReport report, string output)
     {
         output = Path.GetFullPath(output);
-        var targets = new[] { "report.json", "report.html", "result.md", "deviations.bcfzip" }.Select(f => Path.Combine(output, f));
+        var jsonPath = Path.Join(output, "report.json");
+        var htmlPath = Path.Join(output, "report.html");
+        var markdownPath = Path.Join(output, "result.md");
+        var bcfPath = Path.Join(output, "deviations.bcfzip");
+        var targets = new[] { jsonPath, htmlPath, markdownPath, bcfPath };
         if (targets.Any(p => p.Equals(report.IfcPath, StringComparison.OrdinalIgnoreCase) || p.Equals(report.IdsPath, StringComparison.OrdinalIgnoreCase)))
             throw new ArgumentException("A report filename would overwrite an input file. Select a different report folder.");
         Directory.CreateDirectory(output);
-        report.JsonPath = Path.Combine(output, "report.json"); report.HtmlPath = Path.Combine(output, "report.html"); report.MarkdownPath = Path.Combine(output, "result.md");
-        try { report.BcfPath = Path.Combine(output, "deviations.bcfzip"); Bcf.Write(report); report.BcfSchemaValidated = true; }
+        report.JsonPath = jsonPath; report.HtmlPath = htmlPath; report.MarkdownPath = markdownPath;
+        try { report.BcfPath = bcfPath; Bcf.Write(report); report.BcfSchemaValidated = true; }
         catch (IOException ex) { report.Error("BCF_WRITE_ERROR", ex.Message); report.BcfPath = null; }
         catch (System.Xml.Schema.XmlSchemaException ex) { report.Error("BCF_SCHEMA_ERROR", ex.Message); report.BcfPath = null; }
         File.WriteAllText(report.JsonPath, JsonSerializer.Serialize(report, JsonConfig.Options), new UTF8Encoding(false));

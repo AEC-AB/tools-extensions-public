@@ -58,4 +58,6 @@ Overall technical errors take precedence over requirement failures and successes
 
 These address four official expected-pass cases that initially failed in the unmodified engine. Additional negative regressions check incorrect values, datatypes and mapped classes, and material property applicability. No test case names or project identifiers occur in production logic. Conformance evidence is not buildingSMART certification.
 
+Resource collection checks evaluate positive value matches before applying prohibition to the collection. Unit tests exercise both mixed-value orders for materials and profiles directly through the binder, plus datatype checks through the production service. The strict IDS auditor rejects prohibited property value constraints before engine execution; separate tests retain this boundary. BCF verification snapshots violations once and checks component GlobalIds against a set.
+
 - IFC2X3 attribute-only applicability uses native attribute checks over actual model entities, avoiding upstream class discovery that includes types absent from IFC2X3. Attribute filters after resource-property selections also retain native checking semantics.

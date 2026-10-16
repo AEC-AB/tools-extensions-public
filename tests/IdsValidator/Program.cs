@@ -16,14 +16,14 @@ var tests = Directory.EnumerateFiles(casesRoot, "*.ids", SearchOption.AllDirecto
         Path.GetFileName(p).Split('-')[0] switch { "pass" => "passed", "fail" => "requirements_failed", "invalid" => "technical_error", _ => throw new InvalidDataException(p) }, true)).ToList();
 if (tests.Count != 334) throw new InvalidDataException("Expected exactly 334 official cases");
 var original = tests.Single(t => t.Id == "attribute/pass-an_optional_attribute_passes_if_null.ids");
-var fixtureDirectory = Path.Combine(output, "fixtures");
+var fixtureDirectory = Path.Join(output, "fixtures");
 Directory.CreateDirectory(fixtureDirectory);
 XNamespace idsNs = "http://standards.buildingsmart.org/IDS", xsi = "http://www.w3.org/2001/XMLSchema-instance";
 void Fixture(string id, string expected, Action<XDocument> change, string? ifc = null, string? warning = null, string? error = null)
 {
     var doc = XDocument.Load(original.Ids);
     change(doc);
-    var path = Path.Combine(fixtureDirectory, id + ".ids");
+    var path = Path.Join(fixtureDirectory, Path.GetFileName(id) + ".ids");
     doc.Save(path);
     tests.Add(new(id, path, ifc ?? original.Ifc, expected, false, warning, error));
 }
@@ -39,17 +39,17 @@ Fixture("duplicate-hint", "technical_error", d => d.Root!.Attribute(xsi + "schem
 Fixture("wrong-namespace", "technical_error", d => { d.Root!.Name = XName.Get("ids", "urn:other"); d.Root.SetAttributeValue("xmlns", "urn:other"); }, error: "IDS_DOCUMENT_EXPECTED");
 foreach (var fixture in new[] { ("malformed-xml", "<ids>", "IDS_XML_INVALID"), ("xsd-input", "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'/>", "IDS_DOCUMENT_EXPECTED") })
 {
-    var path = Path.Combine(fixtureDirectory, fixture.Item1 + ".ids"); File.WriteAllText(path, fixture.Item2);
+    var path = Path.Join(fixtureDirectory, Path.GetFileName(fixture.Item1) + ".ids"); File.WriteAllText(path, fixture.Item2);
     tests.Add(new(fixture.Item1, path, original.Ifc, "technical_error", false, Error: fixture.Item3));
 }
-var ifc4x3 = Path.Combine(fixtureDirectory, "ifc4x3.ifc");
+var ifc4x3 = Path.Join(fixtureDirectory, "ifc4x3.ifc");
 File.WriteAllText(ifc4x3, File.ReadAllText(original.Ifc).Replace("'IFC4'", "'IFC4X3_ADD2'"));
 Fixture("ifc4x3-pass", "passed", d => d.Descendants(idsNs + "specification").Single().SetAttributeValue("ifcVersion", "IFC4X3_ADD2"), ifc4x3);
 Fixture("ifc4x3-fail", "requirements_failed", d => { d.Descendants(idsNs + "specification").Single().SetAttributeValue("ifcVersion", "IFC4X3_ADD2"); d.Descendants(idsNs + "attribute").Single().SetAttributeValue("cardinality", "required"); }, ifc4x3);
 Fixture("ifc4x3-metadata-warning", "passed", _ => { }, ifc4x3, warning: "IFC_VERSION_METADATA");
 foreach (var pair in new[] { ("invalid-ifc", "not an IFC"), ("empty-ifc", "") })
 {
-    var path = Path.Combine(fixtureDirectory, pair.Item1 + ".ifc"); File.WriteAllText(path, pair.Item2);
+    var path = Path.Join(fixtureDirectory, Path.GetFileName(pair.Item1) + ".ifc"); File.WriteAllText(path, pair.Item2);
     tests.Add(new(pair.Item1, original.Ids, path, "technical_error", false, Error: "IO_ERROR"));
 }
 tests.Add(new("missing-ifc", original.Ids, Path.Combine(fixtureDirectory, "absent.ifc"), "technical_error", false, Error: "IFC_FILE_MISSING"));
@@ -59,7 +59,7 @@ void ResourceFixture(string id, string sourceId, string expected, Action<XDocume
     var source = tests.Single(t => t.Id == sourceId);
     var document = XDocument.Load(source.Ids);
     change(document);
-    var path = Path.Combine(fixtureDirectory, id + ".ids"); document.Save(path);
+    var path = Path.Join(fixtureDirectory, Path.GetFileName(id) + ".ids"); document.Save(path);
     tests.Add(new(id, path, source.Ifc, expected, false));
 }
 const string material2x3 = "property/pass-material_properties_are_supported_under_ifc2x3_via_extendedmaterialproperties.ids";

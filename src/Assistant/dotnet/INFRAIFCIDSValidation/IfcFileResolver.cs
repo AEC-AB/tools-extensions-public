@@ -235,7 +235,7 @@ internal static class IfcFileResolver
         IEnumerable<string> matches;
         try
         {
-            matches = Directory.EnumerateFiles(directory, pattern, SearchOption.TopDirectoryOnly);
+matches = Directory.GetFiles(directory, pattern, SearchOption.TopDirectoryOnly);
         }
         catch (IOException)
         {

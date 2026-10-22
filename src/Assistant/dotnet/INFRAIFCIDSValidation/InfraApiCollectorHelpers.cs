@@ -34,6 +34,8 @@ internal static class InfraApiCollectorHelpers
     {
         api = null;
         error = string.Empty;
+        InfraAssemblyLoadContext? loadContext = null;
+        bool apiCreated = false;
 
         try
         {
@@ -56,36 +58,29 @@ internal static class InfraApiCollectorHelpers
             Log($"Using INFRA API DLL: {dllPath}");
 
             string apiFolder = Path.GetDirectoryName(dllPath) ?? installLocation;
-            var loadContext = new InfraAssemblyLoadContext(apiFolder);
+            loadContext = new InfraAssemblyLoadContext(apiFolder);
 
-            try
+            Assembly assembly = loadContext.LoadFromAssemblyPath(dllPath);
+            Type? apiType = assembly.GetType(ApiTypeName)
+                ?? assembly.GetTypes().FirstOrDefault(type => string.Equals(type.Name, "InfraAssistantApi", StringComparison.Ordinal));
+
+            if (apiType == null)
             {
-                Assembly assembly = loadContext.LoadFromAssemblyPath(dllPath);
-                Type? apiType = assembly.GetType(ApiTypeName)
-                    ?? assembly.GetTypes().FirstOrDefault(type => string.Equals(type.Name, "InfraAssistantApi", StringComparison.Ordinal));
-
-                if (apiType == null)
-                {
-                    error = $"Type '{ApiTypeName}' not found in '{dllPath}'.";
-                    Log(error);
-                    return false;
-                }
-
-                api = Activator.CreateInstance(apiType);
-                if (api == null)
-                {
-                    error = $"Could not create instance of '{apiType.FullName}'.";
-                    Log(error);
-                    return false;
-                }
-
-                return true;
+                error = $"Type '{ApiTypeName}' not found in '{dllPath}'.";
+                Log(error);
+                return false;
             }
-            catch (Exception) when (loadContext.Unload_Safe())
+
+            api = Activator.CreateInstance(apiType);
+            if (api == null)
             {
-                // Unreachable — Unload_Safe always returns false.
-                throw;
+                error = $"Could not create instance of '{apiType.FullName}'.";
+                Log(error);
+                return false;
             }
+
+            apiCreated = true;
+            return true;
         }
         catch (ArgumentException ex)
         {
@@ -176,6 +171,13 @@ internal static class InfraApiCollectorHelpers
             error = FormatException(ex);
             Log($"TryCreateApiInstance failed: {error}");
             return false;
+        }
+        finally
+        {
+            if (!apiCreated)
+            {
+                loadContext?.Unload();
+            }
         }
     }
 
@@ -506,13 +508,6 @@ internal static class InfraApiCollectorHelpers
             string safeAssemblyFileName = Path.GetFileName(assemblyName.Name) + ".dll";
             string candidatePath = Path.Combine(_assemblyFolder, safeAssemblyFileName);
             return File.Exists(candidatePath) ? LoadFromAssemblyPath(candidatePath) : null;
-        }
-
-        /// <summary>Always returns false; used as a no-op in catch-when clauses.</summary>
-        public bool Unload_Safe()
-        {
-            Unload();
-            return false;
         }
     }
 }

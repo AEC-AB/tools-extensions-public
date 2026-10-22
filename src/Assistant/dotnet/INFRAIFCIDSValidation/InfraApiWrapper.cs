@@ -24,6 +24,28 @@ internal sealed class InfraApiWrapper
             return null;
         }
 
+        string[] requiredMethods =
+        [
+            nameof(GetCommonProjectsLocation),
+            nameof(ScanAllProjects),
+            nameof(ScanIdsFiles),
+            nameof(CreateMetadataFile),
+            nameof(WriteProjectPathToRegistry),
+            nameof(SaveSelectedIdsFilesToRegistry),
+            nameof(WriteOutputDirectoryToRegistry),
+            nameof(LaunchInfraAutomation)
+        ];
+
+        Type apiType = api!.GetType();
+        string[] missingMethods = requiredMethods
+            .Where(methodName => apiType.GetMethod(methodName) is null)
+            .ToArray();
+        if (missingMethods.Length > 0)
+        {
+            error = $"The installed INFRA API is incompatible. Missing required methods: {string.Join(", ", missingMethods)}. Update or repair the INFRA installation to a version compatible with this extension.";
+            return null;
+        }
+
         return new InfraApiWrapper(api!);
     }
 

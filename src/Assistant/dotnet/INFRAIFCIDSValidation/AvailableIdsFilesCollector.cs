@@ -78,7 +78,18 @@ public class AvailableIdsFilesCollector : IAsyncAutoFillCollector<INFRAIFCIDSVal
             List<string> idsFiles;
             if (idsLoadedFromApi && InfraApiCollectorHelpers.TryCreateApiInstance(out object? idsApi, out _))
             {
-                idsFiles = InfraApiCollectorHelpers.Invoke<List<string>>(idsApi!, "ScanIdsFiles", idsPath) ?? [];
+                try
+                {
+                    idsFiles = InfraApiCollectorHelpers.Invoke<List<string>>(idsApi!, "ScanIdsFiles", idsPath) ?? [];
+                }
+                catch (TargetInvocationException ex)
+                {
+                    loadError = InfraApiCollectorHelpers.FormatException(ex);
+                    idsLoadedFromApi = false;
+                    InfraApiCollectorHelpers.Log($"AvailableIdsFilesCollector API scan failed: {loadError}");
+                    idsFiles = InfraApiCollectorHelpers.ScanIdsFilesFallback(idsPath);
+                    InfraApiCollectorHelpers.Log($"AvailableIdsFilesCollector fallback discovered {idsFiles.Count} IDS file(s).");
+                }
             }
             else
             {

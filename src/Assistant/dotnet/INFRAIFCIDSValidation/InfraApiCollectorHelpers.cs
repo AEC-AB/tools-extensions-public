@@ -444,7 +444,7 @@ internal static class InfraApiCollectorHelpers
             IEnumerable<string> files = [];
             try
             {
-                files = Directory.EnumerateFiles(current, pattern, SearchOption.TopDirectoryOnly);
+files = Directory.GetFiles(current, pattern, SearchOption.TopDirectoryOnly);
             }
             catch (UnauthorizedAccessException)
             {

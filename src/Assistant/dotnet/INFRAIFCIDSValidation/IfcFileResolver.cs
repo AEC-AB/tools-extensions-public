@@ -335,9 +335,22 @@ matches = Directory.GetFiles(directory, pattern, SearchOption.TopDirectoryOnly);
             yield break;
         }
 
-        foreach (string filePath in files.Where(filePath => regex.IsMatch(Path.GetFileName(filePath))))
+foreach (string filePath in files)
         {
-            yield return Path.GetFullPath(filePath);
+            bool matches;
+            try
+            {
+                matches = regex.IsMatch(Path.GetFileName(filePath));
+            }
+            catch (RegexMatchTimeoutException)
+            {
+                yield break;
+            }
+
+            if (matches)
+            {
+                yield return Path.GetFullPath(filePath);
+            }
         }
     }
 }

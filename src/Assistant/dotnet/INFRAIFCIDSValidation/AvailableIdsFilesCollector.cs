@@ -36,7 +36,16 @@ public class AvailableIdsFilesCollector : IAsyncAutoFillCollector<INFRAIFCIDSVal
                 if (!string.IsNullOrWhiteSpace(projectsLocation) && Directory.Exists(projectsLocation))
                 {
                     projects = InfraApiCollectorHelpers.Invoke<Dictionary<string, string>>(api!, "ScanAllProjects") ?? [];
-                    idsLoadedFromApi = true;
+                    if (projects.Count == 0)
+                    {
+                        loadError = "INFRA API returned no projects.";
+                        projects = InfraApiCollectorHelpers.ScanProjectsFallback();
+                        InfraApiCollectorHelpers.Log($"AvailableIdsFilesCollector fallback discovered {projects.Count} project(s).");
+                    }
+                    else
+                    {
+                        idsLoadedFromApi = true;
+                    }
                 }
                 else
                 {

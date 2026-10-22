@@ -15,8 +15,8 @@ internal static class StreamBimFileTransferService
     internal static async Task<StreamBimSingleFileDownloadResult> DownloadFileAsync(
         StreamBIMDownloaderArgs args,
         AsyncFtpClient client,
-        string projectPath,
         FtpListItem file,
+        string localRelativePath,
         CancellationToken cancellationToken)
     {
         try
@@ -26,7 +26,7 @@ internal static class StreamBimFileTransferService
                 return StreamBimSingleFileDownloadResult.Skipped(file.FullName);
             }
 
-            var localPath = StreamBimPathHelper.CreateLocalPath(args.DownloadFolder, projectPath, file.FullName);
+            var localPath = StreamBimPathHelper.CreateLocalPath(args.DownloadFolder, localRelativePath);
 
             if (args.SkipUnchangedFiles &&
                 File.Exists(localPath) &&

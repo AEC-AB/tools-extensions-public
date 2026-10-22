@@ -8,10 +8,7 @@ Use this skill when updating extension `README.md` files for end users.
 
 ## Load these docs first
 
-Use the `extension-docs` MCP tool:
-
-1. `operation=search` with query `WRITING_EXTENSION_README_HELP_FILES.md`
-2. `operation=content` using the returned document id
+Use `../docs-routing/SKILL.md` to resolve `ExtensionDocsRoot`, then read `WRITING_EXTENSION_README_HELP_FILES.md`.
 
 ## Delivery rules
 

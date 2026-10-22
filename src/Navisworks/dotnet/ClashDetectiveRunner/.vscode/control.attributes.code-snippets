@@ -1,0 +1,20 @@
+{
+  "Control attribute type": {
+    "prefix": [
+      "control-attribute-type"
+    ],
+    "body": [
+      "[ControlType(ControlType.${1|ImageViewer,Password,Url,Browse,Save,Option,ListBox|})]"
+    ],
+    "description": "Type of control to display"
+  },
+  "Control attribute setting": {
+    "prefix": [
+      "control-attribute-setting"
+    ],
+    "body": [
+      "[ControlSettings(\"${1:MaxHeight}\", \"${2:300}\")]"
+    ],
+    "description": "Adjust the settings for a wpf control"
+  }
+}

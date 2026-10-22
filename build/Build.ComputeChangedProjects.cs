@@ -1,5 +1,6 @@
 using LibGit2Sharp;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Globbing;
 using Nuke.Common;
 using Nuke.Common.Utilities.Collections;
 
@@ -18,7 +19,8 @@ partial class Build : NukeBuild
             BuildAllProjects("Git repository not found.");
             return;
         }
-        var sourceDir = NormalizePath(Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(gitFolder)!)!, "src"));
+        var repositoryRoot = NormalizePath(Path.GetDirectoryName(Path.GetDirectoryName(gitFolder)!)!);
+        var sourceDir = NormalizePath(Path.Combine(repositoryRoot, "src"));
         using var repo = new Repository(gitFolder);
 
         var currentBranch = repo.Head;
@@ -49,13 +51,17 @@ partial class Build : NukeBuild
             .Where(path => Path.GetFileName(path) == "Directory.Build.props")
             .ToList();
 
+        var changedSourceFiles = changedFiles
+            .Select(path => NormalizePath(Path.Combine(repositoryRoot, path)))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         var projectsToBuild = new List<string>();
 
         // If any Directory.Build.props files changed, rebuild all projects in the corresponding integration (all projects in subdirectories of the changed props file)
         if (changedPropsFiles.Count > 0)
         {
             var changedProps = changedPropsFiles
-                .Select(path => Path.GetDirectoryName(path)!)
+                .Select(path => Path.GetDirectoryName(path)!)!
                 .Select(dir => NormalizePath(dir))
                 .ToList();
 
@@ -67,11 +73,26 @@ partial class Build : NukeBuild
 
         foreach (var projectPath in projects)
         {
-            var projectDir = Path.GetDirectoryName(projectPath)!;
-            var changesInProject = changedFiles
-                .Where(path => NormalizePath(path).StartsWith(NormalizePath(projectDir) + "/", StringComparison.OrdinalIgnoreCase))
-                .ToList();
-            if (changesInProject.Count > 0)
+            var projectDirectory = NormalizePath(Path.GetDirectoryName(projectPath)!);
+            var hasChangesInProjectDirectory = changedSourceFiles.Any(path =>
+                path.StartsWith(projectDirectory + "/", StringComparison.OrdinalIgnoreCase));
+            if (hasChangesInProjectDirectory)
+            {
+                projectsToBuild.Add(projectPath);
+                continue;
+            }
+
+            var linkedSourceFiles = LoadProject(projectPath)
+                .GetItems("Compile")
+                .Select(item => NormalizePath(item.GetMetadataValue("FullPath")))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            if (changedSourceFiles.Overlaps(linkedSourceFiles))
+            {
+                projectsToBuild.Add(projectPath);
+                continue;
+            }
+
+            if (ChangedFilesMatchCompileIncludes(projectPath, changedSourceFiles))
             {
                 projectsToBuild.Add(projectPath);
             }
@@ -99,6 +120,21 @@ partial class Build : NukeBuild
 
         Console.WriteLine($"ComputeChangedProjects fallback: {reason} Building all projects.");
         _projectsToBuild.AddRange(projects);
+    }
+
+    bool ChangedFilesMatchCompileIncludes(string projectPath, IReadOnlySet<string> changedSourceFiles)
+    {
+        var projectDirectory = Path.GetDirectoryName(projectPath)!;
+        var compileIncludes = LoadProject(projectPath)
+            .Xml.Items
+            .Where(item => string.Equals(item.ItemType, "Compile", StringComparison.OrdinalIgnoreCase))
+            .Select(item => item.Include)
+            .Where(include => !string.IsNullOrWhiteSpace(include))
+            .Select(include => MSBuildGlob.Parse(projectDirectory, include!))
+            .ToList();
+
+        return changedSourceFiles.Any(changedSourceFile =>
+            compileIncludes.Any(include => include.IsMatch(changedSourceFile)));
     }
 
     static string NormalizePath(string path) =>

@@ -8,10 +8,7 @@ Use this skill when editing `*Command.cs`, collector code, or Tekla-specific run
 
 ## Load these docs first
 
-Use the `extension-docs` MCP tool:
-
-1. `operation=content` with document id `tekla`
-2. `operation=search` with focused topics such as `model connection` when you need examples
+Use `../docs-routing/SKILL.md` to resolve `ExtensionDocsRoot`, then read `PLATFORM_GUIDES/TEKLA.md`. Search that file for topics such as `model connection` when you need examples.
 
 ## API context
 

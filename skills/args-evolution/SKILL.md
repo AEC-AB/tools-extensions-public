@@ -8,17 +8,16 @@ Use this skill when editing `*Args.cs` in any integration under this repository.
 
 ## Load these docs first
 
-Use the `extension-docs` MCP tool:
-
-1. `operation=content` with document id `args-developer-guide`
-2. `operation=search` with query `args versioning upgrades`
-3. `operation=content` using the returned document id
-
-If the `extension-docs` MCP tool is unavailable or returns no results, proceed using only the rules in this document and inform the user that docs could not be loaded.
+Use `../docs-routing/SKILL.md` to resolve `ExtensionDocsRoot`, then read `ARGS_DEVELOPER_GUIDE.md`. Search that file for `version` and `upgrade` when changing a persisted shape.
 
 ## Upgrade rules
 
-Before changing the `*Args.cs` structure, ask the user whether the Args class is already used in production workflows before proceeding.
+Newly generated, unshipped Args classes are exempt from the production-use
+question and upgrade ceremony: make structural changes directly without a
+version bump or upgrade mapping.
+
+For an existing or production Args class, ask the user whether the Args class
+is already used in production workflows before proceeding.
 
 If the answer is yes:
 

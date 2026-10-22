@@ -29,9 +29,9 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
             return Result.Text.Failed("Download folder is required.");
         }
 
-        if (args.Files.Count == 0)
+        if (args.Files.Count == 0 || args.Files.Any(string.IsNullOrWhiteSpace))
         {
-            return Result.Text.Failed("Select at least one file or folder to download.");
+            return Result.Text.Failed("Enter a file or folder path in every Files/Folders to download row.");
         }
 
         try

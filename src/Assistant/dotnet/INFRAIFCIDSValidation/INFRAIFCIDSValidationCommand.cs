@@ -123,7 +123,19 @@ public class INFRAIFCIDSValidationCommand : IAssistantExtension<INFRAIFCIDSValid
         {
             api.LaunchInfraAutomation(arguments, projectName);
         }
-        catch (Exception ex) when (ex is InvalidOperationException || ex is ArgumentException || ex is IOException || ex is UnauthorizedAccessException)
+        catch (InvalidOperationException ex)
+        {
+            return Result.Text.Failed($"Failed to launch INFRA automation: {ex.Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            return Result.Text.Failed($"Failed to launch INFRA automation: {ex.Message}");
+        }
+        catch (IOException ex)
+        {
+            return Result.Text.Failed($"Failed to launch INFRA automation: {ex.Message}");
+        }
+        catch (UnauthorizedAccessException ex)
         {
             return Result.Text.Failed($"Failed to launch INFRA automation: {ex.Message}");
         }

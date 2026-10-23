@@ -26,10 +26,10 @@ The extension UI fields map to the settings below.
 	- Assistant variable with prefix: var:MyIfcFiles
 	- Assistant variable with braces: ${MyIfcFiles}
 	- Loop/task variable in raw data: Loop.Path
-	- Combined variable and wildcard: ${{ Loop.Path }}\*.ifc where Loop.Path contains folder paths
+	- Combined variable and wildcard: ${{ Variable1 }}\*.ifc where Variable1 resolves to a folder path, such as C:\Models
 	- Regex entry scoped to a folder: regex:C:\Models|^.*\.ifc$
 	Variable values may contain multiple entries separated by newline, semicolon, comma, or pipe.
-	Important: IFC files raw data is passed through to the extension. The extension resolves plain variable names like Loop.Path and embedded placeholders like ${{ Loop.Path }} or ${{ Loop.Path }}\*.ifc at runtime.
+	Important: IFC files raw data is passed through to the extension. The extension resolves plain variable names like Loop.Path and embedded placeholders like ${{ Variable1 }} or ${{ Variable1 }}\*.ifc at runtime.
 - Output folder: Required existing folder where INFRA output can be reviewed.
 - Validation commands: One or more commands to run. Available values:
 	- IFC_CHECK
@@ -48,7 +48,7 @@ When run, the extension validates inputs, resolves project, IFC, and IDS selecti
 2. Select Project name from discovered INFRA projects.
 3. Add IFC files.
 4. If needed, right-click IFC files and open raw data to enter wildcard paths, variable names, or regex entries.
-5. For loop-based folder expansion, enter entries like ${{ Loop.Path }}\*.ifc directly in IFC files textfield.
+5. To combine a folder-path variable with a wildcard, enter an entry like ${{ Variable1 }}\*.ifc directly in the IFC files text field. Variable1 must resolve to a folder path, such as C:\Models.
 6. Choose IDS files directly or leave empty to scan automatically.
 7. Select Output folder.
 8. Select one or more Validation commands.
@@ -59,7 +59,7 @@ When run, the extension validates inputs, resolves project, IFC, and IDS selecti
 - Windows environment.
 - INFRA API assembly available from INFRA installation.
 - Selected output folder already exists.
-- Selected IFC and IDS files exist on disk after wildcard, variable, or regex expansion.
+- Selected IFC and IDS files exist on disk.
 
 ### Outputs And Side Effects
 - Metadata creation via INFRA API for selected IFC files.
@@ -101,10 +101,10 @@ Collector diagnostics are written to:
 	- A: Yes. Select one or more values in Validation commands.
 
 - Q: What can I put in IFC files raw data?
-	- A: Exact file paths, wildcard paths, Assistant variable names, var:VariableName, ${VariableName}, Loop.Path, combined placeholder entries like ${{ Loop.Path }}\*.ifc, and regex entries using regex:folder|pattern.
+	- A: Exact file paths, wildcard paths, Assistant variable names, var:VariableName, ${VariableName}, Loop.Path, combined placeholder entries like ${{ Variable1 }}\*.ifc (where Variable1 resolves to a folder path), and regex entries using regex:folder|pattern.
 
 - Q: How do I combine a folder variable with *.ifc in IFC files?
-	- A: Enter it directly in IFC files raw data as ${{ Loop.Path }}\*.ifc. The extension resolves the placeholder first, then expands the wildcard.
+	- A: Enter it directly in IFC files raw data as ${{ Variable1 }}\*.ifc, where Variable1 resolves to a folder path such as C:\Models. The extension resolves the placeholder first, then expands the wildcard.
 
 - Q: Are subfolders included when using wildcard or regex entries?
 	- A: No. Expansion is limited to the top level of the specified folder.

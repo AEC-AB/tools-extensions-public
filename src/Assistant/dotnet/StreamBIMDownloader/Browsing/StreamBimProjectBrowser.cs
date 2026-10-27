@@ -55,6 +55,8 @@ public sealed class StreamBimProjectBrowser : IOnlineBrowser<StreamBIMDownloader
                 Name = item.Name,
                 Value = item.Name,
                 Kind = OnlineBrowserItemKind.Folder,
+                Provider = OnlineBrowserProvider.Custom,
+                Scope = args.ApplicationName,
             })
             .ToArray();
         return new OnlineBrowserPage { Items = items };

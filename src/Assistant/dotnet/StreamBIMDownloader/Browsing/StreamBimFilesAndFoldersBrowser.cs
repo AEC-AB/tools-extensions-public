@@ -17,14 +17,14 @@ public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDo
             return new();
         }
 
-        if (string.IsNullOrWhiteSpace(args.Project))
+        if (string.IsNullOrWhiteSpace(args.ProjectValue))
         {
             throw new InvalidOperationException("Select a StreamBIM project before resolving a saved file.");
         }
 
         var credentials = StreamBimCredentialProvider.TryGetUserCredentials(args.ApplicationName)
             ?? throw new InvalidOperationException("StreamBIM credentials were not found.");
-        var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.Project);
+        var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.ProjectValue);
         var relativeValue = StreamBimPathHelper.NormalizeRelativePath(reference.Value);
         if (string.IsNullOrWhiteSpace(relativeValue))
         {
@@ -59,7 +59,7 @@ public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDo
                 token: cancellationToken);
             if (item is null)
             {
-                throw new InvalidOperationException($"Saved StreamBIM item '{reference.Value}' was not found in project '{args.Project}'.");
+                throw new InvalidOperationException($"Saved StreamBIM item '{reference.Value}' was not found in project '{args.ProjectValue}'.");
             }
 
             resolvedType = item.Type;
@@ -84,6 +84,8 @@ public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDo
                 Name = segment,
                 Value = cumulativePath,
                 Kind = OnlineBrowserItemKind.Folder,
+                Provider = OnlineBrowserProvider.Custom,
+                Scope = $"{args.ApplicationName}:{args.ProjectValue}",
             });
         }
 
@@ -94,6 +96,8 @@ public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDo
                 Name = segments.Last(),
                 Value = relativeValue,
                 Kind = resolvedType == FtpObjectType.Directory ? OnlineBrowserItemKind.Folder : OnlineBrowserItemKind.File,
+                Provider = OnlineBrowserProvider.Custom,
+                Scope = $"{args.ApplicationName}:{args.ProjectValue}",
             }
             : null;
         return new OnlineBrowserLocation { Item = resolvedItem, Folders = breadcrumb };
@@ -108,7 +112,7 @@ public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDo
         {
             throw new InvalidOperationException("StreamBIM file browsing does not support continuation tokens.");
         }
-        if (string.IsNullOrWhiteSpace(args.Project))
+        if (string.IsNullOrWhiteSpace(args.ProjectValue))
         {
             throw new InvalidOperationException("Select a StreamBIM project before browsing its files.");
         }
@@ -116,7 +120,7 @@ public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDo
         var credentials = StreamBimCredentialProvider.TryGetUserCredentials(args.ApplicationName)
             ?? throw new InvalidOperationException("StreamBIM credentials were not found.");
 
-        var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.Project);
+        var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.ProjectValue);
         var relativeParentPath = string.IsNullOrWhiteSpace(request.ParentId)
             ? string.Empty
             : StreamBimPathHelper.NormalizeRelativePath(request.ParentId);
@@ -143,6 +147,8 @@ public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDo
                     Kind = item.Type == FtpObjectType.Directory
                         ? OnlineBrowserItemKind.Folder
                         : OnlineBrowserItemKind.File,
+                    Provider = OnlineBrowserProvider.Custom,
+                    Scope = $"{args.ApplicationName}:{args.ProjectValue}",
                 };
             })
             .ToArray();

@@ -9,9 +9,9 @@ Store the StreamBIM username and password in Windows Credential Manager. Use the
 ## Inputs
 
 - StreamBIM Credentials: Application ID of the Windows Credential Manager entry used for the StreamBIM login.
-- Project: Select the StreamBIM project with the online folder browser.
+- Project: Select the StreamBIM project with the online folder browser. The extension receives a typed selection with the provider ID, display name, item kind, and project-relative value.
 - Destination folder: Local folder where downloaded files are saved.
-- Files/Folders to download: Browse project folders and select one or more files or folders, including items in different folders. Values remain project-relative paths, such as `Planning/Electrical/design.pdf`. You can still enter paths with `*` and `?` wildcards manually.
+- Files/Folders to download: Browse project folders and select one or more files or folders, including items in different folders. The extension receives typed selections with stable IDs and project-relative values, such as `Planning/Electrical/design.pdf`. You can still enter paths with `*` and `?` wildcards manually.
 - Skip unchanged files: Skips files that already exist locally with the same modified timestamp.
 
 ## Downloading files
@@ -42,5 +42,6 @@ Individual files are saved directly in the destination folder. When downloading 
 - Opening the browser returns to the last selected folder, or the containing folder of the last selected file. Saved paths remain visible before the browser loads any remote items.
 - StreamBIM resolves saved references by their FTP path. It does not recover moved or renamed items by ID; extensions backed by services with stable IDs can implement that behavior through the same browser API.
 - Use the stars to save favorites. Favorites belong to the current Assistant user and can be shared with compatible extensions using the same favorites keys. File and folder favorites are kept separately for each project and credential application ID.
-- Extension developers can share project favorites with `FavoritesKey = "streambim.projects"` and scope `ApplicationName`. Share file and folder favorites with `FavoritesKey = "streambim.project-content"` and scopes `Project` and `ApplicationName`. Use the same saved project-relative paths. Last-selected folders remain separate for each extension field.
-- Building this version requires Assistant extension packages containing `OnlineBrowserFieldAttribute` and `IOnlineBrowser<TArgs>`.
+- Extension developers can share project favorites with `FavoritesKey = "streambim.projects"` and scope `ApplicationName`. Share file and folder favorites with `FavoritesKey = "streambim.project-content"` and scopes `Project.Value` and `ApplicationName`. Use the same saved project-relative paths. Last-selected folders remain separate for each extension field.
+- Version 2 stores the project and file fields as typed online-browser controls. Existing version 1 workflows are upgraded automatically, preserving the credential application, project value, file paths, destination folder, and skip-unchanged setting. Legacy paths have no stable provider ID, so the browser resolves them by their saved value when it opens.
+- Building this version requires Assistant extension packages containing `OnlineBrowserFieldAttribute`, `OnlineBrowserSelection`, `OnlineBrowserSelections`, and `IOnlineBrowser<TArgs>`.

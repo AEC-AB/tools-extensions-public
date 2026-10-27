@@ -18,10 +18,10 @@ internal static class StreamBimDownloadService
         AsyncFtpClient client,
         CancellationToken cancellationToken)
     {
-        var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.Project);
+        var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.ProjectValue);
         var builder = new StreamBimDownloadOutcomeBuilder();
 
-        foreach (var configuredFile in args.Files)
+        foreach (var configuredFile in args.Files.Items.Select(item => item.Value))
         {
             cancellationToken.ThrowIfCancellationRequested();
             builder.Add(await DownloadConfiguredFileWithRetriesAsync(args, client, projectPath, configuredFile, cancellationToken));

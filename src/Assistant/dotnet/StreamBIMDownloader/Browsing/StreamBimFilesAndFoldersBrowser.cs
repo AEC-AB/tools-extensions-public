@@ -6,15 +6,15 @@ namespace StreamBIMDownloader;
 [SupportedOSPlatform("windows")]
 public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDownloaderArgs>
 {
-    public async Task<IReadOnlyList<OnlineBrowserItem>> GetLocationAsync(
+    public async Task<OnlineBrowserLocation> GetLocationAsync(
         StreamBIMDownloaderArgs args,
-        string value,
+        OnlineBrowserItemReference reference,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (string.IsNullOrWhiteSpace(value))
+        if (string.IsNullOrWhiteSpace(reference.Value))
         {
-            return [];
+            return new();
         }
 
         if (string.IsNullOrWhiteSpace(args.Project))
@@ -25,15 +25,20 @@ public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDo
         var credentials = StreamBimCredentialProvider.TryGetUserCredentials(args.ApplicationName)
             ?? throw new InvalidOperationException("StreamBIM credentials were not found.");
         var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.Project);
-        var relativeValue = StreamBimPathHelper.NormalizeRelativePath(value);
+        var relativeValue = StreamBimPathHelper.NormalizeRelativePath(reference.Value);
+        if (string.IsNullOrWhiteSpace(relativeValue))
+        {
+            return new();
+        }
         if (StreamBimPathHelper.ContainsIgnoredFolder(relativeValue))
         {
-            throw new InvalidOperationException($"Saved StreamBIM path '{value}' points to an ignored folder.");
+            throw new InvalidOperationException($"Saved StreamBIM path '{reference.Value}' points to an ignored folder.");
         }
 
         var segments = relativeValue.Split('/', StringSplitOptions.RemoveEmptyEntries);
         var wildcardSegmentIndex = Array.FindIndex(segments, StreamBimPathHelper.ContainsWildcard);
         string relativeFolderPath;
+        FtpObjectType? resolvedType = null;
 
         using var client = await StreamBimFtpClientFactory.CreateAndConnectClientAsync(credentials, cancellationToken);
         if (wildcardSegmentIndex >= 0)
@@ -44,7 +49,7 @@ public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDo
                 token: cancellationToken);
             if (!string.IsNullOrEmpty(relativeFolderPath) && folderInfo?.Type != FtpObjectType.Directory)
             {
-                throw new InvalidOperationException($"Saved StreamBIM path '{value}' could not resolve its containing folder.");
+                throw new InvalidOperationException($"Saved StreamBIM path '{reference.Value}' could not resolve its containing folder.");
             }
         }
         else
@@ -54,15 +59,17 @@ public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDo
                 token: cancellationToken);
             if (item is null)
             {
-                throw new InvalidOperationException($"Saved StreamBIM item '{value}' was not found in project '{args.Project}'.");
+                throw new InvalidOperationException($"Saved StreamBIM item '{reference.Value}' was not found in project '{args.Project}'.");
             }
+
+            resolvedType = item.Type;
 
             relativeFolderPath = item.Type == FtpObjectType.Directory
                 ? relativeValue
                 : string.Join("/", segments.Take(Math.Max(segments.Length - 1, 0)));
             if (item.Type is not (FtpObjectType.File or FtpObjectType.Directory))
             {
-                throw new InvalidOperationException($"Saved StreamBIM item '{value}' has an unsupported remote type.");
+                throw new InvalidOperationException($"Saved StreamBIM item '{reference.Value}' has an unsupported remote type.");
             }
         }
 
@@ -80,14 +87,27 @@ public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDo
             });
         }
 
-        return breadcrumb;
+        OnlineBrowserItem? resolvedItem = resolvedType is FtpObjectType.File or FtpObjectType.Directory
+            ? new OnlineBrowserItem
+            {
+                Id = relativeValue,
+                Name = segments.Last(),
+                Value = relativeValue,
+                Kind = resolvedType == FtpObjectType.Directory ? OnlineBrowserItemKind.Folder : OnlineBrowserItemKind.File,
+            }
+            : null;
+        return new OnlineBrowserLocation { Item = resolvedItem, Folders = breadcrumb };
     }
 
-    public async Task<IReadOnlyList<OnlineBrowserItem>> GetChildrenAsync(
+    public async Task<OnlineBrowserPage> GetChildrenAsync(
         StreamBIMDownloaderArgs args,
-        string? parentId,
+        OnlineBrowserPageRequest request,
         CancellationToken cancellationToken)
     {
+        if (!string.IsNullOrWhiteSpace(request.ContinuationToken))
+        {
+            throw new InvalidOperationException("StreamBIM file browsing does not support continuation tokens.");
+        }
         if (string.IsNullOrWhiteSpace(args.Project))
         {
             throw new InvalidOperationException("Select a StreamBIM project before browsing its files.");
@@ -97,16 +117,16 @@ public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDo
             ?? throw new InvalidOperationException("StreamBIM credentials were not found.");
 
         var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.Project);
-        var relativeParentPath = string.IsNullOrWhiteSpace(parentId)
+        var relativeParentPath = string.IsNullOrWhiteSpace(request.ParentId)
             ? string.Empty
-            : StreamBimPathHelper.NormalizeRelativePath(parentId);
+            : StreamBimPathHelper.NormalizeRelativePath(request.ParentId);
 
         using var client = await StreamBimFtpClientFactory.CreateAndConnectClientAsync(credentials, cancellationToken);
         var listing = await client.GetListing(
             StreamBimPathHelper.CombineFtpPath(projectPath, relativeParentPath),
             cancellationToken);
 
-        return listing
+        var items = listing
             .Where(item => item.Type is FtpObjectType.File or FtpObjectType.Directory)
             .Where(item => !string.IsNullOrWhiteSpace(item.Name))
             .Where(item => item.Type != FtpObjectType.Directory || !StreamBimPathHelper.IsIgnoredDirectoryName(item.Name))
@@ -126,5 +146,6 @@ public sealed class StreamBimFilesAndFoldersBrowser : IOnlineBrowser<StreamBIMDo
                 };
             })
             .ToArray();
+        return new OnlineBrowserPage { Items = items };
     }
 }

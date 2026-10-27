@@ -37,7 +37,10 @@ Individual files are saved directly in the destination folder. When downloading 
 - Paths are relative to the selected project. When a project contains a root folder with the same name as the project itself, keep that folder in the path exactly as the browser shows it. A path that starts with the project name is tried as a real folder first, and only if that folder does not exist is the leading project name treated as a redundant prefix and removed, so pasting a full path that repeats the project name also works.
 - Folders named `_backup` and folders ending with `-revs`, and anything inside them, are ignored.
 - The online browser loads one folder at a time. A listing failure appears in the browser; use Refresh to retry. Cancel leaves the field unchanged.
+- StreamBIM returns each FTP folder as one complete page. The shared browser also supports Load more for providers with paged APIs.
+- File favorites are resolved and selected directly. Folder favorites open the folder for browsing.
 - Opening the browser returns to the last selected folder, or the containing folder of the last selected file. Saved paths remain visible before the browser loads any remote items.
+- StreamBIM resolves saved references by their FTP path. It does not recover moved or renamed items by ID; extensions backed by services with stable IDs can implement that behavior through the same browser API.
 - Use the stars to save favorites. Favorites belong to the current Assistant user and can be shared with compatible extensions using the same favorites keys. File and folder favorites are kept separately for each project and credential application ID.
 - Extension developers can share project favorites with `FavoritesKey = "streambim.projects"` and scope `ApplicationName`. Share file and folder favorites with `FavoritesKey = "streambim.project-content"` and scopes `Project` and `ApplicationName`. Use the same saved project-relative paths. Last-selected folders remain separate for each extension field.
 - Building this version requires Assistant extension packages containing `OnlineBrowserFieldAttribute` and `IOnlineBrowser<TArgs>`.

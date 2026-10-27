@@ -6,32 +6,36 @@ namespace StreamBIMDownloader;
 [SupportedOSPlatform("windows")]
 public sealed class StreamBimProjectBrowser : IOnlineBrowser<StreamBIMDownloaderArgs>
 {
-    public async Task<IReadOnlyList<OnlineBrowserItem>> GetLocationAsync(
+    public async Task<OnlineBrowserLocation> GetLocationAsync(
         StreamBIMDownloaderArgs args,
-        string value,
+        OnlineBrowserItemReference reference,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (string.IsNullOrWhiteSpace(value))
+        if (string.IsNullOrWhiteSpace(reference.Value))
         {
-            return [];
+            return new();
         }
 
-        var projects = await GetChildrenAsync(args, null, cancellationToken);
-        var project = projects.FirstOrDefault(item => item.Value == value)
-            ?? throw new InvalidOperationException($"Saved StreamBIM project '{value}' was not found.");
-        return [project];
+        var projects = await GetChildrenAsync(args, new(), cancellationToken);
+        var project = projects.Items.FirstOrDefault(item => item.Value == reference.Value)
+            ?? throw new InvalidOperationException($"Saved StreamBIM project '{reference.Value}' was not found.");
+        return new OnlineBrowserLocation { Item = project, Folders = [project] };
     }
 
-    public async Task<IReadOnlyList<OnlineBrowserItem>> GetChildrenAsync(
+    public async Task<OnlineBrowserPage> GetChildrenAsync(
         StreamBIMDownloaderArgs args,
-        string? parentId,
+        OnlineBrowserPageRequest request,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (!string.IsNullOrWhiteSpace(parentId))
+        if (!string.IsNullOrWhiteSpace(request.ContinuationToken))
         {
-            return [];
+            throw new InvalidOperationException("StreamBIM project browsing does not support continuation tokens.");
+        }
+        if (!string.IsNullOrWhiteSpace(request.ParentId))
+        {
+            return new();
         }
 
         var credentials = StreamBimCredentialProvider.TryGetUserCredentials(args.ApplicationName)
@@ -40,7 +44,7 @@ public sealed class StreamBimProjectBrowser : IOnlineBrowser<StreamBIMDownloader
         using var client = await StreamBimFtpClientFactory.CreateAndConnectClientAsync(credentials, cancellationToken);
         var listing = await client.GetListing("/", cancellationToken);
 
-        return listing
+        var items = listing
             .Where(item => item.Type == FtpObjectType.Directory)
             .Where(item => !string.IsNullOrWhiteSpace(item.Name))
             .Where(item => !StreamBimPathHelper.IsIgnoredDirectoryName(item.Name))
@@ -53,5 +57,6 @@ public sealed class StreamBimProjectBrowser : IOnlineBrowser<StreamBIMDownloader
                 Kind = OnlineBrowserItemKind.Folder,
             })
             .ToArray();
+        return new OnlineBrowserPage { Items = items };
     }
 }

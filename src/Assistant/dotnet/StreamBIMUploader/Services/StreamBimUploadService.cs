@@ -13,7 +13,7 @@ internal static class StreamBimUploadService
         AsyncFtpClient client,
         CancellationToken cancellationToken)
     {
-        var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.Project);
+        var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.ProjectValue);
         var builder = new StreamBimUploadOutcomeBuilder();
         var diagnostics = StreamBimUploadDiagnostics.Create(args.VerboseDiagnostics);
         client.Config.DataConnectionType = FtpDataConnectionType.PASVEX;

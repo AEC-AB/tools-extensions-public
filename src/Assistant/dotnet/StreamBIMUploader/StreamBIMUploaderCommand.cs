@@ -13,7 +13,7 @@ public class StreamBIMUploaderCommand : IAssistantExtension<StreamBIMUploaderArg
             return Result.Text.Failed("StreamBIM Credentials are required.");
         }
 
-        if (string.IsNullOrWhiteSpace(args.Project))
+        if (string.IsNullOrWhiteSpace(args.ProjectValue))
         {
             return Result.Text.Failed("Project is required.");
         }

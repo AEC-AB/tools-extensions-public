@@ -25,7 +25,7 @@ internal static class StreamBimFileTransferService
     {
         try
         {
-            var remotePath = StreamBimPathHelper.CreateRemotePath(projectPath, args.TargetFolder, remoteRelativePath);
+            var remotePath = StreamBimPathHelper.CreateRemotePath(projectPath, args.TargetFolderValue, remoteRelativePath);
             diagnostics.Log($"Resolved remote path: '{remotePath}'.");
 
             if (StreamBimPathHelper.ContainsIgnoredFolder(remotePath))

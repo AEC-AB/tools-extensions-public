@@ -141,5 +141,18 @@
     "introduced": "Not determined",
     "notes": "Verbose diagnostics log full local/remote file paths, FTP operation details, exception messages, and file sizes to temp directory log file. Opt-in via VerboseDiagnostics flag. No credentials in logs. Exception messages from FluentFTP logged verbatim which could reveal server details.",
     "category": "Logging"
+  },
+  {
+    "id": "SEC-012",
+    "severity": "Info",
+    "title": "Personal data in DaluxUser model with no identified access path",
+    "status": "Open",
+    "location": "src/Assistant/dotnet/DaluxCloudUpload/Models/DaluxModels.cs:634-653",
+    "first_seen": "20261030-034207",
+    "last_verified": "20261030-034207",
+    "page": "SEC-012-personal-data-daluxuser-no-access-path.md",
+    "introduced": "Not determined",
+    "notes": "DaluxUser model contains Email, FirstName, LastName. GetProjectUsersAsync method fetches users from Dalux API but is not called from anywhere in the codebase. No export, mail, or log paths identified. CLI extension only, not a web service.",
+    "category": "Personal data"
   }
 ]

@@ -18,12 +18,12 @@ Run `20260926-015629` — incremental. Reviewed the AutoCAD LISPRunner and RunCo
 | High | 1 | 1 |
 | Medium | 2 | 2 |
 | Low | 4 | 4 |
-| Info | 2 | 2 |
-| **Total** | **11** | **11** |
+| Info | 3 | 3 |
+| **Total** | **12** | **12** |
 
 | Status | Count |
 |---|---|
-| Open | 11 |
+| Open | 12 |
 
 ## Top open findings
 
@@ -38,6 +38,8 @@ Run `20260926-015629` — incremental. Reviewed the AutoCAD LISPRunner and RunCo
 5. **SEC-010** (Medium) — Navisworks SaveDocumentAs path traversal via unvalidated directory creation: `Directory.CreateDirectory()` called on user-supplied path from `SaveFileField` without traversal validation; file paths also echoed in success messages.
 
 ## What changed since previous run
+
+Run `20261030-034207` — incremental. `context/changes.md` is empty — no source code changes since run 20261009-163727 (commit be9cc40). All 11 existing Open findings re-verified against the current commit (no files in changes.md, no evidence changed). New finding SEC-012 filed: personal data in DaluxUser model with no identified access path. Backlog is now empty — the personal data backlog item from the first run has been completed. Total: 12 findings (2 Critical, 1 High, 2 Medium, 4 Low, 3 Info).
 
 Run `20261009-163727` — incremental. Commit `be9cc40` (Add Tekla 2025 support) changed only build configuration files (Directory.Build.props, 7 .csproj files) across `src/Tekla/dotnet/` — no source code (.cs) files modified. SEC-008 (Tekla IFCExport path traversal) and SEC-009 (five Tekla extensions safe) re-verified against be9cc40. Both findings confirmed still valid — the path traversal issue in IFCExportCommand.cs line 30-38 (no traversal validation, no filename sanitization) and the safe assessment of the other five extensions remain unchanged. No new findings.
 
@@ -59,4 +61,9 @@ Run `20260926-215844` session 12 — incremental. Reviewed StreamBIM diagnostics
 
 ## Areas not yet covered
 
-Backlog is empty. All tracked categories have been reviewed in run 20260926-215844.
+Empty — all tracked categories have been reviewed. The sweep is complete.
+
+## Open requests
+
+None.
+

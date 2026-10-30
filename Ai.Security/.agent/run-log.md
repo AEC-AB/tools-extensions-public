@@ -2,6 +2,16 @@
 
 Newest first, ten most recent runs only (the runner trims older entries; git history and the pull requests are the full record). Header written by the runner, completed by the agent.
 
+## Run 20261030-034207 - incremental
+
+- Date: 2026-10-30T03:42Z
+- Model: openai/spark-qwen3-35b
+- Branch: security/ai-security
+- Source tools-extensions-public @ be9cc40
+- Items created: SEC-012 (Info, Personal data in DaluxUser model with no identified access path)
+- Items updated: Findings.md (1 new row), findings.json (1 new entry), coverage.md (backlog item for DaluxUser personal data moved from Backlog to Reviewed), Summary.md (count updated, changes section), learnings.md (DaluxUser note), pr-summary.md
+- Notes: Incremental run. context/changes.md is empty — no source code changes since run 20261009-163727 (commit be9cc40). All 11 existing Open findings re-verified against the current commit (no files in changes.md, no evidence changed). New finding SEC-012: DaluxUser model in DaluxCloudUpload contains Email, FirstName, LastName personal data fields. GetProjectUsersAsync method exists but is not called from anywhere in the codebase — this is a CLI-only extension, not a web service. Personal data is transient only, no persistence or export in this repo. Info severity. Backlog is now empty — all tracked categories have been reviewed. Total: 12 findings (2 Critical, 1 High, 2 Medium, 4 Low, 3 Info). Sweep complete.
+
 ## Run 20261009-163727 - incremental
 
 - Date: 2026-10-09T16:37Z

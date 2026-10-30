@@ -60,9 +60,8 @@
 | Config | Build pipeline permissions | 20260926-215844 | Safe PR triggers (GitHub restricts fork secrets), no sensitive ops. No new finding. |
 | Logging | PrintPDF telemetry/logging | 20260926-215844 | In-memory only, returned to Revit UI dialog, no PII or secrets. No new finding. |
 | Re-verification | Tekla build config changes at be9cc40 | 20261009-163727 | SEC-008 (IFCExport path traversal) and SEC-009 (five Tekla extensions safe) re-verified. Commit only changes build config (.csproj, Directory.Build.props) to add Tekla 2025 support - no source code (.cs) modifications. Both findings confirmed still valid. |
+| Personal data | DaluxUser personal data access path | 20261030-034207 | SEC-012: DaluxUser model has Email, FirstName, LastName. GetProjectUsersAsync is not called from anywhere in the codebase. CLI extension only, no web API serving this data. SEC-002 related finding already covers Dalux API key handling. |
 
-## Backlog (not yet reviewed, highest risk first)
+## Backlog
 
-| Category | Area | Why | Hint |
-|---|---|---|---|
-
+Empty — all tracked areas reviewed.

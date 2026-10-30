@@ -1,12 +1,10 @@
 # Learnings and standing instructions
 
-Lines here are instructions for future runs. Humans may add lines at any time; the agent never removes a human-written line.
+Lessons for future runs, written by the agent. People steer the agent in [../README.md](../README.md), not here.
 
 ## From humans
 
-- Report only. Never change code, config or pipelines. Describe what a fix involves; do not write it.
-- Never copy a secret value or personal data into any page. Location and kind only.
-- Export folders (`*Exports/`) hold customer data files: report their presence in git as a data-protection finding once; do not enumerate their contents.
+Standing instructions, requests and questions for the agent are written in [../README.md](../README.md), not here.
 
 ## From the agent
 
@@ -25,4 +23,5 @@ Lines here are instructions for future runs. Humans may add lines at any time; t
 - StreamBIM uploader diagnostics logs to %TEMP%\StreamBIMUploader\ - no log rotation. Opt-in via VerboseDiagnostics flag.
 - Eight nuget.config files total (1 root + 7 Tekla per-project); all reference api.nuget.org/v3 with <clear/>; semantically identical but different whitespace in one file.
 - Directory.Build.props and .targets files for Revit and Tekla projects have no secrets or insecure defaults; CW.Assistant.Extensions packages use wildcard version 26.* (reproducibility concern).
+- DaluxUser model (DaluxCloudUpload/Models/DaluxModels.cs) contains three personal data fields (Email, FirstName, LastName). GetProjectUsersAsync method exists but is not called from anywhere in the codebase — this is a CLI-only extension, not a web service. Personal data is transient only, no persistence or export in this repo.
 

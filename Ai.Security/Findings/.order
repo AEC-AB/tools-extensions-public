@@ -9,3 +9,4 @@ SEC-008-tekla-ifcexport-path-traversal
 SEC-009-tekla-file-ops-safe-assessment
 SEC-010-navisworks-path-traversal-and-info-disclosure
 SEC-011-streambim-diagnostics-logging
+SEC-012-personal-data-daluxuser-no-access-path

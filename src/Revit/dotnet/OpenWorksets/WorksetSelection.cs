@@ -25,7 +25,8 @@ internal sealed class WorksetSelection
 
     public static WorksetSelection Resolve(Document document, IReadOnlyCollection<string> names, IReadOnlyCollection<Regex> patterns)
     {
-        var userWorksets = new FilteredWorksetCollector(document)
+        using var collector = new FilteredWorksetCollector(document);
+        var userWorksets = collector
             .OfKind(WorksetKind.UserWorkset)
             .ToWorksets();
 

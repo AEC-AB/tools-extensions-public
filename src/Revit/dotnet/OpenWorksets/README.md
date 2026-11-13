@@ -74,8 +74,8 @@ When the workflow runs as a dry run, the extension lists the worksets it would o
 - **Solution**: Open the workset in **Collaborate > Worksets**, or synchronize with central and run the extension again.
 
 ### Issue 8: A link is "Not loaded"
-- **Causes**: The link file was moved, renamed or cannot be reached (for example a disconnected network drive), or the link is nested in another link.
-- **Solution**: Open **Manage Links** and fix the path with **Reload From**. For a nested link, reload its parent link.
+- **Causes**: The link file was moved, renamed or cannot be reached (for example a disconnected network drive), you do not have permission to open it, the link is nested in another link, or the link type is on a workset that is still closed.
+- **Solution**: Open **Manage Links** and fix the path with **Reload From**. For a nested link, reload its parent link. If the details name a closed workset, add that workset to the selection and run the extension again.
 
 ### Issue 9: "has no 3D view type"
 - **Causes**: The model has no 3D view family type, so the temporary view cannot be created.

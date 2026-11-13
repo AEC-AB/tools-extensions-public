@@ -60,7 +60,7 @@ public class OpenWorksetsCommand : IRevitExtension<OpenWorksetsArgs>
         var stillClosed = selection.Closed.Except(opened).ToList();
 
         var linkOutcomes = args.ReloadUnloadedLinks
-            ? LinkLoader.LoadUnloaded(LinkLoader.FindLinks(document, opened, includeLinkInstances: true), cancellationToken)
+            ? LinkLoader.LoadUnloaded(document, LinkLoader.FindLinks(document, opened, includeLinkInstances: true), cancellationToken)
             : [];
 
         var report = BuildReport(selection, opened, stillClosed, linkOutcomes, cancellationToken.IsCancellationRequested);

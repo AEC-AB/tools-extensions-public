@@ -29,7 +29,8 @@ internal class UserWorksetCollector : IRevitAutoFillCollector<OpenWorksetsArgs>
         if (document is null || !document.IsWorkshared)
             return [];
 
-        return new FilteredWorksetCollector(document)
+        using var collector = new FilteredWorksetCollector(document);
+        return collector
             .OfKind(WorksetKind.UserWorkset)
             .ToWorksets()
             .Select(workset => workset.Name)

@@ -16,14 +16,18 @@ internal static class LinkLoader
     {
         var worksetIds = new HashSet<int>(worksets.Select(workset => workset.Id.IntegerValue));
 
-        var linkTypeIdsWithInstanceOnWorkset = includeLinkInstances
-            ? new HashSet<ElementId>(new FilteredElementCollector(document)
+        var linkTypeIdsWithInstanceOnWorkset = new HashSet<ElementId>();
+        if (includeLinkInstances)
+        {
+            using var instanceCollector = new FilteredElementCollector(document);
+            linkTypeIdsWithInstanceOnWorkset.UnionWith(instanceCollector
                 .OfClass(typeof(RevitLinkInstance))
                 .Where(instance => worksetIds.Contains(instance.WorksetId.IntegerValue))
-                .Select(instance => instance.GetTypeId()))
-            : [];
+                .Select(instance => instance.GetTypeId()));
+        }
 
-        return new FilteredElementCollector(document)
+        using var linkTypeCollector = new FilteredElementCollector(document);
+        return linkTypeCollector
             .OfClass(typeof(RevitLinkType))
             .Cast<RevitLinkType>()
             .Where(linkType => worksetIds.Contains(linkType.WorksetId.IntegerValue)
@@ -35,8 +39,15 @@ internal static class LinkLoader
     /// <summary>
     /// Loads every link type that is not loaded. Must be called outside any transaction.
     /// </summary>
-    public static List<LinkLoadOutcome> LoadUnloaded(IEnumerable<RevitLinkType> linkTypes, CancellationToken cancellationToken)
+    /// <remarks>
+    /// Revit cannot load a link type whose type element is on a closed workset. That happens
+    /// when a link is selected through an instance on an opened workset while its type is on
+    /// another workset that stays closed. Such links are reported, not loaded, because opening
+    /// a workset the user did not select would change more of the model than was asked for.
+    /// </remarks>
+    public static List<LinkLoadOutcome> LoadUnloaded(Document document, IEnumerable<RevitLinkType> linkTypes, CancellationToken cancellationToken)
     {
+        var worksetTable = document.GetWorksetTable();
         var outcomes = new List<LinkLoadOutcome>();
 
         foreach (var linkType in linkTypes)
@@ -44,15 +55,22 @@ internal static class LinkLoader
             if (cancellationToken.IsCancellationRequested)
                 break;
 
+            var status = linkType.GetLinkedFileStatus();
+            if (status == LinkedFileStatus.Loaded)
+                continue;
+
             if (linkType.IsNestedLink)
             {
                 outcomes.Add(new(linkType.Name, false, "Nested link. Reload the parent link instead."));
                 continue;
             }
 
-            var status = linkType.GetLinkedFileStatus();
-            if (status == LinkedFileStatus.Loaded)
+            var typeWorkset = worksetTable.GetWorkset(linkType.WorksetId);
+            if (!typeWorkset.IsOpen)
+            {
+                outcomes.Add(new(linkType.Name, false, $"The link type is on the closed workset '{typeWorkset.Name}'. Add that workset to the selection and run the extension again."));
                 continue;
+            }
 
             outcomes.Add(Load(linkType, status));
         }
@@ -71,6 +89,10 @@ internal static class LinkLoader
         catch (Autodesk.Revit.Exceptions.InvalidOperationException exception)
         {
             return new(linkType.Name, false, $"{previousStatus} → not loaded: {exception.Message}");
+        }
+        catch (Autodesk.Revit.Exceptions.FileAccessException exception)
+        {
+            return new(linkType.Name, false, $"{previousStatus} → not loaded, the linked file cannot be accessed: {exception.Message} Check that you have permission to open the file.");
         }
     }
 }

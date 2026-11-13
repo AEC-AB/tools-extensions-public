@@ -75,7 +75,8 @@ internal static class WorksetOpener
 
     private static ElementId? FindThreeDimensionalViewType(Document document)
     {
-        return new FilteredElementCollector(document)
+        using var collector = new FilteredElementCollector(document);
+        return collector
             .OfClass(typeof(ViewFamilyType))
             .Cast<ViewFamilyType>()
             .FirstOrDefault(viewType => viewType.ViewFamily == ViewFamily.ThreeDimensional)
@@ -101,13 +102,14 @@ internal static class WorksetOpener
         using var transaction = new Transaction(document, "Isolate links");
         transaction.Start();
 
-        var temporaryWorkset = Workset.Create(document, $"OpenWorksets-{Guid.NewGuid():N}");
+        using var temporaryWorkset = Workset.Create(document, $"OpenWorksets-{Guid.NewGuid():N}");
         var linkTypeIds = new HashSet<ElementId>(links.Select(link => link.Id));
 
         foreach (var link in links)
             SetWorkset(link, temporaryWorkset.Id);
 
-        var instances = new FilteredElementCollector(document)
+        using var collector = new FilteredElementCollector(document);
+        var instances = collector
             .OfClass(typeof(RevitLinkInstance))
             .Where(instance => linkTypeIds.Contains(instance.GetTypeId()));
 
@@ -157,7 +159,7 @@ internal static class WorksetOpener
             new XYZ(0, MarkerSize, 0),
         };
 
-        var profile = new CurveLoop();
+        using var profile = new CurveLoop();
         for (var i = 0; i < corners.Length; i++)
             profile.Append(Line.CreateBound(corners[i], corners[(i + 1) % corners.Length]));
 

@@ -402,7 +402,7 @@ public int NumericInput { get; set; }
 
 ### Allowed Values (for Enums)
 ```csharp
-[AllowedValues(nameof(CustomEnum.Option2), nameof(CustomEnum.Option3),
+[AllowedValues(CustomEnum.Option2, CustomEnum.Option3,
     ErrorMessage = "Please select either Option2 or Option3.")]
 public CustomEnum RadioButtonWithEnum { get; set; }
 ```

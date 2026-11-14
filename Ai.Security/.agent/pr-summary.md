@@ -1,10 +1,10 @@
-# Pull request summary - Incremental (AssistantDemoExtension fix)
+# Pull request summary - Incremental (run 20261114-121630)
 
 Overwritten by the agent on every run. Plain Markdown, under 3500 characters, no `#` followed by digits, no secret values.
 
 ## Run scope and headline
 
-Run 20261114-121630 -- incremental. Commit 0f3f47d fixed the demo's AllowedValues check in AssistantDemoExtensionArgs.cs line 163: renamed string references to actual enum values. Both changed files reviewed -- no security impact. No existing findings reference the changed extension. No new findings. Total: 12 findings (2 Critical, 1 High, 2 Medium, 4 Low, 3 Info), all Open.
+Run 20261114-121630 -- incremental. One commit changed two files: AssistantDemoExtensionArgs.cs (bug fix at line 163, nameof strings to enum values) and README.md (documentation updated to match). Reviewed both changed files thoroughly -- no security impact. No existing findings reference the AssistantDemoExtension. No new findings. Total: 12 findings (2 Critical, 1 High, 2 Medium, 4 Low, 3 Info), all Open. Sweep and backlog are empty.
 
 ## New findings
 
@@ -12,7 +12,7 @@ None.
 
 ## Status changes
 
-None. No existing findings reference the changed files (AssistantDemoExtensionArgs.cs or README.md), so no re-verification was needed. All 12 existing Open findings remain confirmed with unchanged evidence.
+None. No existing findings reference the changed files (AssistantDemoExtensionArgs.cs or README.md). All 12 existing Open findings remain confirmed with unchanged evidence.
 
 ## Reviewer attention
 

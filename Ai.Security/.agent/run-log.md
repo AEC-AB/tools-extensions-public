@@ -8,9 +8,9 @@ Newest first, ten most recent runs only (the runner trims older entries; git his
 - Model: openai/spark35b-v2-qwen3-35b (spark)
 - Branch: security/ai-security
 - Source tools-extensions-public @ 04821c0
-- Items created: none
-- Items updated: coverage.md (Reviewed entry, commit row), Summary.md (changes section), pr-summary.md, run-log.md (this entry)
-- Notes: Incremental run. context/changes.md shows one commit (0f3f47d, Fix the demo's AllowedValues check) touching two files: AssistantDemoExtensionArgs.cs line 163 and README.md line 402. Both changed from nameof() string references to actual enum values — a bug fix for the demo extension's form validation that rejected every run through the Assistant MCP. Reviewed both files thoroughly: no security impact. No existing findings (SEC-001 through SEC-012) reference AssistantDemoExtension. No new findings created. All 12 existing Open findings remain valid (none reference changed files). Sweep complete — backlog empty. No secrets, no injection vectors, no new attack surfaces in the changed demo code.
+- Items created: none (no new findings)
+- Items updated: pr-summary.md, run-log.md (this entry), coverage.md (Reviewed entry, commit row), Summary.md (changes section)
+- Notes: Incremental run. context/changes.md shows one commit (0f3f47d, Fix the demo's AllowedValues check) touching two files: src/Assistant/dotnet/AssistantDemoExtension/AssistantDemoExtensionArgs.cs line 163 ([AllowedValues] attribute changed from nameof() strings to actual enum values) and src/Assistant/dotnet/AssistantDemoExtension/README.md line 405 (documentation updated to show enum values). Reviewed both changed files: the fix corrects a bug where the form validation rejected every run through the Assistant MCP because the AllowedValues check compared enum properties against string names. No security impact — the change makes the demo extension's form validation work correctly. No existing findings (SEC-001 through SEC-012) reference AssistantDemoExtension. No new findings created. All 12 existing Open findings remain valid (none reference changed files). Sweep complete — backlog empty. pr-summary.md written (step 5).
 
 ## Run 20261030-034207 - incremental
 

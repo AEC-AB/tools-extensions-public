@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ExtensionId>OnlineBrowserExample</ExtensionId>
+    <Title>Online browser example</Title>
+    <Description>Browse fictional remote items and inspect typed selections without transferring files.</Description>
+    <PackageTags>Assistant;Example;OnlineBrowser</PackageTags>
+  </PropertyGroup>
+</Project>

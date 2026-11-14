@@ -13,7 +13,7 @@ namespace StreamBIMDownloader;
 internal static class StreamBimFileTransferService
 {
     internal static async Task<StreamBimSingleFileDownloadResult> DownloadFileAsync(
-        StreamBIMDownloaderArgs args,
+        StreamBimDownloadOptions options,
         AsyncFtpClient client,
         FtpListItem file,
         string localRelativePath,
@@ -26,9 +26,9 @@ internal static class StreamBimFileTransferService
                 return StreamBimSingleFileDownloadResult.Skipped(file.FullName);
             }
 
-            var localPath = StreamBimPathHelper.CreateLocalPath(args.DownloadFolder, localRelativePath);
+            var localPath = StreamBimPathHelper.CreateLocalPath(options.DownloadFolder, localRelativePath);
 
-            if (args.SkipUnchangedFiles &&
+            if (options.SkipUnchangedFiles &&
                 File.Exists(localPath) &&
                 StreamBimPathHelper.AreEquivalentTimestamps(file.Modified, File.GetLastWriteTimeUtc(localPath)))
             {

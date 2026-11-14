@@ -13,31 +13,28 @@ public class StreamBIMUploaderArgs
     [Required(ErrorMessage = "StreamBIM Credentials are required.")]
     public string ApplicationName { get; set; } = "StreamBIM";
 
-    [OnlineBrowserField(typeof(StreamBimProjectBrowser),
-        SelectionKind = OnlineBrowserSelectionKind.Folders,
-        FavoritesKey = "streambim.projects",
-        ScopeProperties = [nameof(ApplicationName)],
+    [OptionsField(
+        CollectorType = typeof(StreamBimProjectCollector),
+        CollectorSortOrder = SortOrder.SortByAscending,
+        TriggerProperties = [nameof(ApplicationName)],
         Label = "Project",
-        ToolTip = "Browse StreamBIM projects and select the project to upload files to.")]
+        ToolTip = "Select the StreamBIM project to upload files to.")]
     [Required(ErrorMessage = "Project is required.")]
-    public OnlineBrowserSelection Project { get; set; } = new();
+    public string Project { get; set; } = string.Empty;
 
-    [FilePickerField(
-        Label = "Files to upload",
-        ToolTip = "Select one or more local files to upload.")]
-    public List<string> Files { get; set; } = [];
-
-    [OnlineBrowserField(typeof(StreamBimTargetFolderBrowser),
+    [OnlineBrowserCopyField(typeof(StreamBimTargetFolderBrowser),
+        Direction = OnlineBrowserCopyDirection.LocalToRemote,
+        AllowEmptyDestination = true,
         SelectionKind = OnlineBrowserSelectionKind.Folders,
         FavoritesKey = "streambim.project-content",
-        ScopeProperties = [nameof(Project) + ".Value", nameof(ApplicationName)],
-        Label = "Target folder",
-        ToolTip = "Remote folder path inside the StreamBIM project to upload files into (e.g., 'Uploads/2024'). Leave empty to upload to the project root.",
-        HelperText = "Browse for a destination folder, or clear the path to use the project root.")]
-    public OnlineBrowserSelection TargetFolder { get; set; } = new();
+        ScopeProperties = [nameof(Project), nameof(ApplicationName)],
+        Label = "Upload project files",
+        ToolTip = "Choose a local source file and a StreamBIM target folder for each row.",
+        HelperText = "Leave a target folder empty to upload that row to the project root.")]
+    [MinLength(1, ErrorMessage = "Add at least one file to upload.")]
+    public OnlineBrowserCopy Transfers { get; set; } = new();
 
-    internal string ProjectValue => Project?.SelectedItem?.Value ?? string.Empty;
-    internal string TargetFolderValue => TargetFolder?.SelectedItem?.Value ?? string.Empty;
+    internal string ProjectValue => Project ?? string.Empty;
 
     [BooleanField(
         Label = "Verbose diagnostics",

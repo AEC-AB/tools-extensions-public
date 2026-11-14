@@ -24,14 +24,15 @@ internal static class StreamBimUploadService
 
         diagnostics.Log($"Using FTP data connection mode {client.Config.DataConnectionType}.");
 
-        foreach (var localFilePath in args.Files)
+        foreach (var row in args.Transfers.Targets)
         {
+            var localFilePath = row.Source.Value;
             cancellationToken.ThrowIfCancellationRequested();
             diagnostics.Log($"Selected file: '{localFilePath}'.");
             try
             {
                 builder.Add(await UploadFileWithRetriesAsync(
-                    args,
+                    row.Destination,
                     client,
                     projectPath,
                     localFilePath,
@@ -51,7 +52,7 @@ internal static class StreamBimUploadService
     }
 
     private static async Task<StreamBimItemUploadResult> UploadFileWithRetriesAsync(
-        StreamBIMUploaderArgs args,
+        string targetFolder,
         AsyncFtpClient client,
         string projectPath,
         string localFilePath,
@@ -73,7 +74,7 @@ internal static class StreamBimUploadService
                 }
 
                 return StreamBimItemUploadResult.FromSingle(await StreamBimFileTransferService.UploadFileAsync(
-                    args,
+                    targetFolder,
                     client,
                     projectPath,
                     localFilePath,

@@ -18,26 +18,37 @@ public sealed class StreamBIMUploaderArgsUpgradeV1ToV2 : IArgsUpgrade<StreamBIMU
 {
     public StreamBIMUploaderArgs Upgrade(StreamBIMUploaderArgsV1 previousVersion)
     {
+        var paths = (previousVersion.Files ?? []).Where(path => !string.IsNullOrWhiteSpace(path)).ToList();
+        if (paths.Count == 0 && !string.IsNullOrWhiteSpace(previousVersion.TargetFolder))
+            paths.Add(string.Empty);
+        var targets = paths.Select(path => new OnlineBrowserCopyTarget
+        {
+            Source = new OnlineBrowserSelectionItem
+            {
+                Value = path,
+                Name = System.IO.Path.GetFileName(path),
+                Kind = OnlineBrowserItemKind.File,
+            },
+            Destination = previousVersion.TargetFolder,
+            DestinationItem = CreateDestination(previousVersion),
+        }).ToArray();
+
         return new StreamBIMUploaderArgs
         {
             ApplicationName = previousVersion.ApplicationName,
-            Project = CreateSelection(previousVersion.Project, previousVersion.ApplicationName),
-            Files = previousVersion.Files ?? [],
-            TargetFolder = CreateSelection(previousVersion.TargetFolder, $"{previousVersion.ApplicationName}:{previousVersion.Project}"),
+            Project = previousVersion.Project,
+            Transfers = new OnlineBrowserCopy { Targets = targets, Json = JsonSerializer.Serialize(targets) },
             VerboseDiagnostics = previousVersion.VerboseDiagnostics,
         };
     }
 
-    private static OnlineBrowserSelection CreateSelection(string? value, string? scope)
-    {
-        OnlineBrowserSelectionItem? item = string.IsNullOrWhiteSpace(value) ? null : new()
+    private static OnlineBrowserSelectionItem? CreateDestination(StreamBIMUploaderArgsV1 previousVersion) =>
+        string.IsNullOrWhiteSpace(previousVersion.TargetFolder) ? null : new()
         {
-            Value = value,
-            Name = value.TrimEnd('/', '\\').Split('/', '\\').LastOrDefault() ?? value,
+            Value = previousVersion.TargetFolder,
+            Name = previousVersion.TargetFolder.TrimEnd('/', '\\').Split('/', '\\').LastOrDefault() ?? previousVersion.TargetFolder,
             Kind = OnlineBrowserItemKind.Folder,
             Provider = OnlineBrowserProvider.Custom,
-            Scope = scope,
+            Scope = $"{previousVersion.ApplicationName}:{previousVersion.Project}",
         };
-        return new OnlineBrowserSelection { SelectedItem = item, Json = JsonSerializer.Serialize(item) };
-    }
 }

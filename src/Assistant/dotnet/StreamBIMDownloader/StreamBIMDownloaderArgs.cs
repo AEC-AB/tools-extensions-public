@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json;
 using CW.Assistant.Extensions.Contracts.Fields;
+using CW.Assistant.Extensions.Contracts.Enums;
 using CW.Assistant.Extensions.Contracts.Browsing;
 using CW.Assistant.Extensions.Contracts.Controls;
 using CW.Assistant.Extensions.Contracts.Upgrade;
@@ -19,32 +20,27 @@ public class StreamBIMDownloaderArgs
     [Required(ErrorMessage = "StreamBIM Credentials are required.")]
     public string ApplicationName { get; set; } = "StreamBIM";
 
-    [OnlineBrowserField(typeof(StreamBimProjectBrowser),
-        SelectionKind = OnlineBrowserSelectionKind.Folders,
-        FavoritesKey = "streambim.projects",
-        ScopeProperties = [nameof(ApplicationName)],
+    [OptionsField(
+        CollectorType = typeof(StreamBimProjectCollector),
+        CollectorSortOrder = SortOrder.SortByAscending,
+        TriggerProperties = [nameof(ApplicationName)],
         Label = "Project",
         ToolTip = "Select the StreamBIM project to browse files from.")]
     [Required(ErrorMessage = "Project is required.")]
-    public OnlineBrowserSelection Project { get; set; } = new();
+    public string Project { get; set; } = string.Empty;
 
-    [FolderPickerField(
-        Label = "Destination folder",
-        ToolTip = "Select the local folder to download files to.")]
-    [Required(ErrorMessage = "Destination folder is required.")]
-    public string DownloadFolder { get; set; } = string.Empty;
-
-    [OnlineBrowserField(typeof(StreamBimFilesAndFoldersBrowser),
+    [OnlineBrowserCopyField(typeof(StreamBimFilesAndFoldersBrowser),
+        DestinationKind = OnlineBrowserDestinationKind.Folder,
         SelectionKind = OnlineBrowserSelectionKind.FilesAndFolders,
         FavoritesKey = "streambim.project-content",
-        ScopeProperties = [nameof(Project) + ".Value", nameof(ApplicationName)],
-        Label = "Files/Folders to download",
-        ToolTip = "Enter a project-relative file or folder path, for example \"Planning/Electrical/design.pdf\". Folder downloads include subfolders. Wildcards with * and ? are supported.",
-        HelperText = "Browse the project and select one or more files or folders.")]
+        ScopeProperties = [nameof(Project), nameof(ApplicationName)],
+        Label = "Download project files",
+        ToolTip = "Choose a remote file, folder, or wildcard path and a local destination folder for each row.",
+        HelperText = "Each row downloads its source into its own local folder. Folder downloads include subfolders.")]
     [MinLength(1, ErrorMessage = "Add at least one file or folder to download.")]
-    public OnlineBrowserSelections Files { get; set; } = new();
+    public OnlineBrowserCopy Transfers { get; set; } = new();
 
-    internal string ProjectValue => Project.SelectedItem?.Value ?? string.Empty;
+    internal string ProjectValue => Project ?? string.Empty;
 
     [BooleanField(
         Label = "Skip unchanged files",
@@ -65,47 +61,28 @@ public sealed class StreamBIMDownloaderArgsUpgradeV1ToV2 : IArgsUpgrade<StreamBI
 {
     public StreamBIMDownloaderArgs Upgrade(StreamBIMDownloaderArgsV1 previousVersion)
     {
-        var applicationName = previousVersion.ApplicationName ?? "StreamBIM";
-        var projectPath = previousVersion.Project ?? string.Empty;
-        var projectItem = CreateSelection(projectPath, OnlineBrowserItemKind.Folder, applicationName);
-        var fileItems = (previousVersion.Files ?? [])
-            .Where(path => !string.IsNullOrWhiteSpace(path))
-            .Select(path => CreateSelection(path, OnlineBrowserItemKind.File, $"{applicationName}:{projectPath}"))
-            .OfType<OnlineBrowserSelectionItem>()
-            .ToArray();
+        var paths = (previousVersion.Files ?? []).Where(path => !string.IsNullOrWhiteSpace(path)).ToList();
+        if (paths.Count == 0 && !string.IsNullOrWhiteSpace(previousVersion.DownloadFolder))
+            paths.Add(string.Empty);
+        var targets = paths.Select(path => new OnlineBrowserCopyTarget
+        {
+            Source = new OnlineBrowserSelectionItem
+            {
+                Value = path,
+                Name = path.TrimEnd('/', '\\').Split('/', '\\').LastOrDefault() ?? path,
+                Kind = OnlineBrowserItemKind.File,
+                Provider = OnlineBrowserProvider.Custom,
+                Scope = $"{previousVersion.ApplicationName}:{previousVersion.Project}",
+            },
+            Destination = previousVersion.DownloadFolder,
+        }).ToArray();
 
         return new StreamBIMDownloaderArgs
         {
-            ApplicationName = applicationName,
-            Project = new OnlineBrowserSelection
-            {
-                SelectedItem = projectItem,
-                Json = JsonSerializer.Serialize(projectItem),
-            },
-            DownloadFolder = previousVersion.DownloadFolder,
-            Files = new OnlineBrowserSelections
-            {
-                Items = fileItems,
-                Json = JsonSerializer.Serialize(fileItems),
-            },
+            ApplicationName = previousVersion.ApplicationName,
+            Project = previousVersion.Project,
+            Transfers = new OnlineBrowserCopy { Targets = targets, Json = JsonSerializer.Serialize(targets) },
             SkipUnchangedFiles = previousVersion.SkipUnchangedFiles,
-        };
-    }
-
-    private static OnlineBrowserSelectionItem? CreateSelection(string value, OnlineBrowserItemKind kind, string scope)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return null;
-
-        var name = value.TrimEnd('/', '\\').Split('/', '\\').LastOrDefault() ?? value;
-        return new OnlineBrowserSelectionItem
-        {
-            Id = null,
-            Value = value,
-            Name = name,
-            Kind = kind,
-            Provider = OnlineBrowserProvider.Custom,
-            Scope = scope,
         };
     }
 }

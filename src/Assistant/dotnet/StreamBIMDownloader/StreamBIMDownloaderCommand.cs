@@ -24,20 +24,14 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
             return Result.Text.Failed("Project is required.");
         }
 
-        if (string.IsNullOrWhiteSpace(args.DownloadFolder))
+        if (args.Transfers.Targets.Count == 0 || args.Transfers.Targets.Any(target =>
+            target.Source is null || string.IsNullOrWhiteSpace(target.Source.Value) || string.IsNullOrWhiteSpace(target.Destination)))
         {
-            return Result.Text.Failed("Download folder is required.");
-        }
-
-        if (args.Files.Items.Count == 0 || args.Files.Items.Any(item => string.IsNullOrWhiteSpace(item.Value)))
-        {
-            return Result.Text.Failed("Enter a file or folder path in every Files/Folders to download row.");
+            return Result.Text.Failed("Add at least one download row, with a remote source and local destination folder in every row.");
         }
 
         try
         {
-            Directory.CreateDirectory(args.DownloadFolder);
-
             var credentials = StreamBimCredentialProvider.TryGetUserCredentials(args.ApplicationName);
             if (credentials is null)
             {

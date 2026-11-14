@@ -64,7 +64,7 @@ Use the `OnlineBrowserProvider` constructor and name the required context proper
 
 ## Resources
 
-- [Extension development documentation](../../../../../docs/README.md)
+- [Extension development documentation](../../../../docs/README.md)
 - [StreamBIM Downloader](../StreamBIMDownloader/README.md) and [Uploader](../StreamBIMUploader/README.md) use the fields with an actual service.
 
 ## Version history

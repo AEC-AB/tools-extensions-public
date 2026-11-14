@@ -58,7 +58,7 @@ Keep the path exactly as the browser shows it. A leading project name is tried a
 
 ## Resources
 
-- [Extension development documentation](../../../../../docs/README.md)
+- [Extension development documentation](../../../../docs/README.md)
 - The Assistant field tooltips describe each input; the online browser provides favorites and saved-folder navigation.
 
 ## Version History

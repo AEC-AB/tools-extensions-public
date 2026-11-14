@@ -6,3 +6,4 @@ global using System.Threading;
 global using System.Threading.Tasks;
 
 global using StreamBim;
+global using CW.Assistant.Extensions.Contracts.Browsing;

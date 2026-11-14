@@ -18,20 +18,21 @@ internal static class StreamBimDownloadService
         AsyncFtpClient client,
         CancellationToken cancellationToken)
     {
-        var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.Project);
+        var projectPath = StreamBimPathHelper.NormalizeProjectPath(args.ProjectValue);
         var builder = new StreamBimDownloadOutcomeBuilder();
 
-        foreach (var configuredFile in args.Files)
+        foreach (var transfer in args.Transfers.Targets)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            builder.Add(await DownloadConfiguredFileWithRetriesAsync(args, client, projectPath, configuredFile, cancellationToken));
+            var options = new StreamBimDownloadOptions(transfer.Destination, args.SkipUnchangedFiles);
+            builder.Add(await DownloadConfiguredFileWithRetriesAsync(options, client, projectPath, transfer.Source.Value, cancellationToken));
         }
 
         return builder.BuildBatchResult();
     }
 
     private static async Task<StreamBimItemDownloadResult> DownloadConfiguredFileWithRetriesAsync(
-        StreamBIMDownloaderArgs args,
+        StreamBimDownloadOptions options,
         AsyncFtpClient client,
         string projectPath,
         string configuredFile,
@@ -43,7 +44,7 @@ internal static class StreamBimDownloadService
 
             try
             {
-                return await DownloadConfiguredFileAsync(args, client, projectPath, configuredFile, cancellationToken);
+                return await DownloadConfiguredFileAsync(options, client, projectPath, configuredFile, cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -84,7 +85,7 @@ internal static class StreamBimDownloadService
     }
 
     private static async Task<StreamBimItemDownloadResult> DownloadConfiguredFileAsync(
-        StreamBIMDownloaderArgs args,
+        StreamBimDownloadOptions options,
         AsyncFtpClient client,
         string projectPath,
         string configuredFile,
@@ -110,7 +111,7 @@ internal static class StreamBimDownloadService
                 continue;
             }
 
-            return await DownloadResolvedItemAsync(args, client, resolved, item, cancellationToken);
+            return await DownloadResolvedItemAsync(options, client, resolved, item, cancellationToken);
         }
 
         return closestMiss is null
@@ -164,7 +165,7 @@ internal static class StreamBimDownloadService
         resolution.ValidParentPath.Split('/', StringSplitOptions.RemoveEmptyEntries).Length;
 
     private static async Task<StreamBimItemDownloadResult> DownloadResolvedItemAsync(
-        StreamBIMDownloaderArgs args,
+        StreamBimDownloadOptions options,
         AsyncFtpClient client,
         ConfiguredFileResolution resolved,
         FtpListItem item,
@@ -172,13 +173,13 @@ internal static class StreamBimDownloadService
     {
         if (resolved.IsWildcard)
         {
-            return await DownloadFilesByWildcardAsync(args, client, resolved.FullPath, null, cancellationToken);
+            return await DownloadFilesByWildcardAsync(options, client, resolved.FullPath, null, cancellationToken);
         }
 
         if (item.Type == FtpObjectType.File)
         {
             return StreamBimItemDownloadResult.FromSingle(await StreamBimFileTransferService.DownloadFileAsync(
-                args,
+                options,
                 client,
                 item,
                 StreamBimPathHelper.GetLeafName(item.FullName),
@@ -187,7 +188,7 @@ internal static class StreamBimDownloadService
 
         if (item.Type == FtpObjectType.Directory)
         {
-            return await DownloadFilesByWildcardAsync(args, client, resolved.FullPath + "/*", resolved.FullPath, cancellationToken);
+            return await DownloadFilesByWildcardAsync(options, client, resolved.FullPath + "/*", resolved.FullPath, cancellationToken);
         }
 
         return StreamBimItemDownloadResult.Empty;
@@ -220,7 +221,7 @@ internal static class StreamBimDownloadService
     }
 
     private static async Task<StreamBimItemDownloadResult> DownloadFilesByWildcardAsync(
-        StreamBIMDownloaderArgs args,
+        StreamBimDownloadOptions options,
         AsyncFtpClient client,
         string file,
         string? directoryRoot,
@@ -268,7 +269,7 @@ internal static class StreamBimDownloadService
                     ? StreamBimPathHelper.GetLeafName(itemInFolder.FullName)
                     : GetRelativePath(directoryRoot, itemInFolder.FullName);
                 builder.Add(await StreamBimFileTransferService.DownloadFileAsync(
-                    args,
+                    options,
                     client,
                     itemInFolder,
                     localRelativePath,
@@ -431,3 +432,5 @@ internal static class StreamBimDownloadService
         bool MissingSegmentShouldBeFolder,
         IReadOnlyList<string> SimilarNames);
 }
+
+internal sealed record StreamBimDownloadOptions(string DownloadFolder, bool SkipUnchangedFiles);

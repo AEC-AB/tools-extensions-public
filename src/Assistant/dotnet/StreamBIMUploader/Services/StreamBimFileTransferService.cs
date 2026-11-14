@@ -15,7 +15,7 @@ internal static class StreamBimFileTransferService
     private const int RemoteDirectoryOperationAttempts = 3;
 
     internal static async Task<StreamBimSingleFileUploadResult> UploadFileAsync(
-        StreamBIMUploaderArgs args,
+        string targetFolder,
         AsyncFtpClient client,
         string projectPath,
         string localFilePath,
@@ -25,7 +25,7 @@ internal static class StreamBimFileTransferService
     {
         try
         {
-            var remotePath = StreamBimPathHelper.CreateRemotePath(projectPath, args.TargetFolder, remoteRelativePath);
+            var remotePath = StreamBimPathHelper.CreateRemotePath(projectPath, targetFolder, remoteRelativePath);
             diagnostics.Log($"Resolved remote path: '{remotePath}'.");
 
             if (StreamBimPathHelper.ContainsIgnoredFolder(remotePath))

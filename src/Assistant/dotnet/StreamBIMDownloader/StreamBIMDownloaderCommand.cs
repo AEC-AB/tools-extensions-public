@@ -14,30 +14,24 @@ public class StreamBIMDownloaderCommand : IAssistantExtension<StreamBIMDownloade
 {
     public async Task<IExtensionResult> RunAsync(IAssistantExtensionContext context, StreamBIMDownloaderArgs args, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(args.ApplicationName))
-        {
-            return Result.Text.Failed("Credential application id is required.");
-        }
-
-        if (string.IsNullOrWhiteSpace(args.Project))
-        {
-            return Result.Text.Failed("Project is required.");
-        }
-
-        if (string.IsNullOrWhiteSpace(args.DownloadFolder))
+        if (string.IsNullOrWhiteSpace(args.ApplicationName))
         {
-            return Result.Text.Failed("Download folder is required.");
+            return Result.Text.Failed("Credential application id is required.");
         }
 
-        if (args.Files.Count == 0 || args.Files.Any(string.IsNullOrWhiteSpace))
+        if (string.IsNullOrWhiteSpace(args.ProjectValue))
         {
-            return Result.Text.Failed("Enter a file or folder path in every Files/Folders to download row.");
+            return Result.Text.Failed("Project is required.");
+        }
+
+        if (args.Transfers.Targets.Count == 0 || args.Transfers.Targets.Any(target =>
+            target.Source is null || string.IsNullOrWhiteSpace(target.Source.Value) || string.IsNullOrWhiteSpace(target.Destination)))
+        {
+            return Result.Text.Failed("Add at least one download row, with a remote source and local destination folder in every row.");
         }
 
         try
         {
-            Directory.CreateDirectory(args.DownloadFolder);
-
             var credentials = StreamBimCredentialProvider.TryGetUserCredentials(args.ApplicationName);
             if (credentials is null)
             {

@@ -13,14 +13,14 @@ public class StreamBIMUploaderCommand : IAssistantExtension<StreamBIMUploaderArg
             return Result.Text.Failed("StreamBIM Credentials are required.");
         }
 
-        if (string.IsNullOrWhiteSpace(args.Project))
+        if (string.IsNullOrWhiteSpace(args.ProjectValue))
         {
             return Result.Text.Failed("Project is required.");
         }
 
-        if (args.Files.Count == 0 || args.Files.Any(string.IsNullOrWhiteSpace))
+        if (args.Transfers.Targets.Count == 0 || args.Transfers.Targets.Any(row => string.IsNullOrWhiteSpace(row.Source.Value)))
         {
-            return Result.Text.Failed("Select at least one non-empty file to upload.");
+            return Result.Text.Failed("Add at least one upload row and select a local source file in every row.");
         }
 
         try

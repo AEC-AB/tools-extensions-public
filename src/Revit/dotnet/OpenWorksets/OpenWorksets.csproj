@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ExtensionId>OpenWorksets</ExtensionId>
+    <Authors>COWI Tools</Authors>
+    <Version>2.0.0</Version>
+    <Title>Open Worksets</Title>
+    <Description>Open closed worksets in the active Revit model by selection or name pattern, and optionally reload unloaded Revit links placed on those worksets.</Description>
+    <PackageTags>Revit;Assistant;Extension;Worksets</PackageTags>
+    <PackageIcon>Icon.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+</Project>

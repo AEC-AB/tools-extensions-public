@@ -10,6 +10,10 @@
 |---|---|---|---|
 | tools-extensions-public | main | be9cc40 | 20261009-163727 |
 
+| Repo | Branch | Commit | Run |
+|---|---|---|---|
+| tools-extensions-public | main | 04821c0 | 20261114-121630 |
+
 ## Repo map
 
 | Repo | Path | What it is | Entry points, config, pipelines |
@@ -61,6 +65,7 @@
 | Logging | PrintPDF telemetry/logging | 20260926-215844 | In-memory only, returned to Revit UI dialog, no PII or secrets. No new finding. |
 | Re-verification | Tekla build config changes at be9cc40 | 20261009-163727 | SEC-008 (IFCExport path traversal) and SEC-009 (five Tekla extensions safe) re-verified. Commit only changes build config (.csproj, Directory.Build.props) to add Tekla 2025 support - no source code (.cs) modifications. Both findings confirmed still valid. |
 | Personal data | DaluxUser personal data access path | 20261030-034207 | SEC-012: DaluxUser model has Email, FirstName, LastName. GetProjectUsersAsync is not called from anywhere in the codebase. CLI extension only, no web API serving this data. SEC-002 related finding already covers Dalux API key handling. |
+| Incremental review | AssistantDemoExtension AllowedValues fix | 20261114-121630 | Commit 0f3f47d changed AssistantDemoExtensionArgs.cs line 163 from nameof() strings to enum values - bug fix, no security impact. README.md updated to match. No existing findings reference AssistantDemoExtension; no new findings created. |
 
 ## Backlog
 
